@@ -1,0 +1,67 @@
+{{template "partials/header" .}}
+
+<div class="container" v-if="res.data != null">
+
+    <h1>QrCode : {{ .res.team_page_name }}</h1>
+    <br/>
+    <div class="row">
+        <div class="col">
+            <p><b>Information</b></p>
+        </div>
+        <div class="col">
+            <p><b>Operator</b></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            {{ with .res.info }}
+            {{range .}}
+            <ul>
+                <li>
+                    <b>{{ . }}</b
+                    ><br/>
+                </li>
+                <hr/>
+                {{range .res}}
+                <ul>
+                    <li>{{ . }} : {{ . }}</li>
+                    <hr/>
+                </ul>
+                {{end}}
+            </ul>
+            {{end}}
+            {{end}}
+        </div>
+        <div class="col">
+            <ul v-for="(item, index) in res.data.ops" :key="index">
+                <li>
+                    <b>{{ .index }}</b
+                    ><br/>
+                </li>
+                <hr/>
+                <ul v-for="(item1, index) in item" :key="index">
+                    <li>{{ .item1 }}</li>
+                    <hr/>
+                </ul>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<style scoped>
+    ul {
+        list-style-type: none;
+    }
+
+    h1 {
+        color: #6610f2
+    }
+
+    .row {
+        color: #e02180
+    }
+</style>
+
+{{template "partials/footer" .}}
+

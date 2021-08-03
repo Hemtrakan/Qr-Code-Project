@@ -1,0 +1,34 @@
+{
+  "info": {
+    "input_and_output_connectors": {
+      "audio_in": "Port(s)",
+      "audio_out": "1 ( 3.5 mm ) Port(s)",
+      "display_port": "2 ( Version 1.2 ) ( 1 x In , 1 x Out ) Port(s)",
+      "dvi": "Port(s)",
+      "hdmi": "1 ( Version 1.4 ) Port(s)",
+      "microphone_jack": "Port(s)",
+      "mini_display_port": "Port(s)",
+      "thunderbolt": "Port(s)",
+      "usb_type_c": "1 (DisplayPort Alt mode) Port(s)",
+      "vga": "Port(s)"
+    },
+    "specification": {
+      "Size": "32",
+      "dimension": "716 x 580 x 211 mm",
+      "input_voltage": "100 - 240 VAC",
+      "max_resolution": "2560 x 1440",
+      "panel_type": "IPS",
+      "product_name": "MONITOR (จอมอนิเตอร์) SAMSUNG LS32A600UUEXXT - 32 IPS 2K USB-C 75Hz",
+      "refresh_rate": "75 Hz",
+      "weight": "7.2 / 9.2 kg",
+      "เวลาหมดอายุ": "20/01/2025"
+    }
+  },
+  "ops": {
+    "repair": [
+      "หน้าจอ",
+      "LED",
+      "ที่ตั้งหน้าจอ"
+    ]
+  }
+}

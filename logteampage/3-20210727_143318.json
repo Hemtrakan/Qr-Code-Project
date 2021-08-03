@@ -1,0 +1,32 @@
+{
+ "owner_id": 1,
+ "team_page_name": "BELLkub",
+ "info": {
+  "specification1": {
+   "product_name": "MONITOR (จอมอนิเตอร์) SAMSUNG LS32A600UUEXXT - 32 IPS 2K USB-C 75Hz",
+   "refresh_rate": "75 Hz",
+   "weight": "7.2 / 9.2 kg",
+   "เวลาหมดอายุ": "20/01/2025"
+  },
+  "specification2": {
+   "Size": "32"
+  },
+  "specification3": {
+   "Size": "32",
+   "dimension": "716 x 580 x 211 mm",
+   "input_voltage": "100 - 240 VAC",
+   "max_resolution": "2560 x 1440",
+   "panel_type": "IPS"
+  },
+  "specification4": {
+   "เวลาหมดอายุ": "20/01/2025"
+  }
+ },
+ "ops": {
+  "ซ่อม": [
+   "หน้าจอ",
+   "LED",
+   "อื่น ๆ"
+  ]
+ }
+}
