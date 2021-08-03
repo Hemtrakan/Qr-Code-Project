@@ -1,7 +1,8 @@
-..postgresql
-.fileqrcode/
-.fileteampage/
-.logteampage/
-.tmp
+.postgresql
+fileqrcode/
+fileteampage/
+logteampage/
+.postgresql
+tmp
+.idea
 .upload
-Dockerfile-Local
