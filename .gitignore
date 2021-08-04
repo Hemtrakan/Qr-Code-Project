@@ -2,7 +2,7 @@
 fileqrcode/
 fileteampage/
 logteampage/
-.postgresql
 tmp
+upload
 .idea
-.upload
+.postgresql
