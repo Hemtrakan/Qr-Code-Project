@@ -3,6 +3,5 @@ fileqrcode/
 fileteampage/
 logteampage/
 tmp
-upload
+views
 .idea
-.postgresql
