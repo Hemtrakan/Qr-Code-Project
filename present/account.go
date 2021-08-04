@@ -84,10 +84,18 @@ func getAllAccountOperator(context *fiber.Ctx)error  {
 	return context.JSON(responses)
 }
 
+func admin(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	err := api.RegisterAdmin()
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "สมัครไปแล้ว")
+	}
+	return utility.FiberError(context, http.StatusOK, "สำหรับ UserAdmin")
+}
+
 func AuthError(c *fiber.Ctx, e error) error {
 	c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 		"message": "Unauthorized",
-
 	})
 	return nil
 }

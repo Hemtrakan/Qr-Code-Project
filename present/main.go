@@ -49,6 +49,7 @@ func APICreate(ctrl *control.APIControl) {
 
 	api := app.Group("/api")
 	api.Post("login", login)
+	api.Post("admin", admin)
 
 	qr := app.Group("/qr")
 	qr.Get(":id", getByIdTeamPage)
@@ -57,14 +58,14 @@ func APICreate(ctrl *control.APIControl) {
 	// -- Todo Owner
 	owner := app.Group("/owner")
 	owner.Use(jwtware.New(jwtware.Config{
-		SigningKey:   []byte(constant.SecretKey),
-		SuccessHandler: func (context *fiber.Ctx) error {
+		SigningKey: []byte(constant.SecretKey),
+		SuccessHandler: func(context *fiber.Ctx) error {
 			user := context.Locals("user").(*jwt.Token)
 			claims := user.Claims.(jwt.MapClaims)
 			var userRole = claims["role"]
-			if userRole == string(constant.Owner){
+			if userRole == string(constant.Owner) {
 				return context.Next()
-			}else {
+			} else {
 				return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 					"error": "Unauthorized",
 				})
@@ -82,14 +83,14 @@ func APICreate(ctrl *control.APIControl) {
 	// -- Todo Admin
 	admin := app.Group("/admin")
 	admin.Use(jwtware.New(jwtware.Config{
-		SigningKey:   []byte(constant.SecretKey),
-		SuccessHandler: func (context *fiber.Ctx) error {
+		SigningKey: []byte(constant.SecretKey),
+		SuccessHandler: func(context *fiber.Ctx) error {
 			user := context.Locals("user").(*jwt.Token)
 			claims := user.Claims.(jwt.MapClaims)
 			var userRole = claims["role"]
-			if userRole == string(constant.Admin){
+			if userRole == string(constant.Admin) {
 				return context.Next()
-			}else {
+			} else {
 				return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 					"error": "Unauthorized",
 				})
@@ -110,7 +111,6 @@ func APICreate(ctrl *control.APIControl) {
 	//admin.Put("updateProfile", updateProfile)
 	//admin.Delete("deleteAccountOwner", deleteAccountOwner)
 	//admin.Delete("deleteAccountOperator", deleteAccountOperator)
-
 
 	// -- TeamPage
 	admin.Get("getAllTeamPage", getAllTeamPageAdmin)

@@ -31,8 +31,31 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.Owners) (Error error) 
 	return
 }
 
-func (ctrl *APIControl) RegisterOperator(reqOperator *structure.Operator) (Error error) {
+func (ctrl *APIControl) RegisterAdmin() (Error error) {
+	hashPassword, err := utility.Hash("1234")
+	if err != nil {
+		return err
+	}
 
+	admin := rdbmsstructure.Account{
+		Username:    "admin",
+		Password:    string(hashPassword),
+		FirstName:   "admin",
+		LastName:    "T-dev",
+		PhoneNumber: "-",
+		LineId:      "-",
+		Role:        string(constant.Admin),
+	}
+	err = ctrl.insert(admin)
+	if err != nil {
+		Error = err
+		return
+	}
+	return
+}
+
+
+func (ctrl *APIControl) RegisterOperator(reqOperator *structure.Operator) (Error error) {
 	hashPassword, err := utility.Hash(reqOperator.Password)
 	if err != nil {
 		return err
@@ -57,7 +80,6 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.Operator) (Error
 }
 
 func (ctrl *APIControl) Login(reqLogin *structure.Login) (Token string, Error error) {
-
 	login := rdbmsstructure.Account{
 		Username: reqLogin.Username,
 		Password: reqLogin.Password,
