@@ -1,6 +1,7 @@
 .postgresql
-fileqrcode
-fileteampage
-logteampage
+fileqrcode/
+fileteampage/
+logteampage/
 tmp
 upload
+.idea
