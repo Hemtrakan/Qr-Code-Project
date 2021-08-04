@@ -8,3 +8,6 @@ upload
 fileqrcode/
 fileteampage/
 logteampage/
+tmp
+views
+.idea
