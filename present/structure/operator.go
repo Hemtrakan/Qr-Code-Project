@@ -2,7 +2,7 @@ package structure
 
 import "gorm.io/gorm"
 
-type Operator struct {
+type RegisterOperator struct {
 	gorm.Model
 	Username    string `json:"username"`
 	Password    string `json:"password"`

@@ -2,7 +2,7 @@ package structure
 
 import "gorm.io/gorm"
 
-type Owners struct {
+type RegisterOwners struct {
 	gorm.Model
 	Username    string `json:"username"`
 	Password    string `json:"password"`

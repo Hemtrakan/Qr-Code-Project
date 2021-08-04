@@ -107,10 +107,9 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getAccount", getAccount)
 	admin.Get("getAllAccountOwner", getAllAccountOwner)
 	admin.Get("getAllAccountOperator", getAllAccountOperator)
-	//admin.Get("getAccountById/:id", getAccountById)
-	//admin.Put("updateProfile", updateProfile)
-	//admin.Delete("deleteAccountOwner", deleteAccountOwner)
-	//admin.Delete("deleteAccountOperator", deleteAccountOperator)
+	admin.Get("getAccountById/:id", getAccountById)
+	admin.Put("updateProfile/:id", updateProfile)
+	admin.Delete("deleteAccount/:id", deleteAccount)
 
 	// -- TeamPage
 	admin.Get("getAllTeamPage", getAllTeamPageAdmin)

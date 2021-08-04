@@ -15,7 +15,6 @@ type FactoryInterface interface {
 	// Customer
 	GetAllAccountOwner() (response []rdbmsstructure.Account,Error error)
 	GetAllAccountOperator() (response []rdbmsstructure.Account,Error error)
-	GetByIdAccount(id int) (response rdbmsstructure.Account,Error error)
 	UpdateProfile(Account rdbmsstructure.Account) (Error error)
 	DeleteAccount(id int) (Error error)
 

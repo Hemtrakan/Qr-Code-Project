@@ -8,12 +8,13 @@ import (
 	"qrcode/control"
 	"qrcode/present/structure"
 	"qrcode/utility"
+	"strconv"
 )
 
 
 func registerOwner(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	owner := new(structure.Owners)
+	owner := new(structure.RegisterOwners)
 	err := context.BodyParser(owner)
 	if err != nil{
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
@@ -27,7 +28,7 @@ func registerOwner(context *fiber.Ctx) error {
 
 func registerOperator(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	operator := new(structure.Operator)
+	operator := new(structure.RegisterOperator)
 	err := context.BodyParser(operator)
 	if err != nil{
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
@@ -84,6 +85,54 @@ func getAllAccountOperator(context *fiber.Ctx)error  {
 	return context.JSON(responses)
 }
 
+func getAccountById(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	UserId := context.Params("id")
+	id, err := strconv.Atoi(UserId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	responses, err := api.GetAccount(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.JSON(responses)
+}
+
+func updateProfile(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	Account := new(structure.UpdateProFile)
+	err := context.BodyParser(Account)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	UserId := context.Params("id")
+	id, err := strconv.Atoi(UserId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.UpdateProfile(uint(id),Account)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberError(context, http.StatusOK, "succeed")
+}
+
+func deleteAccount(context *fiber.Ctx) error{
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	UserId := context.Params("id")
+	id, err := strconv.Atoi(UserId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.DeleteAccount(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberError(context, http.StatusOK, "succeed")
+}
+
+
 func admin(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	err := api.RegisterAdmin()
@@ -93,6 +142,7 @@ func admin(context *fiber.Ctx) error {
 	return utility.FiberError(context, http.StatusOK, "สำหรับ UserAdmin")
 }
 
+// AuthError Auth
 func AuthError(c *fiber.Ctx, e error) error {
 	c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 		"message": "Unauthorized",

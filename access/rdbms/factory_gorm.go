@@ -15,6 +15,7 @@ type GORMFactory struct {
 	client *gorm.DB
 }
 
+
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -129,16 +130,26 @@ func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Ac
 	return
 }
 
-func (factory GORMFactory) GetByIdAccount(id int) (response rdbmsstructure.Account, Error error) {
-	panic("implement me")
-}
-
 func (factory GORMFactory) UpdateProfile(Account rdbmsstructure.Account) (Error error) {
-	panic("implement me")
+	db := factory.client.Where("id = ?", Account.ID).Updates(&Account).Error
+	if db != nil {
+		return db
+	}
+	return nil
 }
 
 func (factory GORMFactory) DeleteAccount(id int) (Error error) {
-	panic("implement me")
+	var data rdbmsstructure.Account
+	err := factory.client.Where("id = ?", id).Delete(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			return
+		}
+		return
+	}
+	return
 }
 
 // -- TeamPage

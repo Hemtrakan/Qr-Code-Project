@@ -1,13 +1,15 @@
 package control
 
 import (
+	"gorm.io/gorm"
 	"qrcode/access/constant"
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/present/structure"
 	"qrcode/utility"
+	"time"
 )
 
-func (ctrl *APIControl) RegisterOwner(reqOwner *structure.Owners) (Error error) {
+func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error error) {
 
 	hashPassword, err := utility.Hash(reqOwner.Password)
 	if err != nil {
@@ -55,7 +57,7 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 }
 
 
-func (ctrl *APIControl) RegisterOperator(reqOperator *structure.Operator) (Error error) {
+func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator) (Error error) {
 	hashPassword, err := utility.Hash(reqOperator.Password)
 	if err != nil {
 		return err
@@ -167,6 +169,43 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 	response = DataArray
 	return
 }
+
+func (ctrl *APIControl) UpdateProfile(id uint,Account *structure.UpdateProFile) (Error error ){
+	hashPassword, err := utility.Hash(Account.Password)
+	if err != nil {
+		return err
+	}
+
+	data := rdbmsstructure.Account{
+		Model:       gorm.Model{
+			ID: id,
+			UpdatedAt: time.Now(),
+		},
+		Username:    Account.Username,
+		Password:    string(hashPassword),
+		FirstName:   Account.FirstName,
+		LastName:    Account.LastName,
+		PhoneNumber: Account.PhoneNumber,
+		LineId:      Account.LineId,
+	}
+	err = ctrl.access.RDBMS.UpdateProfile(data)
+	if err != nil {
+		Error = err
+		return
+	}
+	return
+}
+
+func (ctrl *APIControl) DeleteAccount(id int) (Error error ){
+	err := ctrl.access.RDBMS.DeleteAccount(id)
+	if err != nil {
+		Error = err
+		return
+	}
+	return
+}
+
+
 
 func (ctrl *APIControl) insert(Account rdbmsstructure.Account) error {
 	err := ctrl.access.RDBMS.Register(Account)
