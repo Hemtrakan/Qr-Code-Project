@@ -118,6 +118,25 @@ func updateProfile(context *fiber.Ctx) error {
 	return utility.FiberError(context, http.StatusOK, "succeed")
 }
 
+func changePassword(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	ChangePassword := new(structure.ChangePassword)
+	err := context.BodyParser(ChangePassword)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	UserId := context.Params("id")
+	id, err := strconv.Atoi(UserId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.ChangePassword(uint(id),ChangePassword)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberError(context, http.StatusOK, "succeed")
+}
+
 func deleteAccount(context *fiber.Ctx) error{
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	UserId := context.Params("id")

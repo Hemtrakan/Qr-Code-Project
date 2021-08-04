@@ -171,22 +171,35 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 }
 
 func (ctrl *APIControl) UpdateProfile(id uint,Account *structure.UpdateProFile) (Error error ){
-	hashPassword, err := utility.Hash(Account.Password)
-	if err != nil {
-		return err
-	}
-
 	data := rdbmsstructure.Account{
 		Model:       gorm.Model{
 			ID: id,
 			UpdatedAt: time.Now(),
 		},
-		Username:    Account.Username,
-		Password:    string(hashPassword),
 		FirstName:   Account.FirstName,
 		LastName:    Account.LastName,
 		PhoneNumber: Account.PhoneNumber,
 		LineId:      Account.LineId,
+	}
+	err := ctrl.access.RDBMS.UpdateProfile(data)
+	if err != nil {
+		Error = err
+		return
+	}
+	return
+}
+
+func (ctrl *APIControl) ChangePassword(id uint,password *structure.ChangePassword) (Error error)  {
+	hashPassword, err := utility.Hash(password.Password)
+	if err != nil {
+		return err
+	}
+	data := rdbmsstructure.Account{
+		Model:       gorm.Model{
+			ID: id,
+			UpdatedAt: time.Now(),
+		},
+		Password: string(hashPassword),
 	}
 	err = ctrl.access.RDBMS.UpdateProfile(data)
 	if err != nil {
