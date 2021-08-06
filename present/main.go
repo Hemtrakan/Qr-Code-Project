@@ -47,9 +47,12 @@ func APICreate(ctrl *control.APIControl) {
 		return context.Next()
 	})
 
+
+
 	api := app.Group("/api")
 	api.Post("login", login)
 	api.Post("admin", admin)
+
 
 	qr := app.Group("/qr")
 	qr.Get(":id", getByIdTeamPage)
@@ -120,11 +123,8 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Delete("deleteTeamPage/:id", deleteTeamPage)
 
 	// -- QrCode
-	//admin.Post("genQrCode", genQrCode)
-	admin.Post("testGenQr",genQrCode)
-
-	// -- TeamPageLog
-	//admin.Get("getAllLogTeamPage/:id", getAllLogTeamPage)
+	admin.Post("genQr",genQrCode)
+	admin.Get("getQrCodeFile/:name",genQrCodeByName)
 
 	// -- File
 	admin.Post("upload_file", uploadFile)

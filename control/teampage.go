@@ -74,16 +74,15 @@ func (ctrl *APIControl) GetAllTeamPage(id int) (response []*structure.GetAllTeam
 }
 
 func (ctrl *APIControl) InsertTeamPage(reqTeamPage *[]structure.TeamPage) (Error error) {
-	for _, req := range *reqTeamPage {
+	for index, req := range *reqTeamPage {
 		uuid, err := uuid.NewV4()
 		if err != nil {
 			Error = err
 			return
 		}
-		file, _ := json.MarshalIndent(reqTeamPage, "", " ")
 		loc, _ := time.LoadLocation("Asia/Bangkok")
 		fileNamePrefix := time.Now().In(loc).Format("20060102_150405")
-		TeamPageFile := fileNamePrefix + ".json"
+		TeamPageFile := strconv.Itoa(index+1) + "-" + fileNamePrefix + ".json"
 		TeamPage := rdbmsstructure.TeamPage{
 			TeamPageName: req.TeamPageName,
 			TeamPageFile: TeamPageFile,
@@ -97,12 +96,23 @@ func (ctrl *APIControl) InsertTeamPage(reqTeamPage *[]structure.TeamPage) (Error
 			Error = err
 			return
 		}
+		// บันทึก TeamPage
+		FileJson := structure.TeamPage{
+			OwnerId:      req.OwnerId,
+			TeamPageName: req.TeamPageName,
+			QrCodeType:   req.QrCodeType,
+			Info:         req.Info,
+			Ops:          req.Ops,
+		}
+
+		file, _ := json.MarshalIndent(FileJson, "", " ")
 		err = ioutil.WriteFile(string(constant.SaveFileLocation)+"/"+TeamPageFile, file, 0644) //todo ต้องทำเป็น Env
 		if err != nil {
 			Error = err
 			return
 		}
 
+		// สร้าง QR-Code
 		qrc, err := qrcode.New(constant.Http + "/" + uuid.String())
 		if err != nil {
 			fmt.Printf("could not generate QRCode: %v", err)
@@ -188,6 +198,7 @@ func (ctrl *APIControl) DeleteTeamPage(teamPageId structure.GetByIdTeamPage) (Er
 //	}
 //	return nil
 //}
+
 func (ctrl *APIControl) updateTeamPage(TeamPage rdbmsstructure.TeamPage) error {
 	err := ctrl.access.RDBMS.UpdateTeamPage(TeamPage)
 	if err != nil {

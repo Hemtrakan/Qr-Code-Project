@@ -12,6 +12,10 @@ type GenQr struct {
 	Filename []string `json:"filename"`
 }
 
+type GetQrCodeImage struct {
+	FileName string `json:"file_name"`
+}
+
 type Location struct {
 	ID          uint   `json:"id"`
 	Country     string `json:"country"`

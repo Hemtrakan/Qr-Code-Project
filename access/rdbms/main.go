@@ -19,7 +19,7 @@ type FactoryInterface interface {
 	DeleteAccount(id int) (Error error)
 
 	//  QRCode
-	GenerateQrCode(Qrcode rdbmsstructure.Qrcode) (Error error)
+	//GenerateQrCode(Qrcode rdbmsstructure.Qrcode) (Error error)
 	GetIdTeamPage(teamPageId uint) (response rdbmsstructure.TeamPage, Error error)
 
 

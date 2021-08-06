@@ -28,7 +28,7 @@ func gormInstance(env *environment.Properties) GORMFactory {
 	}
 
 	_ = db.AutoMigrate(
-		&rdbmsstructure.Qrcode{},
+		//&rdbmsstructure.Qrcode{},
 		&rdbmsstructure.Account{},
 		&rdbmsstructure.Location{},
 		&rdbmsstructure.TeamPage{},
@@ -37,14 +37,14 @@ func gormInstance(env *environment.Properties) GORMFactory {
 	return GORMFactory{env: env, client: db}
 }
 
-func (factory GORMFactory) GenerateQrCode(Qrcode rdbmsstructure.Qrcode) (Error error) {
-	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Qrcode).Error
-	if db != nil {
-		return db
-	}
-	return nil
-	return
-}
+//func (factory GORMFactory) GenerateQrCode(Qrcode rdbmsstructure.Qrcode) (Error error) {
+//	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Qrcode).Error
+//	if db != nil {
+//		return db
+//	}
+//	return nil
+//	return
+//}
 
 func (factory GORMFactory) GetIdTeamPage(teamPageId uint) (response rdbmsstructure.TeamPage, Error error) {
 	var data rdbmsstructure.TeamPage

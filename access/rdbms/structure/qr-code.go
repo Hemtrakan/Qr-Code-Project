@@ -22,13 +22,13 @@ type LogTeamPage struct {
 	OwnersId        uint `gorm:"foreignKey:ID"`
 }
 
-type Qrcode struct {
-	gorm.Model
-	QrCode     string
-	OwnersId   uint     `gorm:"foreignKey:ID"`
-	Location   Location `gorm:"foreignKey:ID"`
-	TeamPageId uint     `gorm:"foreignKey:ID"`
-}
+//type Qrcode struct {
+//	gorm.Model
+//	QrCode     string
+//	OwnersId   uint     `gorm:"foreignKey:ID"`
+//	Location   Location `gorm:"foreignKey:ID"`
+//	TeamPageId uint     `gorm:"foreignKey:ID"`
+//}
 
 type Location struct {
 	gorm.Model
