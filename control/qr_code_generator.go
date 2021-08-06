@@ -10,7 +10,6 @@ import (
 )
 
 func (ctrl *APIControl) GenerateQrCode(req *structure.GenerateQrCode) (Error error) {
-
 	QrCode := rdbmsstructure.Qrcode{
 		QrCode:     req.QrCode,
 		OwnersId:   req.OwnersId,

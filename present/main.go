@@ -113,7 +113,8 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Delete("deleteAccount/:id", deleteAccount)
 
 	// -- TeamPage
-	admin.Get("getAllTeamPage", getAllTeamPageAdmin)
+	admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้
+	admin.Get("getAllTeamPageById/:id", getAllTeamPageById)
 	admin.Post("insertTeamPage", insertTeamPage)
 	admin.Put("updateTeamPage/:id", updateTeamPage)
 	admin.Delete("deleteTeamPage/:id", deleteTeamPage)

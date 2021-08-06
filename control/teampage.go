@@ -3,8 +3,10 @@ package control
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/gofrs/uuid"
+	"github.com/yeqown/go-qrcode"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"os"
@@ -15,11 +17,11 @@ import (
 	"time"
 )
 
-func (ctrl *APIControl) GetHtml(id string) (URL string ,Error error) {
+func (ctrl *APIControl) GetHtml(id string) (URL string, Error error) {
 	client := resty.New()
 	_, err := client.R().
 		//SetPathParam("id", id).
-		Get("http://localhost:12000/viewdata/"+id)
+		Get("http://localhost:12000/viewdata/" + id)
 	if err != nil {
 		Error = err
 		return
@@ -50,9 +52,9 @@ func (ctrl *APIControl) GetByIdTeamPage(teamPageId structure.GetByIdTeamPage) (r
 	return
 }
 
-func (ctrl *APIControl) GetAllTeamPage(ownersId int) (response []*structure.GetAllTeamPage, Error error) {
+func (ctrl *APIControl) GetAllTeamPage(id int) (response []*structure.GetAllTeamPage, Error error) {
 	var TeamPageArray []*structure.GetAllTeamPage
-	res, err := ctrl.access.RDBMS.GetAllTeamPage(ownersId)
+	res, err := ctrl.access.RDBMS.GetAllTeamPage(id)
 	if err != nil {
 		Error = err
 		return
@@ -63,6 +65,7 @@ func (ctrl *APIControl) GetAllTeamPage(ownersId int) (response []*structure.GetA
 			TeamPageId:   TeamPage.UUID,
 			TeamPageName: TeamPage.TeamPageName,
 			TeamPageFile: TeamPage.TeamPageFile,
+			QrCodeType:   TeamPage.QrCodeType,
 		}
 		TeamPageArray = append(TeamPageArray, &TeamPageStructure)
 	}
@@ -70,32 +73,46 @@ func (ctrl *APIControl) GetAllTeamPage(ownersId int) (response []*structure.GetA
 	return
 }
 
-func (ctrl *APIControl) InsertTeamPage(reqTeamPage *structure.TeamPage) (Error error) {
-	file, _ := json.MarshalIndent(reqTeamPage, "", " ")
-	loc, _ := time.LoadLocation("Asia/Bangkok")
-	fileNamePrefix := time.Now().In(loc).Format("20060102_150405")
-	TeamPageFile := fileNamePrefix + ".json"
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		Error = err
-		return
-	}
-	TeamPage := rdbmsstructure.TeamPage{
-		TeamPageName: reqTeamPage.TeamPageName,
-		TeamPageFile: TeamPageFile,
-		OwnersId:     uint(reqTeamPage.OwnerId),
-		UUID:         uuid,
-	}
-	err = ctrl.insertTeamPage(TeamPage)
-	if err != nil {
-		Error = err
-		return
-	}
+func (ctrl *APIControl) InsertTeamPage(reqTeamPage *[]structure.TeamPage) (Error error) {
+	for _, req := range *reqTeamPage {
+		uuid, err := uuid.NewV4()
+		if err != nil {
+			Error = err
+			return
+		}
+		file, _ := json.MarshalIndent(reqTeamPage, "", " ")
+		loc, _ := time.LoadLocation("Asia/Bangkok")
+		fileNamePrefix := time.Now().In(loc).Format("20060102_150405")
+		TeamPageFile := fileNamePrefix + ".json"
+		TeamPage := rdbmsstructure.TeamPage{
+			TeamPageName: req.TeamPageName,
+			TeamPageFile: TeamPageFile,
+			UUID:         uuid,
+			OwnersId:     uint(req.OwnerId),
+			QrCodeType:   req.QrCodeType,
+		}
+		data, err := ctrl.access.RDBMS.InsertTeamPage(TeamPage)
+		//err = ctrl.insertTeamPage(TeamPage)
+		if err != nil {
+			Error = err
+			return
+		}
+		err = ioutil.WriteFile(string(constant.SaveFileLocation)+"/"+TeamPageFile, file, 0644) //todo ต้องทำเป็น Env
+		if err != nil {
+			Error = err
+			return
+		}
 
-	err = ioutil.WriteFile(string(constant.SaveFileLocation)+"/"+TeamPageFile, file, 0644) //todo ต้องทำเป็น Env
-	if err != nil {
-		Error = err
-		return
+		qrc, err := qrcode.New(constant.Http + "/" + uuid.String())
+		if err != nil {
+			fmt.Printf("could not generate QRCode: %v", err)
+		}
+
+		path := string(constant.SaveFileLocationQrCode) + "/" + req.TeamPageName + "_" + strconv.FormatUint(uint64(data.ID), 10) + ".PNG"
+		// save file
+		if err = qrc.Save(path); err != nil {
+			fmt.Printf("could not save image: %v", err)
+		}
 	}
 	return
 }
@@ -164,13 +181,13 @@ func (ctrl *APIControl) DeleteTeamPage(teamPageId structure.GetByIdTeamPage) (Er
 	return
 }
 
-func (ctrl *APIControl) insertTeamPage(TeamPage rdbmsstructure.TeamPage) error {
-	err := ctrl.access.RDBMS.InsertTeamPage(TeamPage)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+//func (ctrl *APIControl) insertTeamPage(TeamPage rdbmsstructure.TeamPage) error {
+//	err := ctrl.access.RDBMS.InsertTeamPage(TeamPage)
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
 func (ctrl *APIControl) updateTeamPage(TeamPage rdbmsstructure.TeamPage) error {
 	err := ctrl.access.RDBMS.UpdateTeamPage(TeamPage)
 	if err != nil {

@@ -154,12 +154,14 @@ func (factory GORMFactory) DeleteAccount(id int) (Error error) {
 
 // -- TeamPage
 
-func (factory GORMFactory) InsertTeamPage(TeamPage rdbmsstructure.TeamPage) (Error error){
-	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&TeamPage).Error
-	if db != nil {
-		return db
+func (factory GORMFactory) InsertTeamPage(TeamPage rdbmsstructure.TeamPage) (response rdbmsstructure.TeamPage,Error error){
+	err := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&TeamPage).Error
+	if err != nil {
+		Error = err
+		return
 	}
-	return nil
+	response = TeamPage
+	return
 }
 func (factory GORMFactory) UpdateTeamPage(TeamPage rdbmsstructure.TeamPage) (Error error){
 	db := factory.client.Where("id = ?", TeamPage.ID).Updates(&TeamPage).Error

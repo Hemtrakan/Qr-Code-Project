@@ -40,21 +40,23 @@ func getAllTeamPage(context *fiber.Ctx) error {
 	user := context.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	var UserId = claims["id"].(float64)
-	var ownersId = int(UserId)
-	res, err := api.GetAllTeamPage(ownersId)
+	var id = int(UserId)
+	res, err := api.GetAllTeamPage(id)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.Status(http.StatusOK).JSON(res)
 }
 
-func getAllTeamPageAdmin(context *fiber.Ctx) error {
+
+func getAllTeamPageById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	user := context.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	var UserId = claims["id"].(float64)
-	var ownersId = int(UserId)
-	res, err := api.GetAllTeamPage(ownersId)
+	userid := context.Params("id")
+	id, err := strconv.Atoi(userid)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	res, err := api.GetAllTeamPage(id)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -63,7 +65,7 @@ func getAllTeamPageAdmin(context *fiber.Ctx) error {
 
 func insertTeamPage(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	TeamPage := new(structure.TeamPage)
+	TeamPage := new([]structure.TeamPage)
 	err := context.BodyParser(TeamPage)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())

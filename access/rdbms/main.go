@@ -29,7 +29,7 @@ type FactoryInterface interface {
 	GetAccount(id int) (response rdbmsstructure.Account,Error error)
 
 	//  TeamPage
-	InsertTeamPage(TeamPage rdbmsstructure.TeamPage) (Error error)
+	InsertTeamPage(TeamPage rdbmsstructure.TeamPage) (response rdbmsstructure.TeamPage,Error error)
 	UpdateTeamPage(TeamPage rdbmsstructure.TeamPage) (Error error)
 	GetAllTeamPage(ownersId int) (response []rdbmsstructure.TeamPage ,Error error)
 	GetByIdTeamPage(teamPageId string) (response rdbmsstructure.TeamPage ,Error error)

@@ -6,7 +6,7 @@ const (
 	LocalsKeyControl string = "CTRL"
 )
 const SecretKey = "T-DEV Co., Ltd."
-const Http = "http://192.168.1.105:12000/viewdata"
+const Http = "localhost:8080/qr/"
 
 type UserRole string
 

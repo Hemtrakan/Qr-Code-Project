@@ -11,6 +11,7 @@ type TeamPage struct {
 	TeamPageFile string
 	UUID         uuid.UUID `gorm:"uniqueIndex"`
 	OwnersId     uint      `gorm:"foreignKey:ID"`
+	QrCodeType   string
 }
 
 type LogTeamPage struct {

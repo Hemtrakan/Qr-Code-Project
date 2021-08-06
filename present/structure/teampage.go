@@ -8,6 +8,7 @@ import (
 type TeamPage struct {
 	OwnerId      int         `json:"owner_id"`
 	TeamPageName string      `json:"team_page_name"`
+	QrCodeType   string      `json:"qr_code_type"`
 	Info         interface{} `json:"info"`
 	Ops          interface{} `json:"ops"`
 }
@@ -17,6 +18,7 @@ type GetAllTeamPage struct {
 	TeamPageName string    `json:"team_page_name" query:"team_page_name"`
 	TeamPageFile string    `json:"team_page_file" query:"team_page_file"`
 	TeamPageId   uuid.UUID `json:"team_page_id" query:"team_page_id"`
+	QrCodeType   string    `json:"qr_code_type"`
 }
 
 type GetByIdTeamPage struct {
