@@ -7,6 +7,11 @@ type GenerateQrCode struct {
 	Location   Location `json:"location"`
 }
 
+type GenQr struct {
+	FileZip string `json:"file_zip"`
+	Filename []string `json:"filename"`
+}
+
 type Location struct {
 	ID          uint   `json:"id"`
 	Country     string `json:"country"`

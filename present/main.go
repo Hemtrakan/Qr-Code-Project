@@ -120,7 +120,8 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Delete("deleteTeamPage/:id", deleteTeamPage)
 
 	// -- QrCode
-	admin.Post("genQrCode", genQrCode)
+	//admin.Post("genQrCode", genQrCode)
+	admin.Post("testGenQr",genQrCode)
 
 	// -- TeamPageLog
 	//admin.Get("getAllLogTeamPage/:id", getAllLogTeamPage)
