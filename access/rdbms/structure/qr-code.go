@@ -2,25 +2,34 @@ package structure
 
 import (
 	"github.com/gofrs/uuid"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
-type TeamPage struct {
+//type Template struct {
+//	gorm.Model
+//	TeamPageName string
+//	TeamPageFile string
+//}
+
+type QrCode struct {
 	gorm.Model
-	TeamPageName string
-	TeamPageFile string
-	UUID         uuid.UUID `gorm:"uniqueIndex"`
-	OwnersId     uint      `gorm:"foreignKey:ID"`
-	QrCodeType   string
+	OwnerId      uint
+	TemplateName string
+	Info         datatypes.JSON
+	Ops          datatypes.JSON
+	history      datatypes.JSON
+	QrCodeUUID   uuid.UUID `gorm:"uniqueIndex"`
+	Code         string
 }
 
-type LogTeamPage struct {
-	gorm.Model
-	LogTeamPageName string
-	LogTeamPageFile string
-	TeamPageId      uint `gorm:"foreignKey:ID"`
-	OwnersId        uint `gorm:"foreignKey:ID"`
-}
+//type LogTeamPage struct {
+//	gorm.Model
+//	LogTeamPageName string
+//	LogTeamPageFile string
+//	TeamPageId      uint `gorm:"foreignKey:ID"`
+//	OwnersId        uint `gorm:"foreignKey:ID"`
+//}
 
 //type Qrcode struct {
 //	gorm.Model

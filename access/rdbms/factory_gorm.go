@@ -16,6 +16,7 @@ type GORMFactory struct {
 }
 
 
+
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -28,38 +29,28 @@ func gormInstance(env *environment.Properties) GORMFactory {
 	}
 
 	_ = db.AutoMigrate(
-		//&rdbmsstructure.Qrcode{},
 		&rdbmsstructure.Account{},
-		&rdbmsstructure.Location{},
-		&rdbmsstructure.TeamPage{},
-		&rdbmsstructure.LogTeamPage{},
+		&rdbmsstructure.QrCode{},
 	)
 	return GORMFactory{env: env, client: db}
 }
 
-//func (factory GORMFactory) GenerateQrCode(Qrcode rdbmsstructure.Qrcode) (Error error) {
-//	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Qrcode).Error
-//	if db != nil {
-//		return db
+
+//
+//func (factory GORMFactory) GetIdTeamPage(teamPageId uint) (response rdbmsstructure.Template, Error error) {
+//	var data rdbmsstructure.Template
+//	err := factory.client.Where("id = ?", teamPageId).Find(&data).Error
+//	if err != nil {
+//		if !errors.Is(err, gorm.ErrRecordNotFound) {
+//			Error = err
+//		} else {
+//			return
+//		}
+//		return
 //	}
-//	return nil
+//	response = data
 //	return
 //}
-
-func (factory GORMFactory) GetIdTeamPage(teamPageId uint) (response rdbmsstructure.TeamPage, Error error) {
-	var data rdbmsstructure.TeamPage
-	err := factory.client.Where("id = ?", teamPageId).Find(&data).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-		} else {
-			return
-		}
-		return
-	}
-	response = data
-	return
-}
 
 //  Account
 func (factory GORMFactory) Register(Account rdbmsstructure.Account) (Error error) {
@@ -152,83 +143,50 @@ func (factory GORMFactory) DeleteAccount(id int) (Error error) {
 	return
 }
 
-// -- TeamPage
+// -- QR-Code
 
-func (factory GORMFactory) InsertTeamPage(TeamPage rdbmsstructure.TeamPage) (response rdbmsstructure.TeamPage,Error error){
-	err := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&TeamPage).Error
-	if err != nil {
-		Error = err
-		return
-	}
-	response = TeamPage
-	return
-}
-func (factory GORMFactory) UpdateTeamPage(TeamPage rdbmsstructure.TeamPage) (Error error){
-	db := factory.client.Where("id = ?", TeamPage.ID).Updates(&TeamPage).Error
+func (factory GORMFactory) CreateQrCode(QrCode rdbmsstructure.QrCode) (Error error) {
+	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&QrCode).Error
 	if db != nil {
 		return db
 	}
 	return nil
 }
 
-func (factory GORMFactory) GetByIdTeamPage(teamPageId string) (response rdbmsstructure.TeamPage, Error error) {
-	var data rdbmsstructure.TeamPage
-	err := factory.client.Where("uuid = ?", teamPageId).Find(&data).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-		} else {
-			return
-		}
-		return
-	}
-	response = data
-	return
-}
-
-func (factory GORMFactory) DeleteTeamPage(teamPageId uint) (Error error) {
-	var data rdbmsstructure.TeamPage
-	err := factory.client.Where("id = ?", teamPageId).Delete(&data).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-		} else {
-			return
-		}
-		return
-	}
-	return
-}
-
-func (factory GORMFactory) GetAllTeamPage(ownersId int) (response []rdbmsstructure.TeamPage, Error error) {
-	var data []rdbmsstructure.TeamPage
-	err := factory.client.Where("owners_id = ?", ownersId).Find(&data).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-		} else {
-			return
-		}
-		return
-	}
-	response = data
-	return
-}
-
-
-
-// InsertLogTeamPage -- LogTeamPage
-func (factory GORMFactory) InsertLogTeamPage(LogTeamPage rdbmsstructure.LogTeamPage) (Error error) {
-	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&LogTeamPage).Error
+func (factory GORMFactory) UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error error) {
+	db := factory.client.Where("qr_code_uuid = ?", QrCode.QrCodeUUID).Updates(&QrCode).Error
 	if db != nil {
 		return db
 	}
+	return nil
+}
+
+func (factory GORMFactory) UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error) {
+	db := factory.client.Where("id = ?", QrCode.ID).Updates(&QrCode).Error
+	if db != nil {
+		return db
+	}
+	return nil
+}
+
+func (factory GORMFactory) GetQrCode(OwnerId uint,templateName string) (response []rdbmsstructure.QrCode,Error error) {
+	var data []rdbmsstructure.QrCode
+	err := factory.client.Where("owner_id = ? and template_name = ?", OwnerId,templateName).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			return
+		}
+		return
+	}
+	response = data
 	return
 }
 
-func (factory GORMFactory) GetByIdLogTeamPage(teamPageId uint) (response []rdbmsstructure.LogTeamPage, Error error) {
-	var data []rdbmsstructure.LogTeamPage
-	err := factory.client.Where("team_page_id = ?", teamPageId).Find(&data).Error // todo ยังไม่เสร็จ
+func (factory GORMFactory) GetQrCodeById(OwnerId int) (response []rdbmsstructure.QrCode,Error error) {
+	var data []rdbmsstructure.QrCode
+	err := factory.client.Where("owner_id = ?", OwnerId).Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -242,20 +200,111 @@ func (factory GORMFactory) GetByIdLogTeamPage(teamPageId uint) (response []rdbms
 }
 
 
-func (factory GORMFactory) GetAllDataListLogTeamPage(teamPageId uint) (response []rdbmsstructure.LogTeamPage, Error error) {
-	var data []rdbmsstructure.LogTeamPage
-	err := factory.client.Where("team_page_id = ?", teamPageId).Order("id desc").Find(&data).Error // todo ยังไม่เสร็จ
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-		} else {
-			return
-		}
-		return
-	}
-	response = data
-	return
-}
+
+// -- TeamPage
+//
+//func (factory GORMFactory) InsertTeamPage(TeamPage rdbmsstructure.Template) (response rdbmsstructure.Template,Error error){
+//	err := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&TeamPage).Error
+//	if err != nil {
+//		Error = err
+//		return
+//	}
+//	response = TeamPage
+//	return
+//}
+//func (factory GORMFactory) UpdateTeamPage(TeamPage rdbmsstructure.Template) (Error error){
+//	db := factory.client.Where("id = ?", TeamPage.ID).Updates(&TeamPage).Error
+//	if db != nil {
+//		return db
+//	}
+//	return nil
+//}
+//
+//func (factory GORMFactory) GetByIdTeamPage(teamPageId string) (response rdbmsstructure.Template, Error error) {
+//	var data rdbmsstructure.Template
+//	err := factory.client.Where("uuid = ?", teamPageId).Find(&data).Error
+//	if err != nil {
+//		if !errors.Is(err, gorm.ErrRecordNotFound) {
+//			Error = err
+//		} else {
+//			return
+//		}
+//		return
+//	}
+//	response = data
+//	return
+//}
+//
+//func (factory GORMFactory) DeleteTeamPage(teamPageId uint) (Error error) {
+//	var data rdbmsstructure.Template
+//	err := factory.client.Where("id = ?", teamPageId).Delete(&data).Error
+//	if err != nil {
+//		if !errors.Is(err, gorm.ErrRecordNotFound) {
+//			Error = err
+//		} else {
+//			return
+//		}
+//		return
+//	}
+//	return
+//}
+//
+//func (factory GORMFactory) GetAllTeamPage(ownersId int) (response []rdbmsstructure.Template, Error error) {
+//	var data []rdbmsstructure.Template
+//	err := factory.client.Where("owners_id = ?", ownersId).Find(&data).Error
+//	if err != nil {
+//		if !errors.Is(err, gorm.ErrRecordNotFound) {
+//			Error = err
+//		} else {
+//			return
+//		}
+//		return
+//	}
+//	response = data
+//	return
+//}
+//
+
+
+// InsertLogTeamPage -- LogTeamPage
+//func (factory GORMFactory) InsertLogTeamPage(LogTeamPage rdbmsstructure.LogTeamPage) (Error error) {
+//	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&LogTeamPage).Error
+//	if db != nil {
+//		return db
+//	}
+//	return
+//}
+//
+//func (factory GORMFactory) GetByIdLogTeamPage(teamPageId uint) (response []rdbmsstructure.LogTeamPage, Error error) {
+//	var data []rdbmsstructure.LogTeamPage
+//	err := factory.client.Where("team_page_id = ?", teamPageId).Find(&data).Error // todo ยังไม่เสร็จ
+//	if err != nil {
+//		if !errors.Is(err, gorm.ErrRecordNotFound) {
+//			Error = err
+//		} else {
+//			return
+//		}
+//		return
+//	}
+//	response = data
+//	return
+//}
+//
+//
+//func (factory GORMFactory) GetAllDataListLogTeamPage(teamPageId uint) (response []rdbmsstructure.LogTeamPage, Error error) {
+//	var data []rdbmsstructure.LogTeamPage
+//	err := factory.client.Where("team_page_id = ?", teamPageId).Order("id desc").Find(&data).Error // todo ยังไม่เสร็จ
+//	if err != nil {
+//		if !errors.Is(err, gorm.ErrRecordNotFound) {
+//			Error = err
+//		} else {
+//			return
+//		}
+//		return
+//	}
+//	response = data
+//	return
+//}
 
 
 

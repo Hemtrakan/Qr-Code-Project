@@ -1,29 +1,40 @@
 package structure
 
-type GenerateQrCode struct {
-	QrCode     string   `json:"qr_code"`
-	OwnersId   uint     `json:"owners_id" validate:"required"`
-	TeamPageId uint     `json:"team_page_id" validate:"required"`
-	Location   Location `json:"location"`
+type FileZipByTemplateName struct {
+	OwnerId      uint   `json:"owner_id"`
+	TemplateName string `json:"template_name"`
+	FileZip      string `json:"file_zip"`
 }
 
-type GenQr struct {
-	FileZip string `json:"file_zip"`
-	Filename []string `json:"filename"`
+type FileZip struct {
+	OwnerId  int      `json:"owner_id"`
+	FileZip  string   `json:"file_zip"`
+	FileName []FileNames `json:"file_name"`
+}
+
+type FileNames struct {
+	QrCodeId string   `json:"qr_code_id"`
+	Filename string `json:"filename"`
+}
+
+type GetQrCode struct {
+	OwnerId               uint   `json:"owner_id"`
+	TemplateName          string `json:"template_name"`
+	QrCodeId              string `json:"qr_code_id"`
+	ThisQrCodeIsGenerated bool   `json:"this_qr_code_is_generated"`
+}
+
+type ArrayFileName struct {
+	FileName string `json:"file_name"`
 }
 
 type GetQrCodeImage struct {
 	FileName string `json:"file_name"`
 }
 
-type Location struct {
-	ID          uint   `json:"id"`
-	Country     string `json:"country"`
-	Address     string `json:"address"`
-	SubDistrict string `json:"sub_district"`
-	District    string `json:"district"`
-	Province    string `json:"province"`
-	Zipcode     string `json:"zipcode"`
-	XCoordinate string `json:"x_coordinate"`
-	YCoordinate string `json:"y_coordinate"`
+type GenQrCode struct {
+	OwnerId      uint   `json:"owner_id"`
+	CodeName     string `json:"code_name"`
+	TemplateName string `json:"template_name"`
+	Amount       int    `json:"amount"`
 }

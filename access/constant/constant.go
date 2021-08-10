@@ -6,7 +6,7 @@ const (
 	LocalsKeyControl string = "CTRL"
 )
 const SecretKey = "T-DEV Co., Ltd."
-const Http = "localhost:8080/qr/"
+const Http = "http://www.localhost:8080/qr"
 
 type UserRole string
 
@@ -35,7 +35,6 @@ func (userRole UserRole) Role() (result *string, Errors error) {
 		result = &fullName
 	default:
 		Errors = errors.New("unimplemented")
-
 	}
 	return
 }
@@ -43,12 +42,10 @@ func (userRole UserRole) Role() (result *string, Errors error) {
 type CategoryFile string
 
 const (
-	TeamPage CategoryFile = "team_page"
 	QRCode   CategoryFile = "qr_code"
 )
 
 var CategoryFileData = []CategoryFile{
-	TeamPage,
 	QRCode,
 }
 

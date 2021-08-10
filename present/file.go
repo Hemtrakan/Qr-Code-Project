@@ -23,9 +23,6 @@ func uploadFile(context *fiber.Ctx) error {
 			case string(constant.QRCode):
 				fileType = constant.QRCode
 				break
-			case string(constant.TeamPage):
-				fileType = constant.TeamPage
-				break
 			default:
 				log.Fatal("Unimplemented")
 			}
@@ -52,9 +49,6 @@ func getUrlFile(context *fiber.Ctx) error {
 	switch file.Data {
 	case string(constant.QRCode):
 		fileType = constant.QRCode
-		break
-	case string(constant.TeamPage):
-		fileType = constant.TeamPage
 		break
 	default:
 		log.Fatal("Unimplemented")

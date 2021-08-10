@@ -19,27 +19,17 @@ type FactoryInterface interface {
 	DeleteAccount(id int) (Error error)
 
 	//  QRCode
-	//GenerateQrCode(Qrcode rdbmsstructure.Qrcode) (Error error)
-	GetIdTeamPage(teamPageId uint) (response rdbmsstructure.TeamPage, Error error)
-
+	CreateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
+	GetQrCode(OwnerId uint,templateName string) (response []rdbmsstructure.QrCode,Error error)
+	GetQrCodeById(OwnerId int) (response []rdbmsstructure.QrCode,Error error)
+	UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
+	UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error error)
 
 	// Acconut
 	Register(Account rdbmsstructure.Account) (Error error)
 	Login(login rdbmsstructure.Account) (response rdbmsstructure.Account,Error error)
 	GetAccount(id int) (response rdbmsstructure.Account,Error error)
 
-	//  TeamPage
-	InsertTeamPage(TeamPage rdbmsstructure.TeamPage) (response rdbmsstructure.TeamPage,Error error)
-	UpdateTeamPage(TeamPage rdbmsstructure.TeamPage) (Error error)
-	GetAllTeamPage(ownersId int) (response []rdbmsstructure.TeamPage ,Error error)
-	GetByIdTeamPage(teamPageId string) (response rdbmsstructure.TeamPage ,Error error)
-	DeleteTeamPage(teamPageId uint) (Error error)
-
-	// InsertLogTeamPage -- LogTeamPage
-	InsertLogTeamPage(TeamPage rdbmsstructure.LogTeamPage) (Error error)
-	GetByIdLogTeamPage(teamPageId uint) (response []rdbmsstructure.LogTeamPage ,Error error)
-
-	GetAllDataListLogTeamPage(teamPageId uint) (response []rdbmsstructure.LogTeamPage ,Error error)
 }
 
 func Create(env *environment.Properties) FactoryInterface {

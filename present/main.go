@@ -1,6 +1,9 @@
 package present
 
 import (
+	"errors"
+	"fmt"
+	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -47,16 +50,14 @@ func APICreate(ctrl *control.APIControl) {
 		return context.Next()
 	})
 
-
-
 	api := app.Group("/api")
 	api.Post("login", login)
 	api.Post("admin", admin)
 
-
-	qr := app.Group("/qr")
-	qr.Get(":id", getByIdTeamPage)
-	qr.Get("getAllLogTeamPage/:id", getAllLogTeamPage)
+	//qr := app.Group("/qr")
+	//qr.Get(":id", getByIdTeamPage)
+	//qr.Get("getAllLogTeamPage/:id", getAllLogTeamPage)
+	//qr.Get("test", proxy.Forward("http://localhost:12000"))
 
 	// -- Todo Owner
 	owner := app.Group("/owner")
@@ -81,7 +82,7 @@ func APICreate(ctrl *control.APIControl) {
 	// -- API Owner
 	owner.Get("getAccount", getAccount)
 	owner.Post("register_operator", registerOperator)
-	owner.Get("getAllTeamPage", getAllTeamPage)
+	//owner.Get("getAllTeamPage", getAllTeamPage)
 
 	// -- Todo Admin
 	admin := app.Group("/admin")
@@ -109,22 +110,37 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("register_operator", registerOperator)
 	admin.Get("getAccount", getAccount)
 	admin.Get("getAllAccountOwner", getAllAccountOwner)
+	//admin.Get("getSubOwner/:id", getSubOwner) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
 	admin.Get("getAllAccountOperator", getAllAccountOperator)
+	//admin.Get("getOwnerByIdOps/:id",getOwnerByIdOps) // todo ดูข้อมูล Owner ById Ops
 	admin.Get("getAccountById/:id", getAccountById)
 	admin.Put("updateProfile/:id", updateProfile)
 	admin.Put("changePassword/:id", changePassword)
 	admin.Delete("deleteAccount/:id", deleteAccount)
 
 	// -- TeamPage
-	admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้
-	admin.Get("getAllTeamPageById/:id", getAllTeamPageById)
-	admin.Post("insertTeamPage", insertTeamPage)
-	admin.Put("updateTeamPage/:id", updateTeamPage)
-	admin.Delete("deleteTeamPage/:id", deleteTeamPage)
+	admin.Get("getTemplate", getTemplate)
+
+	// -- createQrCode
+	admin.Post("createQrCode", createQrCode)
+	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
+	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
+	admin.Get("getQrCode/:id", GetQrCodeById)
+	admin.Get("getQrCodeFile/:name", genQrCodeByName)
+
+	//admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้
+	//admin.Get("getAllTeamPageById/:id", getAllTeamPageById)
+	//admin.Post("insertTeamPage", insertTeamPage)
+	//admin.Put("updateTeamPage/:id", updateTeamPage)
+	//admin.Delete("deleteTeamPage/:id", deleteTeamPage)
+
+	// -- Type TeamPage
+	//admin.Get("teamPageType",)
+	//admin.Post("teamPageType",)
+	//admin.Put("teamPageType",)
+	//admin.Delete("teamPageType",)
 
 	// -- QrCode
-	admin.Post("genQr",genQrCode)
-	admin.Get("getQrCodeFile/:name",genQrCodeByName)
 
 	// -- File
 	admin.Post("upload_file", uploadFile)
@@ -134,16 +150,16 @@ func APICreate(ctrl *control.APIControl) {
 
 }
 
-//func validateStruct(dataStruct interface{}) error {
-//	validate := validator.New()
-//	err := validate.Struct(dataStruct)
-//	if err != nil {
-//		for _, err := range err.(validator.ValidationErrors) {
-//
-//			return errors.New(fmt.Sprintf("%s: %s", err.StructField(), err.Tag()))
-//		}
-//	} else {
-//		return nil
-//	}
-//	return err
-//}
+func validateStruct(dataStruct interface{}) error {
+	validate := validator.New()
+	err := validate.Struct(dataStruct)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+
+			return errors.New(fmt.Sprintf("%s: %s", err.StructField(), err.Tag()))
+		}
+	} else {
+		return nil
+	}
+	return err
+}

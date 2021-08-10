@@ -8,19 +8,21 @@ require (
 	github.com/go-ini/ini v1.62.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/go-resty/resty/v2 v2.6.0
 	github.com/gofiber/fiber/v2 v2.14.0
 	github.com/gofiber/jwt/v2 v2.2.4
 	github.com/gofiber/template v1.6.13
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/mholt/archiver/v3 v3.5.0
 	github.com/minio/minio-go v6.0.14+incompatible
-	github.com/yeqown/go-qrcode v1.5.6
+	github.com/satori/go.uuid v1.2.0
+	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/yeqown/go-qrcode v1.5.7
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
+	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
+	gorm.io/datatypes v1.0.1
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.11
 )
