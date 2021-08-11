@@ -76,6 +76,20 @@ func getAllAccountOwner(context *fiber.Ctx)error  {
 	return context.JSON(responses)
 }
 
+func getSubOwner(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	id := context.Params("id")
+	OwnerId, err := strconv.Atoi(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+	}
+	response , err := api.GetSubOwner(OwnerId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+	}
+	return context.JSON(response)
+}
+
 func getAllAccountOperator(context *fiber.Ctx)error  {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	responses, err := api.GetAllAccountOperator()
@@ -83,6 +97,20 @@ func getAllAccountOperator(context *fiber.Ctx)error  {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.JSON(responses)
+}
+
+func getOwnerByIdOps(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	id := context.Params("id")
+	OperatorId, err := strconv.Atoi(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+	}
+	response , err := api.GetOwnerByIdOps(OperatorId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+	}
+	return context.JSON(response)
 }
 
 func getAccountById(context *fiber.Ctx) error {

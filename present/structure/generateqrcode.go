@@ -9,19 +9,14 @@ type FileZipByTemplateName struct {
 type FileZip struct {
 	OwnerId  int      `json:"owner_id"`
 	FileZip  string   `json:"file_zip"`
-	FileName []FileNames `json:"file_name"`
-}
-
-type FileNames struct {
-	QrCodeId string   `json:"qr_code_id"`
-	Filename string `json:"filename"`
+	QrCodeId []string `json:"qr_code_id"`
 }
 
 type GetQrCode struct {
-	OwnerId               uint   `json:"owner_id"`
-	TemplateName          string `json:"template_name"`
-	QrCodeId              string `json:"qr_code_id"`
-	ThisQrCodeIsGenerated bool   `json:"this_qr_code_is_generated"`
+	OwnerId      uint   `json:"owner_id"`
+	TemplateName string `json:"template_name"`
+	QrCodeId     string `json:"qr_code_id"`
+	CodeName     string `json:"code_name"`
 }
 
 type ArrayFileName struct {
@@ -37,4 +32,8 @@ type GenQrCode struct {
 	CodeName     string `json:"code_name"`
 	TemplateName string `json:"template_name"`
 	Amount       int    `json:"amount"`
+}
+
+type DelQrCode struct {
+	QrCodeId []string `json:"qr_code_id"`
 }

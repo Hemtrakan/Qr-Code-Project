@@ -15,15 +15,19 @@ type FactoryInterface interface {
 	// Customer
 	GetAllAccountOwner() (response []rdbmsstructure.Account,Error error)
 	GetAllAccountOperator() (response []rdbmsstructure.Account,Error error)
+	GetSubOwner(OwnerId int) (response []rdbmsstructure.Account,Error error)
+	GetOwnerByIdOps(OperatorId int) (response rdbmsstructure.Account,Error error)
 	UpdateProfile(Account rdbmsstructure.Account) (Error error)
 	DeleteAccount(id int) (Error error)
 
 	//  QRCode
 	CreateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 	GetQrCode(OwnerId uint,templateName string) (response []rdbmsstructure.QrCode,Error error)
-	GetQrCodeById(OwnerId int) (response []rdbmsstructure.QrCode,Error error)
+	GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode,Error error)
+	GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (response rdbmsstructure.QrCode,Error error)
 	UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 	UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error error)
+	DeleteQrCode(QrCodeUUID string) (Error error)
 
 	// Acconut
 	Register(Account rdbmsstructure.Account) (Error error)

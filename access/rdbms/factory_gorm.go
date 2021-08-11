@@ -15,8 +15,6 @@ type GORMFactory struct {
 	client *gorm.DB
 }
 
-
-
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -34,23 +32,6 @@ func gormInstance(env *environment.Properties) GORMFactory {
 	)
 	return GORMFactory{env: env, client: db}
 }
-
-
-//
-//func (factory GORMFactory) GetIdTeamPage(teamPageId uint) (response rdbmsstructure.Template, Error error) {
-//	var data rdbmsstructure.Template
-//	err := factory.client.Where("id = ?", teamPageId).Find(&data).Error
-//	if err != nil {
-//		if !errors.Is(err, gorm.ErrRecordNotFound) {
-//			Error = err
-//		} else {
-//			return
-//		}
-//		return
-//	}
-//	response = data
-//	return
-//}
 
 //  Account
 func (factory GORMFactory) Register(Account rdbmsstructure.Account) (Error error) {
@@ -106,9 +87,42 @@ func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Accou
 	return
 }
 
+
+
 func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
 	err := factory.client.Where("role = ?", constant.Operator).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) GetSubOwner(OwnerId int) (response []rdbmsstructure.Account, Error error) {
+	var data []rdbmsstructure.Account
+	err := factory.client.Where("sub_owner_id = ?", OwnerId).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) GetOwnerByIdOps(OperatorId int) (response rdbmsstructure.Account, Error error) {
+	var data rdbmsstructure.Account
+	//err := factory.client.Raw("SELECT * FROM accounts as ownerAccount INNER JOIN accounts as OpsAccount ON ownerAccount.id = OpsAccount.sub_owner_id").Where("sub_owner_id = ?", OperatorId).Find(&data).Error
+	err := factory.client.Where("id = ?", OperatorId).Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -184,7 +198,7 @@ func (factory GORMFactory) GetQrCode(OwnerId uint,templateName string) (response
 	return
 }
 
-func (factory GORMFactory) GetQrCodeById(OwnerId int) (response []rdbmsstructure.QrCode,Error error) {
+func (factory GORMFactory) GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode,Error error) {
 	var data []rdbmsstructure.QrCode
 	err := factory.client.Where("owner_id = ?", OwnerId).Find(&data).Error
 	if err != nil {
@@ -196,6 +210,35 @@ func (factory GORMFactory) GetQrCodeById(OwnerId int) (response []rdbmsstructure
 		return
 	}
 	response = data
+	return
+}
+
+func (factory GORMFactory) GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (response rdbmsstructure.QrCode,Error error) {
+	var data rdbmsstructure.QrCode
+	err := factory.client.Where("owner_id = ? AND qr_code_uuid = ?", OwnerId,QrCodeId).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
+	var data rdbmsstructure.QrCode
+	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Delete(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			return
+		}
+		return
+	}
 	return
 }
 

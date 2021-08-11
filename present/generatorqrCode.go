@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func GetQrCodeById(context *fiber.Ctx) error {
+func getQrCodeById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	id := context.Params("id")
 	ownerId , err := strconv.Atoi(id)
@@ -58,6 +58,19 @@ func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 		return utility.FiberError(context,http.StatusBadRequest,err.Error())
 	}
 	return context.Download(fileZip)
+}
+
+func deleteQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var QrCode = new(structure.DelQrCode)
+	if err := context.BodyParser(QrCode); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err := api.DeleteQrCode(*QrCode)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "succeed")
 }
 
 

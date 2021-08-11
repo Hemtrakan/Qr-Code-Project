@@ -15,7 +15,7 @@ import (
 
 func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
 	var getQrCodeArray []structure.GetQrCode
-	data, err := ctrl.access.RDBMS.GetQrCodeById(OwnerId)
+	data, err := ctrl.access.RDBMS.GetQrCodeByOwnerId(OwnerId)
 	if err != nil {
 		Error = err
 		return
@@ -26,9 +26,10 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 	}
 	for _, res := range data {
 		resGetQrCode := structure.GetQrCode{
-			OwnerId:               res.OwnerId,
-			TemplateName:          res.TemplateName,
-			QrCodeId:              res.QrCodeUUID.String(),
+			OwnerId:      res.OwnerId,
+			TemplateName: res.TemplateName,
+			QrCodeId:     res.QrCodeUUID.String(),
+			CodeName:     res.Code,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
@@ -36,9 +37,20 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 	return
 }
 
+func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
+	for _, del := range req.QrCodeId {
+		err := ctrl.access.RDBMS.DeleteQrCode(del)
+		if err != nil {
+			Error = err
+			return
+		}
+	}
+	return
+}
+
 func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 	// สร้าง QR-Code
-	res, err := ctrl.access.RDBMS.GetQrCode(req.OwnerId,req.TemplateName)
+	res, err := ctrl.access.RDBMS.GetQrCode(req.OwnerId, req.TemplateName)
 	if err != nil {
 		Error = err
 		return
@@ -71,28 +83,44 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 }
 
 func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Error error) {
-	for _, res := range req.FileName{
-		qrc, err := qrcode.New(constant.Http + "/" + res.QrCodeId)
+	var arrayFileName []structure.ArrayFileName
+	for _, QrCodeId := range req.QrCodeId {
+		data, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(req.OwnerId, QrCodeId)
 		if err != nil {
 			Error = err
 			return
 		}
-		path := string(constant.SaveFileLocationQrCode) + "/" + res.Filename + ".PNG"
+		filename := data.Code
+		qrc, err := qrcode.New(constant.Http + "/" + data.QrCodeUUID.String())
+		if err != nil {
+			Error = err
+			return
+		}
+		path := string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
 		// save file
 		if err = qrc.Save(path); err != nil {
 			Error = err
 			return
 		}
+		files := structure.ArrayFileName{
+			FileName: filename,
+		}
+		arrayFileName = append(arrayFileName, files)
 	}
 	output := "zipfile/" + req.FileZip + ".zip"
-	if err := ZipFilesById(output, req.FileName); err != nil {
+	if err := ZipFilesById(output, arrayFileName); err != nil {
 		Error = err
 		return
 	}
-	for _ , del := range req.FileName {
-		filename := del.Filename
+	for _, QrCodeId := range req.QrCodeId {
+		data, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(req.OwnerId, QrCodeId)
+		if err != nil {
+			Error = err
+			return
+		}
+		filename := data.Code
 		path := string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
-		err := os.Remove(path)
+		err = os.Remove(path)
 		if err != nil {
 			Error = err
 			return
@@ -114,7 +142,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 	}
 	var path string
 	var arrayFileName []structure.ArrayFileName
-	for _ , res := range data {
+	for _, res := range data {
 		qrc, err := qrcode.New(constant.Http + "/" + res.QrCodeUUID.String())
 		if err != nil {
 			Error = err
@@ -137,7 +165,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		Error = err
 		return
 	}
-	for _ , del := range data {
+	for _, del := range data {
 		filename := del.Code
 		path = string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
 		err = os.Remove(path)
@@ -151,7 +179,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 
 }
 
-func ZipFilesById(filename string, files []structure.FileNames) error {
+func ZipFilesById(filename string, files []structure.ArrayFileName) error {
 	newZipFile, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -163,7 +191,7 @@ func ZipFilesById(filename string, files []structure.FileNames) error {
 
 	// Add files to zip
 	for _, file := range files {
-		pathFile := "fileqrcode/" + file.Filename + ".PNG"
+		pathFile := "fileqrcode/" + file.FileName + ".PNG"
 		if err = AddFileToZip(zipWriter, pathFile); err != nil {
 			return err
 		}

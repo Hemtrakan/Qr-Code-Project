@@ -110,9 +110,9 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("register_operator", registerOperator)
 	admin.Get("getAccount", getAccount)
 	admin.Get("getAllAccountOwner", getAllAccountOwner)
-	//admin.Get("getSubOwner/:id", getSubOwner) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
+	admin.Get("getSubOwner/:id", getSubOwner) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
 	admin.Get("getAllAccountOperator", getAllAccountOperator)
-	//admin.Get("getOwnerByIdOps/:id",getOwnerByIdOps) // todo ดูข้อมูล Owner ById Ops
+	admin.Get("getOwnerByIdOps/:id",getOwnerByIdOps) // todo ดูข้อมูล Owner ById Ops ยังต้องแก้ SQL ยังไม่ได้ join
 	admin.Get("getAccountById/:id", getAccountById)
 	admin.Put("updateProfile/:id", updateProfile)
 	admin.Put("changePassword/:id", changePassword)
@@ -125,8 +125,9 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("createQrCode", createQrCode)
 	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
 	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
-	admin.Get("getQrCode/:id", GetQrCodeById)
+	admin.Get("getQrCode/:id", getQrCodeById) // Id >>> OwnerId
 	admin.Get("getQrCodeFile/:name", genQrCodeByName)
+	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 
 	//admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้
 	//admin.Get("getAllTeamPageById/:id", getAllTeamPageById)

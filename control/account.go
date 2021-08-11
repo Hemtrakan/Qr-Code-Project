@@ -42,10 +42,10 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 	admin := rdbmsstructure.Account{
 		Username:    "admin",
 		Password:    string(hashPassword),
-		FirstName:   "admin",
-		LastName:    "T-dev",
-		PhoneNumber: "-",
-		LineId:      "-",
+		FirstName:   "FirstName",
+		LastName:    "LastName",
+		PhoneNumber: "PhoneNumber",
+		LineId:      "LineId",
 		Role:        string(constant.Admin),
 	}
 	err = ctrl.insert(admin)
@@ -55,7 +55,6 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 	}
 	return
 }
-
 
 func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator) (Error error) {
 	hashPassword, err := utility.Hash(reqOperator.Password)
@@ -118,15 +117,15 @@ func (ctrl *APIControl) GetAccount(id int) (response structure.UserAccount, Erro
 		PhoneNumber: data.PhoneNumber,
 		LineId:      data.LineId,
 		Role:        data.Role,
-		SubOwnerId: int(data.SubOwnerId),
+		SubOwnerId:  int(data.SubOwnerId),
 	}
 	return
 }
 
-func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOwner ,Error error) {
+func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOwner, Error error) {
 	var DataArray []structure.UserAccountOwner
-	res , err := ctrl.access.RDBMS.GetAllAccountOwner()
-	if err != nil{
+	res, err := ctrl.access.RDBMS.GetAllAccountOwner()
+	if err != nil {
 		Error = err
 		return
 	}
@@ -140,16 +139,16 @@ func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOw
 			LineId:      data.LineId,
 			Role:        data.Role,
 		}
-		DataArray = append(DataArray,UserAccountStructure)
+		DataArray = append(DataArray, UserAccountStructure)
 	}
 	response = DataArray
 	return
 }
 
-func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccountOperator ,Error error) {
+func (ctrl *APIControl) GetSubOwner(OwnerId int) (response []structure.UserAccountOperator, Error error) {
 	var DataArray []structure.UserAccountOperator
-	res , err := ctrl.access.RDBMS.GetAllAccountOperator()
-	if err != nil{
+	res, err := ctrl.access.RDBMS.GetSubOwner(OwnerId)
+	if err != nil {
 		Error = err
 		return
 	}
@@ -162,18 +161,69 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 			PhoneNumber: data.PhoneNumber,
 			LineId:      data.LineId,
 			Role:        data.Role,
-			SubOwnerId: int(data.SubOwnerId),
+			SubOwnerId:  int(data.SubOwnerId),
 		}
-		DataArray = append(DataArray,UserAccountStructure)
+		DataArray = append(DataArray, UserAccountStructure)
 	}
 	response = DataArray
 	return
 }
 
-func (ctrl *APIControl) UpdateProfile(id uint,Account *structure.UpdateProFile) (Error error ){
+func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccountOperator, Error error) {
+	var DataArray []structure.UserAccountOperator
+	res, err := ctrl.access.RDBMS.GetAllAccountOperator()
+	if err != nil {
+		Error = err
+		return
+	}
+	for _, data := range res {
+		id := int(data.ID)
+		UserAccountStructure := structure.UserAccountOperator{
+			Id:          id,
+			FirstName:   data.FirstName,
+			LastName:    data.LastName,
+			PhoneNumber: data.PhoneNumber,
+			LineId:      data.LineId,
+			Role:        data.Role,
+			SubOwnerId:  int(data.SubOwnerId),
+		}
+		DataArray = append(DataArray, UserAccountStructure)
+	}
+	response = DataArray
+	return
+}
+
+func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetOwnerByOperator, Error error) {
+	ops, err := ctrl.access.RDBMS.GetOwnerByIdOps(OperatorId)
+	opsId := int(ops.SubOwnerId)
+	owner, err := ctrl.access.RDBMS.GetAccount(opsId)
+	if err != nil {
+		Error = err
+		return
+	}
+	OwnerId := int(owner.ID)
+	response = structure.GetOwnerByOperator{
+		Operator: structure.Operator{
+			FirstName:   ops.FirstName,
+			LastName:    ops.LastName,
+			PhoneNumber: ops.PhoneNumber,
+			LineId:      ops.LineId,
+			Owner: structure.Owner{
+				OwnerId:     OwnerId,
+				FirstName:   owner.FirstName,
+				LastName:    owner.LastName,
+				PhoneNumber: owner.PhoneNumber,
+				LineId:      owner.LineId,
+			},
+		},
+	}
+	return
+}
+
+func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile) (Error error) {
 	data := rdbmsstructure.Account{
-		Model:       gorm.Model{
-			ID: id,
+		Model: gorm.Model{
+			ID:        id,
 			UpdatedAt: time.Now(),
 		},
 		FirstName:   Account.FirstName,
@@ -189,14 +239,14 @@ func (ctrl *APIControl) UpdateProfile(id uint,Account *structure.UpdateProFile) 
 	return
 }
 
-func (ctrl *APIControl) ChangePassword(id uint,password *structure.ChangePassword) (Error error)  {
+func (ctrl *APIControl) ChangePassword(id uint, password *structure.ChangePassword) (Error error) {
 	hashPassword, err := utility.Hash(password.Password)
 	if err != nil {
 		return err
 	}
 	data := rdbmsstructure.Account{
-		Model:       gorm.Model{
-			ID: id,
+		Model: gorm.Model{
+			ID:        id,
 			UpdatedAt: time.Now(),
 		},
 		Password: string(hashPassword),
@@ -209,7 +259,7 @@ func (ctrl *APIControl) ChangePassword(id uint,password *structure.ChangePasswor
 	return
 }
 
-func (ctrl *APIControl) DeleteAccount(id int) (Error error ){
+func (ctrl *APIControl) DeleteAccount(id int) (Error error) {
 	err := ctrl.access.RDBMS.DeleteAccount(id)
 	if err != nil {
 		Error = err
@@ -217,8 +267,6 @@ func (ctrl *APIControl) DeleteAccount(id int) (Error error ){
 	}
 	return
 }
-
-
 
 func (ctrl *APIControl) insert(Account rdbmsstructure.Account) error {
 	err := ctrl.access.RDBMS.Register(Account)
