@@ -2,6 +2,7 @@ package present
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/proxy"
 	"net/http"
 	"qrcode/access/constant"
 	"qrcode/control"
@@ -13,12 +14,39 @@ import (
 func getQrCodeById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	id := context.Params("id")
-	ownerId , err := strconv.Atoi(id)
-	res ,err := api.GetQrCodeById(ownerId)
+	ownerId, err := strconv.Atoi(id)
+	res, err := api.GetQrCodeById(ownerId)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.JSON(res)
+}
+
+func getDataQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	id := context.Params("id")
+	contentType := context.Get("Content-Type")
+	if contentType == "" {
+		url := "http://192.168.1.104:12000/viewdata/" + id
+		if err := proxy.Do(context, url); err != nil {
+			return err
+		}
+		// Remove Server header from response
+		context.Response().Header.Del(fiber.HeaderServer)
+		return nil
+	} else if contentType == "application/json;charset=UTF-8" {
+		res, err := api.GetDataQrCode(id)
+		if err != nil {
+			return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		}
+		return context.Status(http.StatusOK).JSON(res)
+	} else {
+		res, err := api.GetDataQrCode(id)
+		if err != nil {
+			return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		}
+		return context.Status(http.StatusOK).JSON(res)
+	}
 }
 
 func createQrCode(context *fiber.Ctx) error {
@@ -40,9 +68,9 @@ func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
 	if err := context.BodyParser(data); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	fileZip , err := api.AddFileZipById(*data)
+	fileZip, err := api.AddFileZipById(*data)
 	if err != nil {
-		return utility.FiberError(context,http.StatusBadRequest,err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.Download(fileZip)
 }
@@ -53,9 +81,9 @@ func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 	if err := context.BodyParser(data); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	fileZip , err := api.AddFileZipByTemplateName(*data)
+	fileZip, err := api.AddFileZipByTemplateName(*data)
 	if err != nil {
-		return utility.FiberError(context,http.StatusBadRequest,err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.Download(fileZip)
 }
@@ -72,8 +100,6 @@ func deleteQrCode(context *fiber.Ctx) error {
 	}
 	return utility.FiberSuccess(context, http.StatusOK, "succeed")
 }
-
-
 
 func genQrCodeByName(context *fiber.Ctx) error {
 	name := context.Params("name")

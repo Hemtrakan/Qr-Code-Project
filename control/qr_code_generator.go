@@ -37,6 +37,22 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 	return
 }
 
+func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDataQrCode, Error error) {
+	data, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
+	if err != nil {
+		Error = err
+		return
+	}
+	response = structure.GetDataQrCode{
+		QrCodeId:    data.QrCodeUUID.String(),
+		Info:        string(data.Info),
+		Ops:         string(data.Ops),
+		HistoryInfo: string(data.HistoryInfo),
+		OwnerId:     int(data.OwnerId),
+	}
+	return
+}
+
 func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	for _, del := range req.QrCodeId {
 		err := ctrl.access.RDBMS.DeleteQrCode(del)

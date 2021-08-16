@@ -19,6 +19,14 @@ type GetQrCode struct {
 	CodeName     string `json:"code_name"`
 }
 
+type GetDataQrCode struct {
+	QrCodeId    string `json:"qr_code_id"`
+	Info        string `json:"info"`
+	Ops         string `json:"ops"`
+	HistoryInfo string `json:"history_info"`
+	OwnerId     int    `json:"owner_id"`
+}
+
 type ArrayFileName struct {
 	FileName string `json:"file_name"`
 }

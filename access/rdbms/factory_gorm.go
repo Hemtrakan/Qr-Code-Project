@@ -49,6 +49,7 @@ func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsst
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -64,6 +65,7 @@ func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account,E
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -79,6 +81,7 @@ func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Accou
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -88,6 +91,21 @@ func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Accou
 }
 
 
+func (factory GORMFactory) GetAllAccountOperatorByOwnerID(OwnerId uint) (response []rdbmsstructure.Account, Error error) {
+	var data []rdbmsstructure.Account
+	err := factory.client.Where("sub_owner_id = ?", OwnerId).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
 
 func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
@@ -96,6 +114,7 @@ func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Ac
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -111,6 +130,7 @@ func (factory GORMFactory) GetSubOwner(OwnerId int) (response []rdbmsstructure.A
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -127,6 +147,7 @@ func (factory GORMFactory) GetOwnerByIdOps(OperatorId int) (response rdbmsstruct
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -150,6 +171,7 @@ func (factory GORMFactory) DeleteAccount(id int) (Error error) {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -157,7 +179,48 @@ func (factory GORMFactory) DeleteAccount(id int) (Error error) {
 	return
 }
 
+func (factory GORMFactory) DeleteAccountByOwner(OwnerId uint, OperatorId int) (Error error) {
+	var data rdbmsstructure.Account
+	err := factory.client.Where("id = ?", OperatorId).Where("sub_owner_id = ?",OwnerId).First(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+
+	err = factory.client.Where("id = ?", OperatorId).Where("sub_owner_id = ?",OwnerId).Delete(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+		}
+		return
+	}
+	return
+}
+
 // -- QR-Code
+
+func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response rdbmsstructure.QrCode, Error error) {
+	var data rdbmsstructure.QrCode
+	err := factory.client.Where("qr_code_uuid= ?", QrCodeUUID).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
 
 func (factory GORMFactory) CreateQrCode(QrCode rdbmsstructure.QrCode) (Error error) {
 	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&QrCode).Error
@@ -190,6 +253,7 @@ func (factory GORMFactory) GetQrCode(OwnerId uint,templateName string) (response
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -205,6 +269,7 @@ func (factory GORMFactory) GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstru
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -220,6 +285,7 @@ func (factory GORMFactory) GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (res
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return
@@ -235,6 +301,7 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 		} else {
+			Error = errors.New("record not found")
 			return
 		}
 		return

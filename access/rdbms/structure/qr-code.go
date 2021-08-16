@@ -18,7 +18,7 @@ type QrCode struct {
 	TemplateName string
 	Info         datatypes.JSON
 	Ops          datatypes.JSON
-	history      datatypes.JSON
+	HistoryInfo  datatypes.JSON
 	QrCodeUUID   uuid.UUID `gorm:"uniqueIndex"`
 	Code         string
 }

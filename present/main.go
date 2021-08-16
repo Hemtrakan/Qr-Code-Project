@@ -9,8 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwtware "github.com/gofiber/jwt/v2"
-	"github.com/gofiber/template/html"
-	jwt "github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt"
 	"os"
 	"qrcode/access/constant"
 	"qrcode/control"
@@ -23,13 +22,7 @@ type ContextApi struct {
 }
 
 func APICreate(ctrl *control.APIControl) {
-	engine := html.New("./views", ".html")
-	engine.Layout("embed")
-	engine.Reload(true)
-	engine.Debug(true)
-	app := fiber.New(fiber.Config{
-		Views: engine,
-	})
+	app := fiber.New(fiber.Config{})
 
 	app.Use(logger.New(logger.Config{
 		Next:         nil,
@@ -54,10 +47,10 @@ func APICreate(ctrl *control.APIControl) {
 	api.Post("login", login)
 	api.Post("admin", admin)
 
-	//qr := app.Group("/qr")
-	//qr.Get(":id", getByIdTeamPage)
-	//qr.Get("getAllLogTeamPage/:id", getAllLogTeamPage)
-	//qr.Get("test", proxy.Forward("http://localhost:12000"))
+
+
+	qr := app.Group("/qr")
+	qr.Post("/:id",getDataQrCode) //  Id >>> QrCodeUUId
 
 	// -- Todo Owner
 	owner := app.Group("/owner")
@@ -79,10 +72,22 @@ func APICreate(ctrl *control.APIControl) {
 		ErrorHandler: AuthError,
 		AuthScheme:   "Bearer",
 	}))
-	// -- API Owner
+	// -- API Owner Account
 	owner.Get("getAccount", getAccount)
-	owner.Post("register_operator", registerOperator)
-	//owner.Get("getAllTeamPage", getAllTeamPage)
+	owner.Post("register_operator", registerOperatorOwner)
+
+	owner.Get("getSubOwner", getOperator) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
+	owner.Get("getAccountById/:id", getAccountById)
+	owner.Put("updateProfile/:id", updateProfile)
+	owner.Put("changePassword/:id", changePassword)
+	owner.Delete("deleteAccount/:id", deleteAccountOperator)
+
+	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
+
+
+
+
+
 
 	// -- Todo Admin
 	admin := app.Group("/admin")
@@ -122,6 +127,7 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getTemplate", getTemplate)
 
 	// -- createQrCode
+	admin.Get("getDataQrCode/:id",getDataQrCode)
 	admin.Post("createQrCode", createQrCode)
 	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
 	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
