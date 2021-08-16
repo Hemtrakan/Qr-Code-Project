@@ -1,11 +1,13 @@
 package control
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"qrcode/access/constant"
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/present/structure"
 	"qrcode/utility"
+	"strconv"
 	"time"
 )
 
@@ -57,6 +59,17 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 }
 
 func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator) (Error error) {
+	OwnerId := int(reqOperator.SubOwnerId)
+	data , err := ctrl.access.RDBMS.GetAccount(OwnerId)
+	if data.ID == 0 {
+		Error = errors.New("there is no owner of this id in the system.")
+		return
+	}
+	if data.Role != string(constant.Owner){
+		Error = errors.New("invalid user rights")
+		return
+	}
+
 	hashPassword, err := utility.Hash(reqOperator.Password)
 	if err != nil {
 		return err
@@ -92,7 +105,7 @@ func (ctrl *APIControl) Login(reqLogin *structure.Login) (Token string, Error er
 	}
 	err = utility.VerifyPassword(data.Password, login.Password)
 	if err != nil {
-		Error = err
+		Error = errors.New("incorrect password.")
 		return
 	}
 	Token, err = utility.AuthenticationLogin(data.ID, data.Role)
@@ -100,6 +113,35 @@ func (ctrl *APIControl) Login(reqLogin *structure.Login) (Token string, Error er
 		Error = err
 		return
 	}
+	return Token, nil
+}
+
+func (ctrl *APIControl) LoginAdmin(reqLogin *structure.Login) (Token string, Error error) {
+	login := rdbmsstructure.Account{
+		Username: reqLogin.Username,
+		Password: reqLogin.Password,
+	}
+	data, err := ctrl.access.RDBMS.Login(login)
+	if err != nil {
+		Error = err
+		return
+	}
+	if data.Role == string(constant.Admin) {
+		err = utility.VerifyPassword(data.Password, login.Password)
+		if err != nil {
+			Error = errors.New("incorrect password.")
+			return
+		}
+		Token, err = utility.AuthenticationLogin(data.ID, data.Role)
+		if err != nil {
+			Error = err
+			return
+		}
+	} else {
+		Error = errors.New("Your user rights are not reached.")
+		return
+	}
+
 	return Token, nil
 }
 
@@ -129,6 +171,10 @@ func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOw
 		Error = err
 		return
 	}
+	if len(res) == 0 {
+		Error = errors.New("record not found")
+		return
+	}
 	for _, data := range res {
 		id := int(data.ID)
 		UserAccountStructure := structure.UserAccountOwner{
@@ -150,6 +196,10 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response []structure.UserAccou
 	res, err := ctrl.access.RDBMS.GetSubOwner(OwnerId)
 	if err != nil {
 		Error = err
+		return
+	}
+	if len(res) == 0 {
+		Error = errors.New("record not found")
 		return
 	}
 	for _, data := range res {
@@ -174,6 +224,10 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 	res, err := ctrl.access.RDBMS.GetAllAccountOperator()
 	if err != nil {
 		Error = err
+		return
+	}
+	if len(res) == 0 {
+		Error = errors.New("record not found")
 		return
 	}
 	for _, data := range res {
@@ -231,9 +285,17 @@ func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile)
 		PhoneNumber: Account.PhoneNumber,
 		LineId:      Account.LineId,
 	}
-	err := ctrl.access.RDBMS.UpdateProfile(data)
+
+	sid := strconv.FormatUint(uint64(id), 16)
+	userId, err := strconv.Atoi(sid)
+	res, err := ctrl.access.RDBMS.GetAccount(userId)
+	if res.ID == 0 {
+		Error = errors.New("record not found")
+		return
+	}
+	err = ctrl.access.RDBMS.UpdateProfile(data)
 	if err != nil {
-		Error = err
+		Error = errors.New("record not found")
 		return
 	}
 	return
@@ -251,6 +313,14 @@ func (ctrl *APIControl) ChangePassword(id uint, password *structure.ChangePasswo
 		},
 		Password: string(hashPassword),
 	}
+
+	sid := strconv.FormatUint(uint64(id), 16)
+	userId, err := strconv.Atoi(sid)
+	res, err := ctrl.access.RDBMS.GetAccount(userId)
+	if res.ID == 0 {
+		Error = errors.New("record not found")
+		return
+	}
 	err = ctrl.access.RDBMS.UpdateProfile(data)
 	if err != nil {
 		Error = err
@@ -260,7 +330,14 @@ func (ctrl *APIControl) ChangePassword(id uint, password *structure.ChangePasswo
 }
 
 func (ctrl *APIControl) DeleteAccount(id int) (Error error) {
-	err := ctrl.access.RDBMS.DeleteAccount(id)
+	sid := strconv.FormatUint(uint64(id), 16)
+	userId, err := strconv.Atoi(sid)
+	res, err := ctrl.access.RDBMS.GetAccount(userId)
+	if res.ID == 0 {
+		Error = errors.New("record not found")
+		return
+	}
+	err = ctrl.access.RDBMS.DeleteAccount(id)
 	if err != nil {
 		Error = err
 		return

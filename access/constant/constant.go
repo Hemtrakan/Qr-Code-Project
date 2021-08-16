@@ -49,17 +49,11 @@ var CategoryFileData = []CategoryFile{
 	QRCode,
 }
 
-type MoveFile string
-
-const (
-	SaveFileLocation MoveFile = "fileteampage"
-	LogLocation      MoveFile = "logteampage"
-)
-
 type QrCode string
 
 const (
 	SaveFileLocationQrCode QrCode = "fileqrcode"
+	SaveFileLocationZipFile QrCode = "zipfile"
 )
 
 

@@ -8,8 +8,8 @@ type Account struct {
 	Password    string
 	FirstName   string
 	LastName    string
-	PhoneNumber string
-	LineId      string
+	PhoneNumber string `gorm:"uniqueIndex"`
+	LineId      string `gorm:"uniqueIndex"`
 	Role        string
 	SubOwnerId  uint
 }

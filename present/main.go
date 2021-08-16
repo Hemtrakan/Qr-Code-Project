@@ -44,9 +44,7 @@ func APICreate(ctrl *control.APIControl) {
 	})
 
 	api := app.Group("/api")
-	api.Post("login", login)
-	api.Post("admin", admin)
-
+	api.Post("admin",admin) // todo สำหรับ สมัคร admin เท่านั้น
 
 
 	qr := app.Group("/qr")
@@ -54,6 +52,7 @@ func APICreate(ctrl *control.APIControl) {
 
 	// -- Todo Owner
 	owner := app.Group("/owner")
+	owner.Post("login", login)
 	owner.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(constant.SecretKey),
 		SuccessHandler: func(context *fiber.Ctx) error {
@@ -91,6 +90,7 @@ func APICreate(ctrl *control.APIControl) {
 
 	// -- Todo Admin
 	admin := app.Group("/admin")
+	admin.Post("login", LoginAdmin)
 	admin.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(constant.SecretKey),
 		SuccessHandler: func(context *fiber.Ctx) error {

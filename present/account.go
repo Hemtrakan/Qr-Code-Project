@@ -21,7 +21,7 @@ func registerOwner(context *fiber.Ctx) error {
 	}
 	err = api.RegisterOwner(owner)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, "this user already exists")
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberError(context, http.StatusOK, "success")
 }
@@ -35,7 +35,7 @@ func registerOperator(context *fiber.Ctx) error {
 	}
 	err = api.RegisterOperator(operator)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, "this user already exists")
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberError(context, http.StatusOK, "success")
 }
@@ -49,10 +49,26 @@ func login(context *fiber.Ctx) error {
 	}
 	Token, err := api.Login(Login)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, "record not found")
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberError(context, http.StatusOK, Token)
 }
+
+
+func LoginAdmin(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	Login := new(structure.Login)
+	err := context.BodyParser(Login)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	Token, err := api.LoginAdmin(Login)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberError(context, http.StatusOK, Token)
+}
+
 
 func getAccount(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)

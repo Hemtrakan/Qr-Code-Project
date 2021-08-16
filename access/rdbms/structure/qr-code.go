@@ -20,7 +20,7 @@ type QrCode struct {
 	Ops          datatypes.JSON
 	HistoryInfo  datatypes.JSON
 	QrCodeUUID   uuid.UUID `gorm:"uniqueIndex"`
-	Code         string
+	Code         string    `gorm:"uniqueIndex"`
 }
 
 //type LogTeamPage struct {

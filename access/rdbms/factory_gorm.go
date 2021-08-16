@@ -35,11 +35,12 @@ func gormInstance(env *environment.Properties) GORMFactory {
 
 //  Account
 func (factory GORMFactory) Register(Account rdbmsstructure.Account) (Error error) {
-	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Account).Error
-	if db != nil {
-		return db
+	err := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Account).Error
+	if err != nil {
+		Error = err
+		return
 	}
-	return nil
+	return
 }
 
 func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsstructure.Account, Error error) {
@@ -157,11 +158,18 @@ func (factory GORMFactory) GetOwnerByIdOps(OperatorId int) (response rdbmsstruct
 }
 
 func (factory GORMFactory) UpdateProfile(Account rdbmsstructure.Account) (Error error) {
-	db := factory.client.Where("id = ?", Account.ID).Updates(&Account).Error
-	if db != nil {
-		return db
+	err := factory.client.Where("id = ?", Account.ID).Updates(&Account).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
 	}
-	return nil
+	return
 }
 
 func (factory GORMFactory) DeleteAccount(id int) (Error error) {
@@ -268,6 +276,7 @@ func (factory GORMFactory) GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstru
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
+			return
 		} else {
 			Error = errors.New("record not found")
 			return
@@ -300,6 +309,7 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
+			return
 		} else {
 			Error = errors.New("record not found")
 			return
