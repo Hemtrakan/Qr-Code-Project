@@ -336,14 +336,14 @@ func (ctrl *APIControl) ChangePassword(id uint, password *structure.ChangePasswo
 }
 
 func (ctrl *APIControl) DeleteAccount(id int) (Error error) {
-	sid := strconv.FormatUint(uint64(id), 16)
-	userId, err := strconv.Atoi(sid)
-	res, err := ctrl.access.RDBMS.GetAccount(userId)
-	if res.ID == 0 {
-		Error = errors.New("record not found")
-		return
-	}
-	err = ctrl.access.RDBMS.DeleteAccount(id)
+	//sid := strconv.FormatUint(uint64(id), 16)
+	//userId, err := strconv.Atoi(sid)
+	//res, err := ctrl.access.RDBMS.GetAccount(userId)
+	//if res.ID == 0 {
+	//	Error = errors.New("record not found")
+	//	return
+	//}
+	err := ctrl.access.RDBMS.DeleteAccount(id)
 	if err != nil {
 		Error = err
 		return
