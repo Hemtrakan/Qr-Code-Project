@@ -41,13 +41,11 @@ func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.UserAcco
 	for _, data := range res {
 		id := int(data.ID)
 		UserAccountStructure := structure.UserAccountOperator{
-			Id:          id,
-			FirstName:   data.FirstName,
-			LastName:    data.LastName,
-			PhoneNumber: data.PhoneNumber,
-			LineId:      data.LineId,
-			Role:        data.Role,
-			SubOwnerId:  int(data.SubOwnerId),
+			OperatorId:          id,
+			OperatorFirstName:   data.FirstName,
+			OperatorLastName:    data.LastName,
+			OperatorPhoneNumber: data.PhoneNumber,
+			OperatorLineId:      data.LineId,
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}

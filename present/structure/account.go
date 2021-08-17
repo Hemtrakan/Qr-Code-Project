@@ -55,12 +55,20 @@ type UserAccountOwner struct {
 	Role        string `json:"role"`
 }
 
+
+type GetSubOwner struct {
+	OwnerId          int    `json:"owner_id"`
+	OwnerFirstName   string `json:"owner_first_name"`
+	OwnerLastName    string `json:"owner_last_name"`
+	OwnerPhoneNumber string `json:"owner_phone_number"`
+	OwnerLineId      string `json:"owner_line_id"`
+	UserAccountOperator []UserAccountOperator `json:"user_account_operator"`
+}
+
 type UserAccountOperator struct {
-	Id          int    `json:"id"`
-	FirstName   string `json:"firstname"`
-	LastName    string `json:"lastname"`
-	PhoneNumber string `json:"phonenumber"`
-	LineId      string `json:"lineid"`
-	Role        string `json:"role"`
-	SubOwnerId  int    `json:"sub_owner_id"`
+	OperatorId          int    `json:"operator_id"`
+	OperatorFirstName   string `json:"operator_first_name"`
+	OperatorLastName    string `json:"operator_last_name"`
+	OperatorPhoneNumber string `json:"operator_phone_number"`
+	OperatorLineId      string `json:"operator_line_id"`
 }

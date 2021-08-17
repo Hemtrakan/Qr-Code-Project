@@ -60,12 +60,12 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 
 func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator) (Error error) {
 	OwnerId := int(reqOperator.SubOwnerId)
-	data , err := ctrl.access.RDBMS.GetAccount(OwnerId)
+	data, err := ctrl.access.RDBMS.GetAccount(OwnerId)
 	if data.ID == 0 {
 		Error = errors.New("there is no owner of this id in the system.")
 		return
 	}
-	if data.Role != string(constant.Owner){
+	if data.Role != string(constant.Owner) {
 		Error = errors.New("invalid user rights")
 		return
 	}
@@ -191,31 +191,39 @@ func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOw
 	return
 }
 
-func (ctrl *APIControl) GetSubOwner(OwnerId int) (response []structure.UserAccountOperator, Error error) {
+func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner, Error error) {
 	var DataArray []structure.UserAccountOperator
-	res, err := ctrl.access.RDBMS.GetSubOwner(OwnerId)
+	ops, err := ctrl.access.RDBMS.GetSubOwner(OwnerId)
 	if err != nil {
 		Error = err
 		return
 	}
-	if len(res) == 0 {
-		Error = errors.New("record not found")
+	owner, err := ctrl.access.RDBMS.GetAccount(OwnerId)
+	if err != nil {
+		Error = err
 		return
 	}
-	for _, data := range res {
+	ownerId := int(owner.ID)
+	for _, data := range ops {
 		id := int(data.ID)
-		UserAccountStructure := structure.UserAccountOperator{
-			Id:          id,
-			FirstName:   data.FirstName,
-			LastName:    data.LastName,
-			PhoneNumber: data.PhoneNumber,
-			LineId:      data.LineId,
-			Role:        data.Role,
-			SubOwnerId:  int(data.SubOwnerId),
+		UserAccountOperator := structure.UserAccountOperator{
+			OperatorId:          id,
+			OperatorFirstName:   data.FirstName,
+			OperatorLastName:    data.LastName,
+			OperatorPhoneNumber: data.PhoneNumber,
+			OperatorLineId:      data.LineId,
 		}
-		DataArray = append(DataArray, UserAccountStructure)
+		DataArray = append(DataArray, UserAccountOperator)
 	}
-	response = DataArray
+	var UserAccountStructure = structure.GetSubOwner{
+		OwnerId:             ownerId,
+		OwnerFirstName:      owner.FirstName,
+		OwnerLastName:       owner.LastName,
+		OwnerPhoneNumber:    owner.PhoneNumber,
+		OwnerLineId:         owner.LineId,
+		UserAccountOperator: DataArray,
+	}
+	response = UserAccountStructure
 	return
 }
 
@@ -233,13 +241,11 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 	for _, data := range res {
 		id := int(data.ID)
 		UserAccountStructure := structure.UserAccountOperator{
-			Id:          id,
-			FirstName:   data.FirstName,
-			LastName:    data.LastName,
-			PhoneNumber: data.PhoneNumber,
-			LineId:      data.LineId,
-			Role:        data.Role,
-			SubOwnerId:  int(data.SubOwnerId),
+			OperatorId:          id,
+			OperatorFirstName:   data.FirstName,
+			OperatorLastName:    data.LastName,
+			OperatorPhoneNumber: data.PhoneNumber,
+			OperatorLineId:      data.LineId,
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
