@@ -135,6 +135,8 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getQrCodeFile/:name", genQrCodeByName)
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 
+	admin.Post("structureToJson",structureToJson)
+
 	//admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้
 	//admin.Get("getAllTeamPageById/:id", getAllTeamPageById)
 	//admin.Post("insertTeamPage", insertTeamPage)

@@ -1,5 +1,5 @@
 package computer
 
-type computerOps struct {
-	repair []string
+type Ops struct {
+	Repair []string `json:"repair"`
 }

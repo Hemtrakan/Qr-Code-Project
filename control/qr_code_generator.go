@@ -2,14 +2,17 @@ package control
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"errors"
 	uuid2 "github.com/gofrs/uuid"
 	"github.com/yeqown/go-qrcode"
+	"gorm.io/datatypes"
 	"io"
 	"os"
 	"qrcode/access/constant"
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/present/structure"
+	"qrcode/present/structure/templates/computer"
 	"strconv"
 )
 
@@ -49,9 +52,9 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 	}
 	response = structure.GetDataQrCode{
 		QrCodeId:    data.QrCodeUUID.String(),
-		Info:        string(data.Info),
-		Ops:         string(data.Ops),
-		HistoryInfo: string(data.HistoryInfo),
+		Info:        data.Info,
+		Ops:         data.Ops,
+		HistoryInfo: data.HistoryInfo,
 		OwnerId:     int(data.OwnerId),
 	}
 	return
@@ -59,7 +62,7 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 
 func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	for _, del := range req.QrCodeId {
-		data , err := ctrl.access.RDBMS.GetDataQrCode(del)
+		data, err := ctrl.access.RDBMS.GetDataQrCode(del)
 		if data.QrCodeUUID.String() != del {
 			Error = errors.New("don't have this qr code")
 		}
@@ -72,14 +75,14 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	return
 }
 
-func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error){
+func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 	ownerId := int(req.OwnerId)
-	data , err := ctrl.access.RDBMS.GetAccount(ownerId)
+	data, err := ctrl.access.RDBMS.GetAccount(ownerId)
 	if data.ID == 0 {
 		Error = errors.New("there is no owner of this id in the system")
 		return
 	}
-	if data.Role != string(constant.Owner){
+	if data.Role != string(constant.Owner) {
 		Error = errors.New("invalid user rights")
 		return
 	}
@@ -96,12 +99,18 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error){
 			Error = err
 			return
 		}
+
+		var info = computer.Info{}
+		byteInfo, err := json.Marshal(info)
+		err = json.Unmarshal(byteInfo, &info)
+
 		number := strconv.Itoa(count + i)
 		save := rdbmsstructure.QrCode{
 			OwnerId:      req.OwnerId,
 			TemplateName: req.TemplateName,
-			Info:         nil,
+			Info:         datatypes.JSON(byteInfo),
 			Ops:          nil,
+			HistoryInfo:  nil,
 			QrCodeUUID:   uuid,
 			Code:         req.CodeName + "-" + number,
 		}
@@ -118,12 +127,12 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error){
 
 func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Error error) {
 	var arrayFileName []structure.ArrayFileName
-	data , _ := ctrl.access.RDBMS.GetAccount(req.OwnerId)
+	data, _ := ctrl.access.RDBMS.GetAccount(req.OwnerId)
 	if data.ID == 0 {
 		Error = errors.New("there is no owner of this id in the system")
 		return
 	}
-	if data.Role != string(constant.Owner){
+	if data.Role != string(constant.Owner) {
 		Error = errors.New("invalid user rights")
 		return
 	}
@@ -193,12 +202,12 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 
 func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplateName) (file string, Error error) {
 	ownerId := int(req.OwnerId)
-	dataOwnerId , err := ctrl.access.RDBMS.GetAccount(ownerId)
+	dataOwnerId, err := ctrl.access.RDBMS.GetAccount(ownerId)
 	if dataOwnerId.ID == 0 {
 		Error = errors.New("there is no owner of this id in the system")
 		return
 	}
-	if dataOwnerId.Role != string(constant.Owner){
+	if dataOwnerId.Role != string(constant.Owner) {
 		Error = errors.New("invalid user rights")
 		return
 	}
@@ -289,7 +298,7 @@ func ZipFilesByTemplateName(filename string, files []structure.ArrayFileName) er
 
 	// Add files to zip
 	for _, file := range files {
-		pathFile := string(constant.SaveFileLocationQrCode) +  "/" + file.FileName + ".PNG"
+		pathFile := string(constant.SaveFileLocationQrCode) + "/" + file.FileName + ".PNG"
 		if err = AddFileToZip(zipWriter, pathFile); err != nil {
 			return err
 		}

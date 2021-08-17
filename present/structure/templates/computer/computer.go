@@ -1,7 +1,7 @@
 package computer
 
-type computer struct {
-	info computerInfo
-	history []computerInfo
-	ops     computerOps
+type Computer struct {
+	Info        Info   `json:"info"`
+	HistoryInfo []Info `json:"history_info"`
+	Ops         Ops    `json:"ops"`
 }

@@ -1,6 +1,7 @@
 package present
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 	"net/http"
@@ -99,6 +100,34 @@ func deleteQrCode(context *fiber.Ctx) error {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberSuccess(context, http.StatusOK, "succeed")
+}
+
+func structureToJson(context *fiber.Ctx) error {
+	var gen = new(structure.GenQrCode)
+	if err := context.BodyParser(gen); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	template := gen.TemplateName
+	templates := constant.Template
+	for _, item := range templates {
+		res ,_:= item.Templates()
+		if template == *res {
+			fmt.Println(*res)
+		}
+	}
+	//
+	//
+	//
+	//var structure = computer.Computer{}
+	//byteValue, err := json.Marshal(structure)
+	//err = json.Unmarshal(byteValue, &structure)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(byteValue)
+	//fmt.Println(structure)
+
+	return context.JSON(template)
 }
 
 func genQrCodeByName(context *fiber.Ctx) error {

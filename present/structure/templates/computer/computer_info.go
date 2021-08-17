@@ -1,6 +1,6 @@
 package computer
 
-type computerInfo struct {
+type Info struct {
 	Case        string `json:"case"`
 	PowerSupply string `json:"power_supply"`
 	MainBoar    string `json:"main_boar"`

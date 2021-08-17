@@ -61,7 +61,7 @@ func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsst
 
 func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account,Error error){
 	var data rdbmsstructure.Account
-	err := factory.client.Where("id = ?", id).First(&data).Error
+	err := factory.client.Where("id = ?", id).Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err

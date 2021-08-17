@@ -301,7 +301,7 @@ func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile)
 	}
 	err = ctrl.access.RDBMS.UpdateProfile(data)
 	if err != nil {
-		Error = errors.New("record not found")
+		Error = err
 		return
 	}
 	return
@@ -320,13 +320,13 @@ func (ctrl *APIControl) ChangePassword(id uint, password *structure.ChangePasswo
 		Password: string(hashPassword),
 	}
 
-	sid := strconv.FormatUint(uint64(id), 16)
-	userId, err := strconv.Atoi(sid)
-	res, err := ctrl.access.RDBMS.GetAccount(userId)
-	if res.ID == 0 {
-		Error = errors.New("record not found")
-		return
-	}
+	//sid := strconv.FormatUint(uint64(id), 16)
+	//userId, err := strconv.Atoi(sid)
+	//res, err := ctrl.access.RDBMS.GetAccount(userId)
+	//if res.ID == 0 {
+	//	Error = errors.New("record not found")
+	//	return
+	//}
 	err = ctrl.access.RDBMS.UpdateProfile(data)
 	if err != nil {
 		Error = err
