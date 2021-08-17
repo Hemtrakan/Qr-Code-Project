@@ -7,7 +7,6 @@ import (
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/present/structure"
 	"qrcode/utility"
-	"strconv"
 	"time"
 )
 
@@ -291,15 +290,15 @@ func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile)
 		PhoneNumber: Account.PhoneNumber,
 		LineId:      Account.LineId,
 	}
-
-	sid := strconv.FormatUint(uint64(id), 16)
-	userId, err := strconv.Atoi(sid)
-	res, err := ctrl.access.RDBMS.GetAccount(userId)
-	if res.ID == 0 {
-		Error = errors.New("record not found")
-		return
-	}
-	err = ctrl.access.RDBMS.UpdateProfile(data)
+	//
+	//sid := strconv.FormatUint(uint64(id), 16)
+	//userId, err := strconv.Atoi(sid)
+	//res, err := ctrl.access.RDBMS.GetAccount(userId)
+	//if res.ID == 0 {
+	//	Error = errors.New("record not found")
+	//	return
+	//}
+	err := ctrl.access.RDBMS.UpdateProfile(data)
 	if err != nil {
 		Error = err
 		return
