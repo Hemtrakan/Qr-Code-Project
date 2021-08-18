@@ -1,6 +1,7 @@
 package knex
 
-type serviceWashingMachine struct {
-	history []washingMachineInfo
-	ops     washingMachineOps
+type ServiceWashingMachine struct {
+	Info        WashingMachineInfo   `json:"info"`
+	HistoryInfo []WashingMachineInfo `json:"history_info"`
+	Ops         WashingMachineOps    `json:"ops"`
 }

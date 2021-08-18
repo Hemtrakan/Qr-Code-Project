@@ -26,6 +26,10 @@ func registerOperatorOwner(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
+	err = validateStruct(*operator)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
 	id, err := getOwnerId(context)
 	err = api.RegisterOperatorOwner(operator, id)
 	if err != nil {

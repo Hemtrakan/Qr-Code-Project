@@ -22,7 +22,6 @@ type QrCode struct {
 	QrCodeUUID   uuid.UUID `gorm:"uniqueIndex"`
 	Code         string    `gorm:"uniqueIndex"`
 }
-
 //type LogTeamPage struct {
 //	gorm.Model
 //	LogTeamPageName string

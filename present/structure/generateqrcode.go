@@ -3,15 +3,15 @@ package structure
 import "gorm.io/datatypes"
 
 type FileZipByTemplateName struct {
-	OwnerId      uint   `json:"owner_id"`
-	TemplateName string `json:"template_name"`
-	FileZip      string `json:"file_zip"`
+	OwnerId      uint   `json:"owner_id" validate:"required"`
+	TemplateName string `json:"template_name" validate:"required"`
+	FileZip      string `json:"file_zip" validate:"required"`
 }
 
 type FileZip struct {
-	OwnerId  int      `json:"owner_id"`
-	FileZip  string   `json:"file_zip"`
-	QrCodeId []string `json:"qr_code_id"`
+	OwnerId  int      `json:"owner_id" validate:"required"`
+	FileZip  string   `json:"file_zip" validate:"required"`
+	QrCodeId []string `json:"qr_code_id" validate:"required"`
 }
 
 type GetQrCode struct {
@@ -27,6 +27,7 @@ type GetDataQrCode struct {
 	Ops         datatypes.JSON `json:"ops"`
 	HistoryInfo datatypes.JSON `json:"history_info"`
 	OwnerId     int    `json:"owner_id"`
+	TemplateName string `json:"template_name"`
 }
 
 type ArrayFileName struct {
@@ -38,12 +39,12 @@ type GetQrCodeImage struct {
 }
 
 type GenQrCode struct {
-	OwnerId      uint   `json:"owner_id"`
-	CodeName     string `json:"code_name"`
-	TemplateName string `json:"template_name"`
-	Amount       int    `json:"amount"`
+	OwnerId      uint   `json:"owner_id" validate:"required"`
+	CodeName     string `json:"code_name" validate:"required"`
+	TemplateName string `json:"template_name" validate:"required"`
+	Amount       int    `json:"amount" validate:"required"`
 }
 
 type DelQrCode struct {
-	QrCodeId []string `json:"qr_code_id"`
+	QrCodeId []string `json:"qr_code_id" validate:"required"`
 }

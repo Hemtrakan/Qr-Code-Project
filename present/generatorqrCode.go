@@ -1,7 +1,6 @@
 package present
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
 	"net/http"
@@ -21,6 +20,16 @@ func getQrCodeById(context *fiber.Ctx) error {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.JSON(res)
+}
+
+func getDataQrCodeJson(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	id := context.Params("id")
+	res, err := api.GetDataQrCode(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
 }
 
 func getDataQrCode(context *fiber.Ctx) error {
@@ -56,7 +65,11 @@ func createQrCode(context *fiber.Ctx) error {
 	if err := context.BodyParser(files); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err := api.CreateQrCode(*files)
+	err := validateStruct(*files)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.CreateQrCode(*files)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -67,6 +80,10 @@ func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var data = new(structure.FileZip)
 	if err := context.BodyParser(data); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err := validateStruct(*data)
+	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	fileZip, err := api.AddFileZipById(*data)
@@ -82,6 +99,10 @@ func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 	if err := context.BodyParser(data); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
+	err := validateStruct(*data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
 	fileZip, err := api.AddFileZipByTemplateName(*data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
@@ -95,39 +116,15 @@ func deleteQrCode(context *fiber.Ctx) error {
 	if err := context.BodyParser(QrCode); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err := api.DeleteQrCode(*QrCode)
+	err := validateStruct(*QrCode)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.DeleteQrCode(*QrCode)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberSuccess(context, http.StatusOK, "succeed")
-}
-
-func structureToJson(context *fiber.Ctx) error {
-	var gen = new(structure.GenQrCode)
-	if err := context.BodyParser(gen); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	template := gen.TemplateName
-	templates := constant.Template
-	for _, item := range templates {
-		res ,_:= item.Templates()
-		if template == *res {
-			fmt.Println(*res)
-		}
-	}
-	//
-	//
-	//
-	//var structure = computer.Computer{}
-	//byteValue, err := json.Marshal(structure)
-	//err = json.Unmarshal(byteValue, &structure)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(byteValue)
-	//fmt.Println(structure)
-
-	return context.JSON(template)
 }
 
 func genQrCodeByName(context *fiber.Ctx) error {

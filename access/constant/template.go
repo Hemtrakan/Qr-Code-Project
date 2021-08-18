@@ -7,25 +7,27 @@ import (
 type Templates string
 
 const (
-	serviceWashingMachine Templates = "ServiceWashingMachine"
-	computer Templates = "Computer"
+	ServiceWashingMachine Templates = "serviceWashingMachine"
+	Computer              Templates = "computer"
 )
 
 var Template = []Templates{
-	serviceWashingMachine,
-	computer,
+	ServiceWashingMachine,
+	Computer,
 }
 
 func (Templates Templates) Templates() (result *string, Errors error) {
 	switch Templates {
-	case serviceWashingMachine:
-		TemplatesName := "ServiceWashingMachine"
+	case ServiceWashingMachine:
+		TemplatesName := "serviceWashingMachine"
 		result = &TemplatesName
-	case computer:
-		TemplatesName := "Computer"
+	case Computer:
+		TemplatesName := "computer"
 		result = &TemplatesName
 	default:
 		Errors = errors.New("unimplemented")
 	}
 	return
 }
+
+

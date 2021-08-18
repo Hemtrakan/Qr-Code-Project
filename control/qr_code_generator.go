@@ -12,7 +12,7 @@ import (
 	"qrcode/access/constant"
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/present/structure"
-	"qrcode/present/structure/templates/computer"
+	"qrcode/utility"
 	"strconv"
 )
 
@@ -51,11 +51,12 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		return
 	}
 	response = structure.GetDataQrCode{
-		QrCodeId:    data.QrCodeUUID.String(),
-		Info:        data.Info,
-		Ops:         data.Ops,
-		HistoryInfo: data.HistoryInfo,
-		OwnerId:     int(data.OwnerId),
+		QrCodeId:     data.QrCodeUUID.String(),
+		Info:         data.Info,
+		Ops:          data.Ops,
+		HistoryInfo:  data.HistoryInfo,
+		OwnerId:      int(data.OwnerId),
+		TemplateName: data.TemplateName,
 	}
 	return
 }
@@ -63,6 +64,10 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	for _, del := range req.QrCodeId {
 		data, err := ctrl.access.RDBMS.GetDataQrCode(del)
+		if err != nil {
+			Error = err
+			return
+		}
 		if data.QrCodeUUID.String() != del {
 			Error = errors.New("don't have this qr code")
 		}
@@ -78,6 +83,10 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 	ownerId := int(req.OwnerId)
 	data, err := ctrl.access.RDBMS.GetAccount(ownerId)
+	if err != nil {
+		Error = err
+		return
+	}
 	if data.ID == 0 {
 		Error = errors.New("there is no owner of this id in the system")
 		return
@@ -86,13 +95,28 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 		Error = errors.New("invalid user rights")
 		return
 	}
-	// สร้าง QR-Code
-	res, err := ctrl.access.RDBMS.GetQrCode(req.OwnerId, req.TemplateName)
+	structureInfo, err := utility.CheckTemplate(req.TemplateName)
 	if err != nil {
 		Error = err
 		return
 	}
-	count := len(res)
+	byteInfo, err := json.Marshal(structureInfo)
+	if err != nil {
+		Error = err
+		return
+	}
+	err = json.Unmarshal(byteInfo, &structureInfo)
+	if err != nil {
+		Error = err
+		return
+	}
+	// สร้าง QR-Code
+	count, err := ctrl.access.RDBMS.GetQrCode(req.OwnerId, req.TemplateName)
+	if err != nil {
+		Error = err
+		return
+	}
+	counts := len(count)
 	for i := 0 + 1; i <= req.Amount; i++ {
 		uuid, err := uuid2.NewV4()
 		if err != nil {
@@ -100,27 +124,22 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 			return
 		}
 
-		var info = computer.Info{}
-		byteInfo, err := json.Marshal(info)
-		err = json.Unmarshal(byteInfo, &info)
-
-		number := strconv.Itoa(count + i)
+		number := strconv.Itoa(counts + i)
 		save := rdbmsstructure.QrCode{
 			OwnerId:      req.OwnerId,
 			TemplateName: req.TemplateName,
 			Info:         datatypes.JSON(byteInfo),
-			Ops:          nil,
-			HistoryInfo:  nil,
+			Ops:          datatypes.JSON(""),
+			HistoryInfo:  datatypes.JSON(""),
 			QrCodeUUID:   uuid,
 			Code:         req.CodeName + "-" + number,
 		}
+
 		err = ctrl.access.RDBMS.CreateQrCode(save)
 		if err != nil {
 			Error = err
 			return
 		}
-		//info, _ := json.MarshalIndent(req.Info, "", " ")
-		//ops, _ := json.MarshalIndent(req.Ops, "", " ")
 	}
 	return
 }
@@ -203,6 +222,10 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplateName) (file string, Error error) {
 	ownerId := int(req.OwnerId)
 	dataOwnerId, err := ctrl.access.RDBMS.GetAccount(ownerId)
+	if err != nil {
+		Error = err
+		return
+	}
 	if dataOwnerId.ID == 0 {
 		Error = errors.New("there is no owner of this id in the system")
 		return
@@ -220,7 +243,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		Error = errors.New("no new qrcode")
 		return
 	}
-	os.RemoveAll(string(constant.SaveFileLocationZipFile))
+	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
 	if err != nil {
 		Error = err
 		return
@@ -258,7 +281,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 	}
 
 	file = output
-	os.RemoveAll(string(constant.SaveFileLocationQrCode))
+	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
 	if err != nil {
 		Error = err
 		return

@@ -49,6 +49,7 @@ func APICreate(ctrl *control.APIControl) {
 
 	qr := app.Group("/qr")
 	qr.Post("/:id",getDataQrCode) //  Id >>> QrCodeUUId
+	qr.Post("getDataQrCodeJson/:id",getDataQrCodeJson) //  Id >>> QrCodeUUId
 
 	// -- Todo Owner
 	owner := app.Group("/owner")
@@ -135,21 +136,12 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getQrCodeFile/:name", genQrCodeByName)
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 
-	admin.Post("structureToJson",structureToJson)
 
 	//admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้
 	//admin.Get("getAllTeamPageById/:id", getAllTeamPageById)
 	//admin.Post("insertTeamPage", insertTeamPage)
 	//admin.Put("updateTeamPage/:id", updateTeamPage)
 	//admin.Delete("deleteTeamPage/:id", deleteTeamPage)
-
-	// -- Type TeamPage
-	//admin.Get("teamPageType",)
-	//admin.Post("teamPageType",)
-	//admin.Put("teamPageType",)
-	//admin.Delete("teamPageType",)
-
-	// -- QrCode
 
 	// -- File
 	admin.Post("upload_file", uploadFile)
@@ -164,7 +156,6 @@ func validateStruct(dataStruct interface{}) error {
 	err := validate.Struct(dataStruct)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-
 			return errors.New(fmt.Sprintf("%s: %s", err.StructField(), err.Tag()))
 		}
 	} else {

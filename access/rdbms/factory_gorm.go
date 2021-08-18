@@ -15,6 +15,8 @@ type GORMFactory struct {
 	client *gorm.DB
 }
 
+
+
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -34,11 +36,50 @@ func gormInstance(env *environment.Properties) GORMFactory {
 }
 
 //  Account
+
+func (factory GORMFactory) CheckUserRegister(Username, PhoneNumber, LineId  string, UserId uint) (response *rdbmsstructure.Account, Error error) {
+	var data *rdbmsstructure.Account
+	if UserId == 0{
+		err := factory.client.Where("username = ?", Username).First(&data).Error
+		if err == nil {
+			Error = errors.New("ชื่อผู้ใช้นี้อยู่แล้ว")
+			return
+		}
+		err = factory.client.Where("phone_number = ?", PhoneNumber).First(&data).Error
+		if err == nil {
+			Error = errors.New("เบอร์โทรศัพท์นี้มีอยู่แล้ว")
+			return
+		}
+		err = factory.client.Where("line_id = ?", LineId).First(&data).Error
+		if err == nil {
+			Error = errors.New("LineId นี้มีอยู่แล้ว")
+			return
+		}
+	}
+	//if UserId != 0{
+	//	err := factory.client.Where("phone_number = ? AND id = ?", PhoneNumber,UserId).First(&data).Error
+	//	if err != nil {
+	//		Error = errors.New("เบอร์โทรศัพท์นี้มีอยู่แล้ว")
+	//		return
+	//	}
+	//	err = factory.client.Where("line_id = ?  AND id = ?", LineId,UserId).First(&data).Error
+	//	if err == nil {
+	//		Error = errors.New("LineId นี้มีอยู่แล้ว")
+	//		return
+	//	}
+	//}
+	response = data
+	return
+}
+
+
 func (factory GORMFactory) Register(Account rdbmsstructure.Account) (Error error) {
 	err := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Account).Error
 	if err != nil {
-		Error = err
-		return
+		if !errors.Is(err, gorm.ErrRegistered) {
+			Error = err
+			return
+		}
 	}
 	return
 }
@@ -59,9 +100,27 @@ func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsst
 	return
 }
 
+func (factory GORMFactory) CheckAccountId(id uint) (response *rdbmsstructure.Account, Error error) {
+	var data *rdbmsstructure.Account
+	err := factory.client.Where("id = ?", id).First(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+
 func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account,Error error){
 	var data rdbmsstructure.Account
-	err := factory.client.Where("id = ?", id).Find(&data).Error
+	err := factory.client.Where("id = ?", id).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -172,7 +231,7 @@ func (factory GORMFactory) UpdateProfile(Account rdbmsstructure.Account) (Error 
 	return
 }
 
-func (factory GORMFactory) DeleteAccount(id int) (Error error) {
+func (factory GORMFactory) DeleteAccount(id uint) (Error error) {
 	var data rdbmsstructure.Account
 	err := factory.client.Where("id = ?", id).Delete(&data).Error
 	if err != nil {

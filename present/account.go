@@ -19,11 +19,17 @@ func registerOwner(context *fiber.Ctx) error {
 	if err != nil{
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
+
+	err = validateStruct(*owner)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+
 	err = api.RegisterOwner(owner)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberError(context, http.StatusOK, "success")
+	return utility.FiberError(context, http.StatusOK, "สมัครสมาชิกสำเร็จ")
 }
 
 func registerOperator(context *fiber.Ctx) error {
@@ -33,17 +39,25 @@ func registerOperator(context *fiber.Ctx) error {
 	if err != nil{
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
+	err = validateStruct(*operator)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
 	err = api.RegisterOperator(operator)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberError(context, http.StatusOK, "success")
+	return utility.FiberError(context, http.StatusOK, "สมัครสมาชิกสำเร็จ")
 }
 
 func login(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	Login := new(structure.Login)
 	err := context.BodyParser(Login)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = validateStruct(*Login)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -59,6 +73,10 @@ func LoginAdmin(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	Login := new(structure.Login)
 	err := context.BodyParser(Login)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = validateStruct(*Login)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -97,7 +115,7 @@ func getSubOwner(context *fiber.Ctx) error {
 	id := context.Params("id")
 	OwnerId, err := strconv.Atoi(id)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
 	}
 	response , err := api.GetSubOwner(OwnerId)
 	if err != nil {
@@ -120,7 +138,8 @@ func getOwnerByIdOps(context *fiber.Ctx) error {
 	id := context.Params("id")
 	OperatorId, err := strconv.Atoi(id)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
+
 	}
 	response , err := api.GetOwnerByIdOps(OperatorId)
 	if err != nil {
@@ -134,7 +153,7 @@ func getAccountById(context *fiber.Ctx) error {
 	UserId := context.Params("id")
 	id, err := strconv.Atoi(UserId)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
 	}
 	responses, err := api.GetAccount(id)
 	if err != nil {
@@ -150,16 +169,20 @@ func updateProfile(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
+	err = validateStruct(*Account)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
 	UserId := context.Params("id")
 	id, err := strconv.Atoi(UserId)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
 	}
 	err = api.UpdateProfile(uint(id),Account)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberError(context, http.StatusOK, "succeed")
+	return utility.FiberError(context, http.StatusOK, "แก้ไขข้อมูลผู้ใช้งานสำเร็จ")
 }
 
 func changePassword(context *fiber.Ctx) error {
@@ -169,16 +192,20 @@ func changePassword(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
+	err = validateStruct(*ChangePassword)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
 	UserId := context.Params("id")
 	id, err := strconv.Atoi(UserId)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
 	}
 	err = api.ChangePassword(uint(id),ChangePassword)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberError(context, http.StatusOK, "succeed")
+	return utility.FiberError(context, http.StatusOK, "เปลี่ยนรหัสผ่านสำเร็จ")
 }
 
 func deleteAccount(context *fiber.Ctx) error{
@@ -186,13 +213,13 @@ func deleteAccount(context *fiber.Ctx) error{
 	UserId := context.Params("id")
 	id, err := strconv.Atoi(UserId)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
 	}
-	err = api.DeleteAccount(id)
+	err = api.DeleteAccount(uint(id))
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberError(context, http.StatusOK, "succeed")
+	return utility.FiberError(context, http.StatusOK, "ลบข้อมูลผู้ใช้สำเร็จ")
 }
 
 

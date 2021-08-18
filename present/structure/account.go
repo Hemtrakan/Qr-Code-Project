@@ -1,19 +1,19 @@
 package structure
 
 type Login struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 type ChangePassword struct {
-	Password string `json:"password"`
+	Password string `json:"password" validate:"required"`
 }
 
 type UpdateProFile struct {
-	FirstName   string `json:"firstname"`
-	LastName    string `json:"lastname"`
-	PhoneNumber string `json:"phonenumber"`
-	LineId      string `json:"lineid"`
+	FirstName   string `json:"firstname" validate:"required"`
+	LastName    string `json:"lastname" validate:"required"`
+	PhoneNumber string `json:"phonenumber" validate:"required"`
+	LineId      string `json:"lineid" validate:"required"`
 }
 
 type UserAccount struct {

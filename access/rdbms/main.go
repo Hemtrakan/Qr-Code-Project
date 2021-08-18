@@ -19,7 +19,7 @@ type FactoryInterface interface {
 	GetSubOwner(OwnerId int) (response []rdbmsstructure.Account,Error error)
 	GetOwnerByIdOps(OperatorId int) (response rdbmsstructure.Account,Error error)
 	UpdateProfile(Account rdbmsstructure.Account) (Error error)
-	DeleteAccount(id int) (Error error)
+	DeleteAccount(id uint) (Error error)
 	DeleteAccountByOwner(OwnerId uint,OperatorId int) (Error error)
 
 	//  QRCode
@@ -37,6 +37,9 @@ type FactoryInterface interface {
 	Login(login rdbmsstructure.Account) (response rdbmsstructure.Account,Error error)
 	GetAccount(id int) (response rdbmsstructure.Account,Error error)
 
+
+	CheckAccountId(id uint) (response *rdbmsstructure.Account,Error error)
+	CheckUserRegister(Username , PhoneNumber ,LineId  string,UserId uint) (response *rdbmsstructure.Account,Error error)
 }
 
 func Create(env *environment.Properties) FactoryInterface {

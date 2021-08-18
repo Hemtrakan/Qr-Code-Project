@@ -1,5 +1,5 @@
 package knex
 
-type washingMachineOps struct {
+type WashingMachineOps struct {
 	repair []string
 }
