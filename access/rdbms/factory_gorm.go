@@ -15,8 +15,6 @@ type GORMFactory struct {
 	client *gorm.DB
 }
 
-
-
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -37,24 +35,22 @@ func gormInstance(env *environment.Properties) GORMFactory {
 
 //  Account
 
-func (factory GORMFactory) CheckUserRegister(Username, PhoneNumber, LineId  string, UserId uint) (response *rdbmsstructure.Account, Error error) {
+func (factory GORMFactory) CheckUserRegister(Username, PhoneNumber, LineId string, UserId uint) (response *rdbmsstructure.Account, Error error) {
 	var data *rdbmsstructure.Account
-	if UserId == 0{
-		err := factory.client.Where("username = ?", Username).First(&data).Error
-		if err == nil {
-			Error = errors.New("ชื่อผู้ใช้นี้อยู่แล้ว")
-			return
-		}
-		err = factory.client.Where("phone_number = ?", PhoneNumber).First(&data).Error
-		if err == nil {
-			Error = errors.New("เบอร์โทรศัพท์นี้มีอยู่แล้ว")
-			return
-		}
-		err = factory.client.Where("line_id = ?", LineId).First(&data).Error
-		if err == nil {
-			Error = errors.New("LineId นี้มีอยู่แล้ว")
-			return
-		}
+	err := factory.client.Where("username = ? ", Username).First(&data).Error
+	if err == nil {
+		Error = errors.New("ชื่อผู้ใช้นี้อยู่แล้ว")
+		return
+	}
+	err = factory.client.Where("phone_number = ?", PhoneNumber).First(&data).Error
+	if err == nil {
+		Error = errors.New("เบอร์โทรศัพท์นี้มีอยู่แล้ว")
+		return
+	}
+	err = factory.client.Where("line_id = ?", LineId).First(&data).Error
+	if err == nil {
+		Error = errors.New("LineId นี้มีอยู่แล้ว")
+		return
 	}
 	//if UserId != 0{
 	//	err := factory.client.Where("phone_number = ? AND id = ?", PhoneNumber,UserId).First(&data).Error
@@ -71,7 +67,6 @@ func (factory GORMFactory) CheckUserRegister(Username, PhoneNumber, LineId  stri
 	response = data
 	return
 }
-
 
 func (factory GORMFactory) Register(Account rdbmsstructure.Account) (Error error) {
 	err := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Account).Error
@@ -117,8 +112,7 @@ func (factory GORMFactory) CheckAccountId(id uint) (response *rdbmsstructure.Acc
 	return
 }
 
-
-func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account,Error error){
+func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account, Error error) {
 	var data rdbmsstructure.Account
 	err := factory.client.Where("id = ?", id).First(&data).Error
 	if err != nil {
@@ -149,7 +143,6 @@ func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Accou
 	response = data
 	return
 }
-
 
 func (factory GORMFactory) GetAllAccountOperatorByOwnerID(OwnerId uint) (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
@@ -248,7 +241,7 @@ func (factory GORMFactory) DeleteAccount(id uint) (Error error) {
 
 func (factory GORMFactory) DeleteAccountByOwner(OwnerId uint, OperatorId int) (Error error) {
 	var data rdbmsstructure.Account
-	err := factory.client.Where("id = ?", OperatorId).Where("sub_owner_id = ?",OwnerId).First(&data).Error
+	err := factory.client.Where("id = ?", OperatorId).Where("sub_owner_id = ?", OwnerId).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -259,7 +252,7 @@ func (factory GORMFactory) DeleteAccountByOwner(OwnerId uint, OperatorId int) (E
 		return
 	}
 
-	err = factory.client.Where("id = ?", OperatorId).Where("sub_owner_id = ?",OwnerId).Delete(&data).Error
+	err = factory.client.Where("id = ?", OperatorId).Where("sub_owner_id = ?", OwnerId).Delete(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -275,7 +268,7 @@ func (factory GORMFactory) DeleteAccountByOwner(OwnerId uint, OperatorId int) (E
 
 func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response rdbmsstructure.QrCode, Error error) {
 	var data rdbmsstructure.QrCode
-	err := factory.client.Where("qr_code_uuid= ?", QrCodeUUID).Find(&data).Error
+	err := factory.client.Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -313,9 +306,9 @@ func (factory GORMFactory) UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error err
 	return nil
 }
 
-func (factory GORMFactory) GetQrCode(OwnerId uint,templateName string) (response []rdbmsstructure.QrCode,Error error) {
+func (factory GORMFactory) CountCode(OwnerId uint, templateName,Code string) (response []rdbmsstructure.QrCode, Error error){
 	var data []rdbmsstructure.QrCode
-	err := factory.client.Where("owner_id = ? and template_name = ?", OwnerId,templateName).Find(&data).Error
+	err := factory.client.Where("owner_id = ? and template_name = ? and code = ?", OwnerId, templateName,Code).Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -329,7 +322,39 @@ func (factory GORMFactory) GetQrCode(OwnerId uint,templateName string) (response
 	return
 }
 
-func (factory GORMFactory) GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode,Error error) {
+func (factory GORMFactory) CheckCode(OwnerId uint, templateName,Code string) (response rdbmsstructure.QrCode, Error error) {
+	var data rdbmsstructure.QrCode
+	err := factory.client.Where("owner_id = ? and template_name = ? and code = ?", OwnerId, templateName,Code).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) GetQrCode(OwnerId uint, templateName string) (response []rdbmsstructure.QrCode, Error error) {
+	var data []rdbmsstructure.QrCode
+	err := factory.client.Where("owner_id = ? and template_name = ?", OwnerId, templateName).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode, Error error) {
 	var data []rdbmsstructure.QrCode
 	err := factory.client.Where("owner_id = ?", OwnerId).Find(&data).Error
 	if err != nil {
@@ -346,9 +371,9 @@ func (factory GORMFactory) GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstru
 	return
 }
 
-func (factory GORMFactory) GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (response rdbmsstructure.QrCode,Error error) {
+func (factory GORMFactory) GetQrCodeByQrCodeId(OwnerId int, QrCodeId string) (response rdbmsstructure.QrCode, Error error) {
 	var data rdbmsstructure.QrCode
-	err := factory.client.Where("owner_id = ? AND qr_code_uuid = ?", OwnerId,QrCodeId).Find(&data).Error
+	err := factory.client.Where("owner_id = ? AND qr_code_uuid = ?", OwnerId, QrCodeId).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -377,8 +402,6 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 	}
 	return
 }
-
-
 
 // -- TeamPage
 //
@@ -444,7 +467,6 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 //}
 //
 
-
 // InsertLogTeamPage -- LogTeamPage
 //func (factory GORMFactory) InsertLogTeamPage(LogTeamPage rdbmsstructure.LogTeamPage) (Error error) {
 //	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&LogTeamPage).Error
@@ -484,7 +506,3 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 //	response = data
 //	return
 //}
-
-
-
-

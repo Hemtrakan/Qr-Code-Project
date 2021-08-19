@@ -14,17 +14,23 @@ import (
 	"qrcode/present/structure"
 	"qrcode/utility"
 	"strconv"
+	"strings"
 )
 
 func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
 	var getQrCodeArray []structure.GetQrCode
+	check, err := ctrl.access.RDBMS.CheckAccountId(uint(OwnerId))
+	if err != nil {
+		Error = errors.New("ไม่มีผู้ใช้คนนี้ในระบบ")
+		return
+	}
+	if !(check.Role == string(constant.Owner)) {
+		Error = errors.New("สิทธิ์ผู้ใช้งานไม่ถูกต้อง")
+		return
+	}
 	data, err := ctrl.access.RDBMS.GetQrCodeByOwnerId(OwnerId)
 	if err != nil {
 		Error = err
-		return
-	}
-	if len(data) == 0 {
-		Error = errors.New("this data does not exist")
 		return
 	}
 	for _, res := range data {
@@ -32,7 +38,7 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 			OwnerId:      res.OwnerId,
 			TemplateName: res.TemplateName,
 			QrCodeId:     res.QrCodeUUID.String(),
-			CodeName:     res.Code,
+			CodeName:     res.Code + "-" + res.Count,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
@@ -43,11 +49,7 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDataQrCode, Error error) {
 	data, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
 	if err != nil {
-		Error = err
-		return
-	}
-	if data.ID == 0 {
-		Error = errors.New("this data does not exist")
+		Error = errors.New("ไม่มี QrCode นี้อยู่ในระบบ")
 		return
 	}
 	response = structure.GetDataQrCode{
@@ -57,19 +59,20 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		HistoryInfo:  data.HistoryInfo,
 		OwnerId:      int(data.OwnerId),
 		TemplateName: data.TemplateName,
+		CodeName:     data.Code + "-" + data.Count,
 	}
 	return
 }
 
 func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
+	if len(req.QrCodeId) == 0 {
+		Error = errors.New("ไม่มี Qr-Code ถูกส่งมา")
+	}
 	for _, del := range req.QrCodeId {
-		data, err := ctrl.access.RDBMS.GetDataQrCode(del)
+		_, err := ctrl.access.RDBMS.GetDataQrCode(del)
 		if err != nil {
-			Error = err
+			Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
 			return
-		}
-		if data.QrCodeUUID.String() != del {
-			Error = errors.New("don't have this qr code")
 		}
 		err = ctrl.access.RDBMS.DeleteQrCode(del)
 		if err != nil {
@@ -81,18 +84,26 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 }
 
 func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
+	req.CodeName = strings.Trim(req.CodeName, "\t \n")
+	req.TemplateName = strings.Trim(req.TemplateName, "\t \n")
+	if req.TemplateName == "" {
+		return errors.New("TemplateName ต้องไม่ว่าง")
+	}
+	if !(len(req.CodeName) <= 20) {
+		return errors.New("CodeName ต้องไม่เกิน 20 ตัว")
+	}
+	if req.CodeName == "" {
+		return errors.New("CodeName ต้องไม่ว่าง")
+	}
+
 	ownerId := int(req.OwnerId)
 	data, err := ctrl.access.RDBMS.GetAccount(ownerId)
 	if err != nil {
-		Error = err
-		return
-	}
-	if data.ID == 0 {
-		Error = errors.New("there is no owner of this id in the system")
+		Error = errors.New("ไม่มีผู้ใช้คนนี้อยู่ในระบบ")
 		return
 	}
 	if data.Role != string(constant.Owner) {
-		Error = errors.New("invalid user rights")
+		Error = errors.New("ผู้ใช้คนนี้ไม่มีสิทธิ์ในการสร้าง QR-Code")
 		return
 	}
 	structureInfo, err := utility.CheckTemplate(req.TemplateName)
@@ -111,20 +122,34 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 		return
 	}
 	// สร้าง QR-Code
-	count, err := ctrl.access.RDBMS.GetQrCode(req.OwnerId, req.TemplateName)
+	count, err := ctrl.access.RDBMS.CountCode(req.OwnerId, req.TemplateName, req.CodeName)
 	if err != nil {
 		Error = err
 		return
 	}
-	counts := len(count)
+
+	var counts = 0
+	check, err := ctrl.access.RDBMS.CheckCode(req.OwnerId, req.TemplateName, req.CodeName)
+	if err != nil {
+		Error = err
+		return
+	}
+	if check.Code == req.CodeName {
+		counts = len(count)
+	}
+	//if req.CodeName == check.Code && req.TemplateName == check.TemplateName && req.OwnerId == check.OwnerId{
+	//	Error = errors.New("CodeName นี้มีอยู่ใน Template อื่นอยู่แล้ว")
+	//	return
+	//}
+
 	for i := 0 + 1; i <= req.Amount; i++ {
 		uuid, err := uuid2.NewV4()
 		if err != nil {
 			Error = err
 			return
 		}
-
 		number := strconv.Itoa(counts + i)
+
 		save := rdbmsstructure.QrCode{
 			OwnerId:      req.OwnerId,
 			TemplateName: req.TemplateName,
@@ -132,7 +157,8 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 			Ops:          datatypes.JSON(""),
 			HistoryInfo:  datatypes.JSON(""),
 			QrCodeUUID:   uuid,
-			Code:         req.CodeName + "-" + number,
+			Code:         req.CodeName,
+			Count:        number,
 		}
 
 		err = ctrl.access.RDBMS.CreateQrCode(save)
@@ -146,40 +172,53 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 
 func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Error error) {
 	var arrayFileName []structure.ArrayFileName
-	data, _ := ctrl.access.RDBMS.GetAccount(req.OwnerId)
-	if data.ID == 0 {
-		Error = errors.New("there is no owner of this id in the system")
+
+	req.FileZip = strings.Trim(req.FileZip, "\t \n")
+	if req.FileZip == "" {
+		Error = errors.New("FileZip ต้องไม่ว่าง")
 		return
 	}
-	if data.Role != string(constant.Owner) {
-		Error = errors.New("invalid user rights")
+	if len(req.QrCodeId) == 0 {
+		Error = errors.New("QrCodeId ต้องไม่ว่าง")
+		return
+	}
+	check, err := ctrl.access.RDBMS.GetAccount(req.OwnerId)
+	if err != nil {
+		Error = errors.New("ไม่มีผู้ใช้คนนี้อยู่ในระบบ")
+		return
+	}
+	if check.Role != string(constant.Owner) {
+		Error = errors.New("ผู้ใช้คนนี้ไม่มีสิทธิ์ในการสร้าง QR-Code")
+		return
+	}
+	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
+	if err != nil {
+		Error = err
+		return
+	}
+	err = os.Mkdir(string(constant.SaveFileLocationQrCode), 0755)
+	err = os.Mkdir(string(constant.SaveFileLocationZipFile), 0755)
+	if err != nil {
+		Error = err
 		return
 	}
 	for _, QrCodeId := range req.QrCodeId {
 		data, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(req.OwnerId, QrCodeId)
 		if err != nil {
-			Error = err
-			return
-		}
-		if data.ID == 0 {
-			Error = errors.New("this qr-code does not exist")
-			for _, QrCodeId := range req.QrCodeId {
-				data, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(req.OwnerId, QrCodeId)
-				if err != nil {
-					Error = errors.New("this qr-code does not exist")
-					return
-				}
-				filename := data.Code
-				path := string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
-				err = os.Remove(path)
-				if err != nil {
-					Error = errors.New("this qr-code does not exist")
-					return
-				}
+			Error = errors.New("ไม่มี Qr-Code ที่นี้อยู่ในระบบ")
+			err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
+			if err != nil {
+				Error = err
+				return
+			}
+			err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
+			if err != nil {
+				Error = err
+				return
 			}
 			return
 		}
-		filename := data.Code
+		filename := data.Code + "-" + data.Count
 		qrc, err := qrcode.New(constant.Http + "/" + data.QrCodeUUID.String())
 		if err != nil {
 			Error = err
@@ -196,42 +235,45 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		}
 		arrayFileName = append(arrayFileName, files)
 	}
-	output := "zipfile/" + req.FileZip + ".zip"
+	output := string(constant.SaveFileLocationZipFile) + "/" + req.FileZip + ".zip"
 	if err := ZipFilesById(output, arrayFileName); err != nil {
 		Error = err
 		return
 	}
-	for _, QrCodeId := range req.QrCodeId {
-		data, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(req.OwnerId, QrCodeId)
-		if err != nil {
-			Error = err
-			return
-		}
-		filename := data.Code
-		path := string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
-		err = os.Remove(path)
-		if err != nil {
-			Error = err
-			return
-		}
+	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
+	if err != nil {
+		Error = err
+		return
 	}
 	file = output
 	return
 }
 
 func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplateName) (file string, Error error) {
-	ownerId := int(req.OwnerId)
-	dataOwnerId, err := ctrl.access.RDBMS.GetAccount(ownerId)
+	req.TemplateName = strings.Trim(req.TemplateName, "\t \n")
+	if req.TemplateName == "" {
+		Error = errors.New("TemplateName ต้องไม่ว่าง")
+		return
+	}
+	req.FileZip = strings.Trim(req.FileZip, "\t \n")
+	if req.FileZip == "" {
+		Error = errors.New("FileZip ต้องไม่ว่าง")
+		return
+	}
+	_, err := utility.CheckTemplate(req.TemplateName)
 	if err != nil {
 		Error = err
 		return
 	}
-	if dataOwnerId.ID == 0 {
-		Error = errors.New("there is no owner of this id in the system")
+
+	ownerId := int(req.OwnerId)
+	dataOwnerId, err := ctrl.access.RDBMS.GetAccount(ownerId)
+	if err != nil {
+		Error = errors.New("ไม่มีผู้ใช้คนนี้อยู่ในระบบ")
 		return
 	}
 	if dataOwnerId.Role != string(constant.Owner) {
-		Error = errors.New("invalid user rights")
+		Error = errors.New("ผู้ใช้คนนี้ไม่มีสิทธิ์ในการสร้าง QR-Code")
 		return
 	}
 	data, err := ctrl.access.RDBMS.GetQrCode(req.OwnerId, req.TemplateName)
@@ -240,7 +282,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		return
 	}
 	if len(data) == 0 {
-		Error = errors.New("no new qrcode")
+		Error = errors.New("ยังไม่สร้าง Qr-Code ใน Template ที่ถูกเลือก")
 		return
 	}
 	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
@@ -262,7 +304,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 			Error = err
 			return
 		}
-		filename := res.Code
+		filename := res.Code + "-" + res.Count
 		path = string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
 		// save file
 		if err = qrc.Save(path); err != nil {

@@ -4,12 +4,12 @@ import "gorm.io/gorm"
 
 type Account struct {
 	gorm.Model
-	Username    string `gorm:"uniqueIndex"`
+	Username    string
 	Password    string
 	FirstName   string
 	LastName    string
-	PhoneNumber string `gorm:"uniqueIndex"`
-	LineId      string `gorm:"uniqueIndex"`
+	PhoneNumber string
+	LineId      string
 	Role        string
 	SubOwnerId  uint
 }

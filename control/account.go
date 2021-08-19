@@ -39,11 +39,6 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error
 	reqOwner.Lastname = strings.Trim(reqOwner.Lastname, "\t \n")
 	reqOwner.Lineid = strings.Trim(reqOwner.Lineid, "\t \n")
 	reqOwner.Phonenumber = strings.Trim(reqOwner.Phonenumber, "\t \n")
-	_, err := ctrl.access.RDBMS.CheckUserRegister(reqOwner.Username, reqOwner.Phonenumber, reqOwner.Lineid ,0)
-	if err != nil {
-		Error = err
-		return
-	}
 	user, err := regexp.MatchString("^[a-z0-9_-]{6,20}$", reqOwner.Username)
 	if !user {
 		return errors.New("username ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว และมีอักษรพิเศษได้แค่ _- เท่านั้น")
@@ -56,10 +51,10 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error
 	if err != nil {
 		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
 	}
-	if !(len(reqOwner.Firstname) <= 30 ){
+	if !(len(reqOwner.Firstname) <= 30) {
 		return errors.New("firstname ต้องไม่เกิน 30 ตัว")
 	}
-	if !(len(reqOwner.Lastname) <= 30 ){
+	if !(len(reqOwner.Lastname) <= 30) {
 		return errors.New("lastname ต้องไม่เกิน 30 ตัว")
 	}
 	if reqOwner.Firstname == "" {
@@ -76,7 +71,11 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error
 	if !LineId {
 		return errors.New("lineid ต้องไม่ต่ำกว่า 1 ตัว และ ไม่เกิน 20 ตัว ไม่สามารถใส่ตัวพิมพ์ใหญ่ได้และมีอักษรพิเศษได้แค่ ._- เท่านั้น")
 	}
-
+	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOwner.Username, reqOwner.Phonenumber, reqOwner.Lineid, 0)
+	if err != nil {
+		Error = err
+		return
+	}
 	hashPassword, err := utility.Hash(reqOwner.Password)
 	if err != nil {
 		return err
@@ -129,11 +128,6 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 	reqOperator.Lastname = strings.Trim(reqOperator.Lastname, "\t \n")
 	reqOperator.Lineid = strings.Trim(reqOperator.Lineid, "\t \n")
 	reqOperator.Phonenumber = strings.Trim(reqOperator.Phonenumber, "\t \n")
-	_, err := ctrl.access.RDBMS.CheckUserRegister(reqOperator.Username, reqOperator.Phonenumber, reqOperator.Lineid,0)
-	if err != nil {
-		Error = err
-		return
-	}
 	user, err := regexp.MatchString("^[a-z0-9_-]{6,20}$", reqOperator.Username)
 	if !user {
 		return errors.New("username ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว และมีอักษรพิเศษได้แค่ _- เท่านั้น")
@@ -146,10 +140,10 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 	if err != nil {
 		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
 	}
-	if !(len(reqOperator.Firstname) <= 30 ){
+	if !(len(reqOperator.Firstname) <= 30) {
 		return errors.New("firstname ต้องไม่เกิน 30 ตัว")
 	}
-	if !(len(reqOperator.Lastname) <= 30 ){
+	if !(len(reqOperator.Lastname) <= 30) {
 		return errors.New("lastname ต้องไม่เกิน 30 ตัว")
 	}
 	if reqOperator.Firstname == "" {
@@ -166,7 +160,11 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 	if !LineId {
 		return errors.New("lineid ต้องไม่ต่ำกว่า 1 ตัว และ ไม่เกิน 20 ตัว ไม่สามารถใส่ตัวพิมพ์ใหญ่ได้และมีอักษรพิเศษได้แค่ ._- เท่านั้น")
 	}
-
+	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOperator.Username, reqOperator.Phonenumber, reqOperator.Lineid, 0)
+	if err != nil {
+		Error = err
+		return
+	}
 	OwnerId := int(reqOperator.SubOwnerId)
 	data, err := ctrl.access.RDBMS.GetAccount(OwnerId)
 	if err != nil {
@@ -309,10 +307,14 @@ func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOw
 }
 
 func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner, Error error) {
-	var DataArray []structure.UserAccountOperator
-	_, err := ctrl.access.RDBMS.CheckAccountId(uint(OwnerId))
+	var DataArray []structure.Operators
+	res, err := ctrl.access.RDBMS.CheckAccountId(uint(OwnerId))
 	if err != nil {
 		Error = errors.New("record not found")
+		return
+	}
+	if res.Role != string(constant.Owner) {
+		Error = errors.New("สิทธิ์ของคุณไม่ถูกต้อง")
 		return
 	}
 	ops, err := ctrl.access.RDBMS.GetSubOwner(OwnerId)
@@ -328,7 +330,7 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner
 	ownerId := int(owner.ID)
 	for _, data := range ops {
 		id := int(data.ID)
-		UserAccountOperator := structure.UserAccountOperator{
+		UserAccountOperator := structure.Operators{
 			OperatorId:          id,
 			OperatorFirstName:   data.FirstName,
 			OperatorLastName:    data.LastName,
@@ -368,6 +370,7 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 			OperatorLastName:    data.LastName,
 			OperatorPhoneNumber: data.PhoneNumber,
 			OperatorLineId:      data.LineId,
+			OwnerId:             data.SubOwnerId,
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
@@ -376,11 +379,22 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 }
 
 func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetOwnerByOperator, Error error) {
+
+	_, err := ctrl.access.RDBMS.CheckAccountId(uint(OperatorId))
+	if err != nil {
+		Error = errors.New("record not found")
+		return
+	}
 	ops, err := ctrl.access.RDBMS.GetOwnerByIdOps(OperatorId)
 	if err != nil {
 		Error = err
 		return
 	}
+	if ops.Role != string(constant.Operator) {
+		Error = errors.New("สิทธิ์ของคุณไม่ถูกต้อง")
+		return
+	}
+
 	opsId := int(ops.SubOwnerId)
 	owner, err := ctrl.access.RDBMS.GetAccount(opsId)
 	if err != nil {
@@ -418,24 +432,24 @@ func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile)
 		return
 	}
 	if !(res.PhoneNumber == Account.PhoneNumber) {
-		_, err = ctrl.access.RDBMS.CheckUserRegister("", Account.PhoneNumber, "",0)
+		_, err = ctrl.access.RDBMS.CheckUserRegister("", Account.PhoneNumber, "", 0)
 		if err != nil {
 			Error = err
 			return
 		}
 	}
 	if !(res.LineId == Account.LineId) {
-		_, err = ctrl.access.RDBMS.CheckUserRegister("", "", Account.LineId,0)
+		_, err = ctrl.access.RDBMS.CheckUserRegister("", "", Account.LineId, 0)
 		if err != nil {
 			Error = err
 			return
 		}
 	}
 
-	if !(len(Account.FirstName) <= 30 ){
+	if !(len(Account.FirstName) <= 30) {
 		return errors.New("firstname ต้องไม่เกิน 30 ตัว")
 	}
-	if !(len(Account.LastName) <= 30 ){
+	if !(len(Account.LastName) <= 30) {
 		return errors.New("lastname ต้องไม่เกิน 30 ตัว")
 	}
 	if Account.FirstName == "" {
@@ -506,18 +520,68 @@ func (ctrl *APIControl) ChangePassword(id uint, password *structure.ChangePasswo
 }
 
 func (ctrl *APIControl) DeleteAccount(id uint) (Error error) {
-	_, err := ctrl.access.RDBMS.CheckAccountId(id)
+	res, err := ctrl.access.RDBMS.CheckAccountId(id)
 	if err != nil {
 		Error = errors.New("record not found")
 		return
 	}
-	err = ctrl.access.RDBMS.DeleteAccount(id)
-	if err != nil {
-		Error = err
-		return
+	if res.Role == string(constant.Owner) {
+		ops, err := ctrl.access.RDBMS.GetSubOwner(int(id))
+		if err != nil {
+			Error = errors.New("record not found")
+			return
+		}
+		err = ctrl.access.RDBMS.DeleteAccount(id)
+		if err != nil {
+			Error = err
+			return
+		}
+		for _, data := range ops {
+			err = ctrl.access.RDBMS.DeleteAccount(data.ID)
+			if err != nil {
+				Error = err
+				return
+			}
+		}
+	} else {
+		err = ctrl.access.RDBMS.DeleteAccount(id)
+		if err != nil {
+			Error = err
+			return
+		}
 	}
 	return
 }
+
+//func (ctrl *APIControl) DeleteAccountOwner(OwnerId uint) (Error error) {
+//	res, err := ctrl.access.RDBMS.CheckAccountId(OwnerId)
+//	if err != nil {
+//		Error = errors.New("record not found")
+//		return
+//	}
+//	if res.Role == string(constant.Owner){
+//		ops, err := ctrl.access.RDBMS.GetSubOwner(int(OwnerId))
+//		if err != nil {
+//			Error = errors.New("record not found")
+//			return
+//		}
+//		for _, data := range ops {
+//			err = ctrl.access.RDBMS.DeleteAccount(data.ID)
+//			if err != nil {
+//				Error = err
+//				return
+//			}
+//		}
+//	}else {
+//		err = ctrl.access.RDBMS.DeleteAccount(id)
+//		if err != nil {
+//			Error = err
+//			return
+//		}
+//	}
+//
+//	return
+//}
 
 func (ctrl *APIControl) insert(Account rdbmsstructure.Account) error {
 	err := ctrl.access.RDBMS.Register(Account)

@@ -16,6 +16,6 @@ func CheckTemplate(Templates string) (result interface{}, Error error) {
 		result = knex.WashingMachineInfo{}
 		return
 	}
-	Error = errors.New("this template does not exist in the system")
+	Error = errors.New("ไม่มี template นี้อยู่ในระบบ")
 	return
 }

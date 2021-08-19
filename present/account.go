@@ -139,7 +139,6 @@ func getOwnerByIdOps(context *fiber.Ctx) error {
 	OperatorId, err := strconv.Atoi(id)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
-
 	}
 	response , err := api.GetOwnerByIdOps(OperatorId)
 	if err != nil {

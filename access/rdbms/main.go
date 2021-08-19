@@ -26,6 +26,8 @@ type FactoryInterface interface {
 	GetDataQrCode(QrCodeUUID string) (response rdbmsstructure.QrCode,Error error)
 	CreateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 	GetQrCode(OwnerId uint,templateName string) (response []rdbmsstructure.QrCode,Error error)
+	CheckCode(OwnerId uint,templateName ,Code string) (response rdbmsstructure.QrCode,Error error)
+	CountCode(OwnerId uint,templateName ,Code string) (response []rdbmsstructure.QrCode,Error error)
 	GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode,Error error)
 	GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (response rdbmsstructure.QrCode,Error error)
 	UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error)

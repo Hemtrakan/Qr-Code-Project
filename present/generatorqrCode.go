@@ -15,9 +15,12 @@ func getQrCodeById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	id := context.Params("id")
 	ownerId, err := strconv.Atoi(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
+	}
 	res, err := api.GetQrCodeById(ownerId)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,err.Error())
 	}
 	return context.JSON(res)
 }
@@ -63,7 +66,7 @@ func createQrCode(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var files = new(structure.GenQrCode)
 	if err := context.BodyParser(files); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
 	err := validateStruct(*files)
 	if err != nil {
@@ -73,14 +76,14 @@ func createQrCode(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberError(context, http.StatusOK, "succeed")
+	return utility.FiberError(context, http.StatusOK, "สร้าง QrCode สำเร็จ")
 }
 
 func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var data = new(structure.FileZip)
 	if err := context.BodyParser(data); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest,"ส่งชนิดของข้อมูลมาผิด")
 	}
 	err := validateStruct(*data)
 	if err != nil {
@@ -97,7 +100,7 @@ func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var data = new(structure.FileZipByTemplateName)
 	if err := context.BodyParser(data); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
 	err := validateStruct(*data)
 	if err != nil {
@@ -114,7 +117,7 @@ func deleteQrCode(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var QrCode = new(structure.DelQrCode)
 	if err := context.BodyParser(QrCode); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
 	err := validateStruct(*QrCode)
 	if err != nil {
@@ -124,11 +127,11 @@ func deleteQrCode(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberSuccess(context, http.StatusOK, "succeed")
+	return utility.FiberSuccess(context, http.StatusOK, "ลบ QrCode สำเร็จ")
 }
 
-func genQrCodeByName(context *fiber.Ctx) error {
-	name := context.Params("name")
-	fileImage := string(constant.SaveFileLocationQrCode) + "/" + name + ".PNG"
-	return context.Download(fileImage)
-}
+//func genQrCodeByName(context *fiber.Ctx) error {
+//	name := context.Params("name")
+//	fileImage := string(constant.SaveFileLocationQrCode) + "/" + name + ".PNG"
+//	return context.Download(fileImage)
+//}

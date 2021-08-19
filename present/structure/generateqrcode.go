@@ -28,6 +28,7 @@ type GetDataQrCode struct {
 	HistoryInfo datatypes.JSON `json:"history_info"`
 	OwnerId     int    `json:"owner_id"`
 	TemplateName string `json:"template_name"`
+	CodeName     string `json:"code_name"`
 }
 
 type ArrayFileName struct {
