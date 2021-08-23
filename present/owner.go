@@ -33,20 +33,39 @@ func registerOperatorOwner(context *fiber.Ctx) error {
 	id, err := getOwnerId(context)
 	err = api.RegisterOperatorOwner(operator, id)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, "this user already exists")
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberSuccess(context, http.StatusOK, "success")
+	return utility.FiberSuccess(context, http.StatusOK, "สมัครสมาชิกสำเร็จ")
 }
 
 func getOperator(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	id, err := getOwnerId(context)
+	if err != nil {
+		return utility.FiberError(context,http.StatusBadRequest, err.Error())
+	}
 	res ,err := api.GetOperator(id)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.Status(http.StatusOK).JSON(res)
 }
+
+func getOperatorById(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	OwnerId, err := getOwnerId(context)
+	if err != nil {
+		return utility.FiberError(context,http.StatusBadRequest, err.Error())
+	}
+	UserId := context.Params("id")
+	OperatorId, err := strconv.Atoi(UserId)
+	res ,err := api.GetOperatorById(OperatorId,OwnerId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
+}
+
 
 
 func deleteAccountOperator(context *fiber.Ctx) error {
@@ -58,8 +77,56 @@ func deleteAccountOperator(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberSuccess(context, http.StatusOK, "success")
+	return utility.FiberSuccess(context, http.StatusOK, "ลบข้อมูลของช่างซ่อมสำเร็จ")
 }
+
+func ChangePasswordOperator(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	OwnerId, err := getOwnerId(context)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	changePasswordOwner := new(structure.ChangePasswordOperator)
+	err = context.BodyParser(changePasswordOwner)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = validateStruct(*changePasswordOwner)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.ChangePasswordOperator(OwnerId, *changePasswordOwner)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "เปลี่ยนรหัสผ่านสำเร็จ")
+}
+
+
+func ChangePasswordOwner(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	OwnerId, err := getOwnerId(context)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	changePasswordOwner := new(structure.ChangePasswordOwner)
+	err = context.BodyParser(changePasswordOwner)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = validateStruct(*changePasswordOwner)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.ChangePasswordOwner(OwnerId, *changePasswordOwner)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "เปลี่ยนรหัสผ่านสำเร็จ")
+}
+
+
+
 
 func getQrCodeOwnerById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)

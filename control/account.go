@@ -279,30 +279,30 @@ func (ctrl *APIControl) GetAccount(id int) (response structure.UserAccount, Erro
 	return
 }
 
-func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOwner, Error error) {
+func (ctrl *APIControl) GetAllAccountOwner(page *structure.SearchAccountOwner) (response structure.UserAccountOwnerWithPaginationResponse, Error error) {
 	var DataArray []structure.UserAccountOwner
-	res, err := ctrl.access.RDBMS.GetAllAccountOwner()
+	res, pagination, err := ctrl.access.RDBMS.GetAllAccountOwner(page.Page, page.Limit, page.Firstname, page.Lastname, page.Phonenumber, page.Lineid)
 	if err != nil {
 		Error = err
-		return
-	}
-	if len(res) == 0 {
-		response = DataArray
 		return
 	}
 	for _, data := range res {
 		id := int(data.ID)
 		UserAccountStructure := structure.UserAccountOwner{
 			Id:          id,
+			UserName:    data.Username,
 			FirstName:   data.FirstName,
 			LastName:    data.LastName,
 			PhoneNumber: data.PhoneNumber,
 			LineId:      data.LineId,
 			Role:        data.Role,
+			CreatedAt:   data.CreatedAt,
+			UpdatedAt:   data.UpdatedAt,
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
-	response = DataArray
+	response.Paginator = &pagination
+	response.Detail = DataArray
 	return
 }
 
@@ -332,15 +332,19 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner
 		id := int(data.ID)
 		UserAccountOperator := structure.Operators{
 			OperatorId:          id,
+			OperatorUserName:    data.Username,
 			OperatorFirstName:   data.FirstName,
 			OperatorLastName:    data.LastName,
 			OperatorPhoneNumber: data.PhoneNumber,
 			OperatorLineId:      data.LineId,
+			CreatedAt:           data.CreatedAt,
+			UpdatedAt:           data.UpdatedAt,
 		}
 		DataArray = append(DataArray, UserAccountOperator)
 	}
 	var UserAccountStructure = structure.GetSubOwner{
 		OwnerId:             ownerId,
+		OwnerUserName:       owner.Username,
 		OwnerFirstName:      owner.FirstName,
 		OwnerLastName:       owner.LastName,
 		OwnerPhoneNumber:    owner.PhoneNumber,
@@ -351,30 +355,38 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner
 	return
 }
 
-func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccountOperator, Error error) {
+func (ctrl *APIControl) GetAllAccountOperator(page *structure.SearchAccountOperator) (response structure.UserAccountOperatorWithPaginationResponse, Error error) {
 	var DataArray []structure.UserAccountOperator
-	res, err := ctrl.access.RDBMS.GetAllAccountOperator()
+	res, pagination, err := ctrl.access.RDBMS.GetAllAccountOperator(page.Page, page.Limit, page.Firstname, page.Lastname, page.Phonenumber, page.Lineid)
 	if err != nil {
 		Error = err
 		return
 	}
-	if len(res) == 0 {
-		response = DataArray
-		return
-	}
 	for _, data := range res {
 		id := int(data.ID)
+
+		owner, err := ctrl.access.RDBMS.GetAccount(int(data.SubOwnerId))
+		if err != nil {
+			Error = err
+			return
+		}
+
 		UserAccountStructure := structure.UserAccountOperator{
 			OperatorId:          id,
+			OperatorUserName:    data.Username,
 			OperatorFirstName:   data.FirstName,
 			OperatorLastName:    data.LastName,
 			OperatorPhoneNumber: data.PhoneNumber,
 			OperatorLineId:      data.LineId,
 			OwnerId:             data.SubOwnerId,
+			OwnerName:           owner.FirstName + " " + owner.LastName,
+			CreatedAt:           data.CreatedAt,
+			UpdatedAt:           data.UpdatedAt,
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
-	response = DataArray
+	response.Paginator = &pagination
+	response.Detail = DataArray
 	return
 }
 
@@ -404,16 +416,22 @@ func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetO
 	OwnerId := int(owner.ID)
 	response = structure.GetOwnerByOperator{
 		Operator: structure.Operator{
+			Id:         int(ops.SubOwnerId),
+			UserName:    ops.Username,
 			FirstName:   ops.FirstName,
 			LastName:    ops.LastName,
 			PhoneNumber: ops.PhoneNumber,
 			LineId:      ops.LineId,
+			CreatedAt:   ops.CreatedAt,
+			UpdatedAt:   ops.UpdatedAt,
 			Owner: structure.Owner{
 				OwnerId:     OwnerId,
 				FirstName:   owner.FirstName,
 				LastName:    owner.LastName,
 				PhoneNumber: owner.PhoneNumber,
 				LineId:      owner.LineId,
+				CreatedAt:   owner.CreatedAt,
+				UpdatedAt:   owner.UpdatedAt,
 			},
 		},
 	}

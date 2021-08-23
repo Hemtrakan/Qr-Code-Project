@@ -76,10 +76,11 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Get("getAccount", getAccount)
 	owner.Post("register_operator", registerOperatorOwner)
 
-	owner.Get("getSubOwner", getOperator) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
-	owner.Get("getAccountById/:id", getAccountById)
+	owner.Get("getOperator", getOperator) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
+	owner.Get("getOperatorById/:id", getOperatorById)
 	owner.Put("updateProfile/:id", updateProfile)
-	owner.Put("changePassword/:id", changePassword)
+	owner.Put("changePasswordOwner", ChangePasswordOwner)
+	owner.Put("changePasswordOperator", ChangePasswordOperator)
 	owner.Delete("deleteAccount/:id", deleteAccountOperator)
 
 	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
@@ -133,8 +134,10 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
 	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
 	admin.Get("getAllQrCodeByOwnerId/:id", getQrCodeById) // Id >>> OwnerId
-	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
+
+	admin.Post("insertDataQrCode",insertDataQrCode) // todo ยังไม่เสร็จ
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
+	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
 
 
 	//admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้

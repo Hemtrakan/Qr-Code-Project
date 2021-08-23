@@ -3,6 +3,7 @@ package rdbms
 import (
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/environment"
+	"qrcode/utility"
 	"sync"
 )
 
@@ -13,14 +14,15 @@ var (
 
 type FactoryInterface interface {
 	// Customer
-	GetAllAccountOwner() (response []rdbmsstructure.Account,Error error)
-	GetAllAccountOperator() (response []rdbmsstructure.Account,Error error)
+	GetAllAccountOwner(page *int,limit *int,Firstname , Lastname ,Phonenumber ,Lineid *string) (response []rdbmsstructure.Account,paginator utility.Paginator,Error error)
+	GetAllAccountOperator(page *int,limit *int,Firstname , Lastname ,Phonenumber ,Lineid *string) (response []rdbmsstructure.Account,paginator utility.Paginator,Error error)
 	GetAllAccountOperatorByOwnerID(OwnerId uint) (response []rdbmsstructure.Account,Error error)
 	GetSubOwner(OwnerId int) (response []rdbmsstructure.Account,Error error)
 	GetOwnerByIdOps(OperatorId int) (response rdbmsstructure.Account,Error error)
 	UpdateProfile(Account rdbmsstructure.Account) (Error error)
 	DeleteAccount(id uint) (Error error)
 	DeleteAccountByOwner(OwnerId uint,OperatorId int) (Error error)
+	GetOperatorById(OperatorId int ,OwnerId uint) (response rdbmsstructure.Account,Error error)
 
 	//  QRCode
 	GetDataQrCode(QrCodeUUID string) (response rdbmsstructure.QrCode,Error error)

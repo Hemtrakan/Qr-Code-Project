@@ -36,6 +36,8 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 	for _, res := range data {
 		resGetQrCode := structure.GetQrCode{
 			OwnerId:      res.OwnerId,
+			CreatedAt:    res.CreatedAt,
+			UpdatedAt:    res.UpdatedAt,
 			TemplateName: res.TemplateName,
 			QrCodeId:     res.QrCodeUUID.String(),
 			CodeName:     res.Code + "-" + res.Count,
@@ -61,6 +63,34 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		TemplateName: data.TemplateName,
 		CodeName:     data.Code + "-" + data.Count,
 	}
+	return
+}
+
+func (ctrl *APIControl) InsertDataQrCode(req *structure.UpdateDataQrCode) (response interface{} ,Error error)  {
+	data, err := ctrl.access.RDBMS.GetDataQrCode(req.QrCodeId)
+	if err != nil {
+		Error = errors.New("ไม่มี QrCode นี้อยู่ในระบบ")
+		return
+	}
+	if data.OwnerId != req.OwnerId {
+		Error = errors.New("เจ้าของ Qr-Code ไม่ถูกต้อง")
+		return
+	}
+	//DataQrCode := structure.GetDataQrCode{
+	//	QrCodeId:     data.QrCodeUUID.String(),
+	//	Info:         data.Info,
+	//	Ops:          data.Ops,
+	//	HistoryInfo:  data.HistoryInfo,
+	//	OwnerId:      int(data.OwnerId),
+	//	TemplateName: data.TemplateName,
+	//}
+
+	Check , err := utility.CheckStructureTemplate(req.TemplateName, req.Data.Info)
+	if err != nil {
+		Error = err
+		return
+	}
+	response = Check
 	return
 }
 
@@ -116,11 +146,6 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 		Error = err
 		return
 	}
-	err = json.Unmarshal(byteInfo, &structureInfo)
-	if err != nil {
-		Error = err
-		return
-	}
 	// สร้าง QR-Code
 	count, err := ctrl.access.RDBMS.CountCode(req.OwnerId, req.TemplateName, req.CodeName)
 	if err != nil {
@@ -137,10 +162,6 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 	if check.Code == req.CodeName {
 		counts = len(count)
 	}
-	//if req.CodeName == check.Code && req.TemplateName == check.TemplateName && req.OwnerId == check.OwnerId{
-	//	Error = errors.New("CodeName นี้มีอยู่ใน Template อื่นอยู่แล้ว")
-	//	return
-	//}
 
 	for i := 0 + 1; i <= req.Amount; i++ {
 		uuid, err := uuid2.NewV4()

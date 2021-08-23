@@ -1,13 +1,62 @@
 package control
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"qrcode/access/constant"
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/present/structure"
 	"qrcode/utility"
+	"regexp"
+	"strings"
+	"time"
 )
 
-func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOperator,OwnerId uint) (Error error) {
+func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOperator, OwnerId uint) (Error error) {
+	reqOperator.Username = strings.ToLower(reqOperator.Username)
+	reqOperator.Password = strings.Trim(reqOperator.Password, "\t \n")
+	reqOperator.Firstname = strings.Trim(reqOperator.Firstname, "\t \n")
+	reqOperator.Lastname = strings.Trim(reqOperator.Lastname, "\t \n")
+	reqOperator.Lineid = strings.Trim(reqOperator.Lineid, "\t \n")
+	reqOperator.Phonenumber = strings.Trim(reqOperator.Phonenumber, "\t \n")
+	user, err := regexp.MatchString("^[a-z0-9_-]{6,20}$", reqOperator.Username)
+	if !user {
+		return errors.New("username ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว และมีอักษรพิเศษได้แค่ _- เท่านั้น")
+	}
+	pass, err := regexp.MatchString("^[a-zA-Z0-9_!-]{6,20}$", reqOperator.Password)
+	if !pass {
+		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
+	}
+	err = validPassword(reqOperator.Password)
+	if err != nil {
+		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
+	}
+	if !(len(reqOperator.Firstname) <= 30) {
+		return errors.New("firstname ต้องไม่เกิน 30 ตัว")
+	}
+	if !(len(reqOperator.Lastname) <= 30) {
+		return errors.New("lastname ต้องไม่เกิน 30 ตัว")
+	}
+	if reqOperator.Firstname == "" {
+		return errors.New("firstname ต้องไม่ว่าง")
+	}
+	if reqOperator.Lastname == "" {
+		return errors.New("lastname ต้องไม่ว่าง")
+	}
+	Phonenumber, err := regexp.MatchString("^[0-9]{9,10}$", reqOperator.Phonenumber)
+	if !Phonenumber {
+		return errors.New("phonenumber ต้องไม่ต่ำกว่า 9 ตัว และ ไม่เกิน 10 ตัว ต้องมีแต่ตัวเลขเท่านั้น")
+	}
+	LineId, err := regexp.MatchString("^[a-z0-9._-]{1,20}$", reqOperator.Lineid)
+	if !LineId {
+		return errors.New("lineid ต้องไม่ต่ำกว่า 1 ตัว และ ไม่เกิน 20 ตัว ไม่สามารถใส่ตัวพิมพ์ใหญ่ได้และมีอักษรพิเศษได้แค่ ._- เท่านั้น")
+	}
+	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOperator.Username, reqOperator.Phonenumber, reqOperator.Lineid, 0)
+	if err != nil {
+		Error = err
+		return
+	}
+
 	hashPassword, err := utility.Hash(reqOperator.Password)
 	if err != nil {
 		return err
@@ -31,8 +80,33 @@ func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOpe
 	return
 }
 
-func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.UserAccountOperator,Error error) {
-	var DataArray []structure.UserAccountOperator
+func (ctrl *APIControl) GetOperatorById(OperatorId int, OwnerId uint) (response structure.UserAccount, Error error) {
+	_, err := ctrl.access.RDBMS.CheckAccountId(uint(OperatorId))
+	if err != nil {
+		Error = errors.New("ไม่มีช่างซ่อมคนนี้")
+		return
+	}
+	data, err := ctrl.access.RDBMS.GetOperatorById(OperatorId, OwnerId)
+	if err != nil {
+		Error = errors.New("ไม่มีช่างคนนี้")
+		return
+	}
+
+	id := data.ID
+	response = structure.UserAccount{
+		Id:          int(id),
+		FirstName:   data.FirstName,
+		LastName:    data.LastName,
+		PhoneNumber: data.PhoneNumber,
+		LineId:      data.LineId,
+		Role:        data.Role,
+		SubOwnerId:  int(data.SubOwnerId),
+	}
+	return
+}
+
+func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.Operators, Error error) {
+	var DataArray []structure.Operators
 	res, err := ctrl.access.RDBMS.GetAllAccountOperatorByOwnerID(OwnerId)
 	if err != nil {
 		Error = err
@@ -40,12 +114,15 @@ func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.UserAcco
 	}
 	for _, data := range res {
 		id := int(data.ID)
-		UserAccountStructure := structure.UserAccountOperator{
+		UserAccountStructure := structure.Operators{
 			OperatorId:          id,
+			OperatorUserName:    data.Username,
 			OperatorFirstName:   data.FirstName,
 			OperatorLastName:    data.LastName,
 			OperatorPhoneNumber: data.PhoneNumber,
 			OperatorLineId:      data.LineId,
+			CreatedAt:           data.CreatedAt,
+			UpdatedAt:           data.UpdatedAt,
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
@@ -53,10 +130,82 @@ func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.UserAcco
 	return
 }
 
-func (ctrl *APIControl) DeleteAccountOperator(OwnerId uint,OperatorId int) (Error error){
-	err := ctrl.access.RDBMS.DeleteAccountByOwner(OwnerId,OperatorId)
+func (ctrl *APIControl) DeleteAccountOperator(OwnerId uint, OperatorId int) (Error error) {
+	err := ctrl.access.RDBMS.DeleteAccountByOwner(OwnerId, OperatorId)
 	if err != nil {
 		Error = err
+		return
+	}
+	return
+}
+
+func (ctrl *APIControl) ChangePasswordOperator(OwnerId uint, password structure.ChangePasswordOperator) (Error error) {
+	pass, err := regexp.MatchString("^[a-zA-Z0-9_!-]{6,20}$", password.NewPassword)
+	if !pass {
+		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
+	}
+	err = validPassword(password.NewPassword)
+	if err != nil {
+		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
+	}
+	_, err = ctrl.access.RDBMS.GetOperatorById(password.OperatorId, OwnerId)
+	if err != nil {
+		Error = errors.New("เจ้าของคนนี้ไม่มีสิทธิ์เปลี่ยนรหัสผ่านช่างซ่อม")
+	}
+	changePassword, err := utility.Hash(password.NewPassword)
+	if err != nil {
+		Error = errors.New("ไม่สามารถเปลี่ยนรหัสผ่านได้ ติดต่อผู้ดูแลระบบ")
+		return
+	}
+	change := rdbmsstructure.Account{
+		Model: gorm.Model{
+			ID:        uint(password.OperatorId),
+			UpdatedAt: time.Now(),
+		},
+		Password: string(changePassword),
+	}
+	err = ctrl.access.RDBMS.UpdateProfile(change)
+	if err != nil {
+		Error = errors.New("ไม่สามารถเปลี่ยนรหัสผ่านได้ ติดต่อผู้ดูแลระบบ")
+		return
+	}
+	return
+}
+
+func (ctrl *APIControl) ChangePasswordOwner(OwnerId uint, password structure.ChangePasswordOwner) (Error error) {
+	_, err := ctrl.access.RDBMS.CheckAccountId(OwnerId)
+	if err != nil {
+		Error = errors.New("record not found")
+		return
+	}
+	pass, err := regexp.MatchString("^[a-zA-Z0-9_!-]{6,20}$", password.NewPassword)
+	if !pass {
+		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
+	}
+	err = validPassword(password.NewPassword)
+	if err != nil {
+		return errors.New("password ต้องไม่ต่ำกว่า 6 ตัว และ ไม่เกิน 20 ตัว ต้องมีตัวพิมพ์ใหญ่และตัวพิมพ์เล็กตัวเลขและมีอักษรพิเศษได้แค่ !_- เท่านั้น")
+	}
+	data, err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
+	err = utility.VerifyPassword(data.Password, password.OldPassword)
+	if err != nil {
+		return errors.New("รหัสผ่านเก่าไม่ถูกต้อง")
+	}
+	changePassword, err := utility.Hash(password.NewPassword)
+	if err != nil {
+		Error = errors.New("ไม่สามารถเปลี่ยนรหัสผ่านได้ ติดต่อผู้ดูแลระบบ")
+		return
+	}
+	change := rdbmsstructure.Account{
+		Model: gorm.Model{
+			ID:        OwnerId,
+			UpdatedAt: time.Now(),
+		},
+		Password: string(changePassword),
+	}
+	err = ctrl.access.RDBMS.UpdateProfile(change)
+	if err != nil {
+		Error = errors.New("ไม่สามารถเปลี่ยนรหัสผ่านได้ ติดต่อผู้ดูแลระบบ")
 		return
 	}
 	return

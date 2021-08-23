@@ -113,6 +113,24 @@ func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 	return context.Download(fileZip)
 }
 
+func insertDataQrCode(context *fiber.Ctx) error  {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var DataQrCode = new(structure.UpdateDataQrCode)
+	if err := context.BodyParser(DataQrCode); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,"ส่งชนิดของข้อมูลมาผิด")
+	}
+	err := validateStruct(*DataQrCode)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	res , err := api.InsertDataQrCode(DataQrCode)
+	if err != nil {
+		return utility.FiberError(context,http.StatusBadRequest,err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
+	//return utility.FiberSuccess(context,http.StatusOK, "บันทึกข้อมูลสำเร็จ")
+}
+
 func deleteQrCode(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var QrCode = new(structure.DelQrCode)
