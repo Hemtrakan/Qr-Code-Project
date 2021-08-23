@@ -8,7 +8,6 @@ import (
 	"qrcode/access/constant"
 	rdbmsstructure "qrcode/access/rdbms/structure"
 	"qrcode/environment"
-	"qrcode/utility"
 )
 
 type GORMFactory struct {
@@ -133,47 +132,47 @@ func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account, 
 	return
 }
 
-func (factory GORMFactory) GetAllAccountOwner(page *int, limit *int, Firstname, Lastname, Phonenumber, Lineid *string) (response []rdbmsstructure.Account, paginator utility.Paginator, Error error) {
+func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Account,  Error error) {
 	var data []rdbmsstructure.Account
-	db := factory.client.Where("role = ?", constant.Owner)
-	if Firstname != nil {
-		db = db.Where("first_name like ? ", fmt.Sprintf("%s", "%"+*Firstname+"%"))
-	}
-	if Lastname != nil {
-		db = db.Where("last_name like ?", fmt.Sprintf("%s", "%"+*Lastname+"%"))
-	}
-	if Phonenumber != nil {
-		db = db.Where("phone_number like ?", fmt.Sprintf("%s", "%"+*Phonenumber+"%"))
-	}
-	if Lineid != nil {
-		db = db.Where("line_id like ?", fmt.Sprintf("%s", "%"+*Lineid+"%"))
-	}
-
-	pagination := utility.Paging(&utility.Param{
-		DB:      db,
-		Page:    *page,
-		Limit:   *limit,
-		OrderBy: []string{"created_at asc"},
-	}, &data)
-	paginator = *pagination
-
-	if db.Error != nil {
-		Error = db.Error
-		return
-	}
-	response = data
-
-	//err := factory.client.Where("role = ?", constant.Owner).Find(&data).Error
-	//if err != nil {
-	//	if !errors.Is(err, gorm.ErrRecordNotFound) {
-	//		Error = err
-	//	} else {
-	//		Error = errors.New("record not found")
-	//		return
-	//	}
+	//db := factory.client.Where("role = ?", constant.Owner)
+	//if Firstname != nil {
+	//	db = db.Where("first_name like ? ", fmt.Sprintf("%s", "%"+*Firstname+"%"))
+	//}
+	//if Lastname != nil {
+	//	db = db.Where("last_name like ?", fmt.Sprintf("%s", "%"+*Lastname+"%"))
+	//}
+	//if Phonenumber != nil {
+	//	db = db.Where("phone_number like ?", fmt.Sprintf("%s", "%"+*Phonenumber+"%"))
+	//}
+	//if Lineid != nil {
+	//	db = db.Where("line_id like ?", fmt.Sprintf("%s", "%"+*Lineid+"%"))
+	//}
+	//
+	//pagination := utility.Paging(&utility.Param{
+	//	DB:      db,
+	//	Page:    *page,
+	//	Limit:   *limit,
+	//	OrderBy: []string{"created_at asc"},
+	//}, &data)
+	//paginator = *pagination
+	//
+	//if db.Error != nil {
+	//	Error = db.Error
 	//	return
 	//}
 	//response = data
+
+	err := factory.client.Where("role = ?", constant.Owner).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
 	return
 }
 
@@ -193,35 +192,46 @@ func (factory GORMFactory) GetAllAccountOperatorByOwnerID(OwnerId uint) (respons
 	return
 }
 
-func (factory GORMFactory) GetAllAccountOperator(page *int, limit *int, Firstname, Lastname, Phonenumber, Lineid *string) (response []rdbmsstructure.Account, paginator utility.Paginator, Error error) {
+func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Account,  Error error) {
 	var data []rdbmsstructure.Account
-	db := factory.client.Where("role = ?", constant.Operator)
-	if Firstname != nil {
-		db = db.Where("first_name like ? ", fmt.Sprintf("%s", "%"+*Firstname+"%"))
-	}
-	if Lastname != nil {
-		db = db.Where("last_name like ?", fmt.Sprintf("%s", "%"+*Lastname+"%"))
-	}
-	if Phonenumber != nil {
-		db = db.Where("phone_number like ?", fmt.Sprintf("%s", "%"+*Phonenumber+"%"))
-	}
-	if Lineid != nil {
-		db = db.Where("line_id like ?", fmt.Sprintf("%s", "%"+*Lineid+"%"))
-	}
-
-	pagination := utility.Paging(&utility.Param{
-		DB:      db,
-		Page:    *page,
-		Limit:   *limit,
-		OrderBy: []string{"created_at asc"},
-	}, &data)
-	paginator = *pagination
-
-	if db.Error != nil {
-		Error = db.Error
+	err := factory.client.Where("role = ?", constant.Operator).Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
 		return
 	}
 	response = data
+	//db := factory.client.Where("role = ?", constant.Operator)
+	//if Firstname != nil {
+	//	db = db.Where("first_name like ? ", fmt.Sprintf("%s", "%"+*Firstname+"%"))
+	//}
+	//if Lastname != nil {
+	//	db = db.Where("last_name like ?", fmt.Sprintf("%s", "%"+*Lastname+"%"))
+	//}
+	//if Phonenumber != nil {
+	//	db = db.Where("phone_number like ?", fmt.Sprintf("%s", "%"+*Phonenumber+"%"))
+	//}
+	//if Lineid != nil {
+	//	db = db.Where("line_id like ?", fmt.Sprintf("%s", "%"+*Lineid+"%"))
+	//}
+	//
+	//pagination := utility.Paging(&utility.Param{
+	//	DB:      db,
+	//	Page:    *page,
+	//	Limit:   *limit,
+	//	OrderBy: []string{"created_at asc"},
+	//}, &data)
+	//paginator = *pagination
+	//
+	//if db.Error != nil {
+	//	Error = db.Error
+	//	return
+	//}
+	//response = data
 	return
 }
 

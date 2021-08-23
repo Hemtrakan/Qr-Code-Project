@@ -104,11 +104,11 @@ func getAccount(context *fiber.Ctx) error {
 func getAllAccountOwner(context *fiber.Ctx)error  {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 
-	searchAccountOwner := new(structure.SearchAccountOwner)
-	if err := context.QueryParser(searchAccountOwner); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	responses, err := api.GetAllAccountOwner(searchAccountOwner)
+	//searchAccountOwner := new(structure.SearchAccountOwner)
+	//if err := context.QueryParser(searchAccountOwner); err != nil {
+	//	return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	//}
+	responses, err := api.GetAllAccountOwner()
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -131,11 +131,11 @@ func getSubOwner(context *fiber.Ctx) error {
 
 func getAllAccountOperator(context *fiber.Ctx)error  {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	searchAccountOperator := new(structure.SearchAccountOperator)
-	if err := context.QueryParser(searchAccountOperator); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	responses, err := api.GetAllAccountOperator(searchAccountOperator)
+	//searchAccountOperator := new(structure.SearchAccountOperator)
+	//if err := context.QueryParser(searchAccountOperator); err != nil {
+	//	return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	//}
+	responses, err := api.GetAllAccountOperator()
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}

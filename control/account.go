@@ -279,9 +279,9 @@ func (ctrl *APIControl) GetAccount(id int) (response structure.UserAccount, Erro
 	return
 }
 
-func (ctrl *APIControl) GetAllAccountOwner(page *structure.SearchAccountOwner) (response structure.UserAccountOwnerWithPaginationResponse, Error error) {
+func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOwner, Error error) {
 	var DataArray []structure.UserAccountOwner
-	res, pagination, err := ctrl.access.RDBMS.GetAllAccountOwner(page.Page, page.Limit, page.Firstname, page.Lastname, page.Phonenumber, page.Lineid)
+	res, err := ctrl.access.RDBMS.GetAllAccountOwner()
 	if err != nil {
 		Error = err
 		return
@@ -301,8 +301,8 @@ func (ctrl *APIControl) GetAllAccountOwner(page *structure.SearchAccountOwner) (
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
-	response.Paginator = &pagination
-	response.Detail = DataArray
+	//response.Paginator = &pagination
+	response = DataArray
 	return
 }
 
@@ -355,9 +355,9 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner
 	return
 }
 
-func (ctrl *APIControl) GetAllAccountOperator(page *structure.SearchAccountOperator) (response structure.UserAccountOperatorWithPaginationResponse, Error error) {
+func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccountOperator, Error error) {
 	var DataArray []structure.UserAccountOperator
-	res, pagination, err := ctrl.access.RDBMS.GetAllAccountOperator(page.Page, page.Limit, page.Firstname, page.Lastname, page.Phonenumber, page.Lineid)
+	res, err := ctrl.access.RDBMS.GetAllAccountOperator()
 	if err != nil {
 		Error = err
 		return
@@ -385,8 +385,9 @@ func (ctrl *APIControl) GetAllAccountOperator(page *structure.SearchAccountOpera
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
-	response.Paginator = &pagination
-	response.Detail = DataArray
+	//response.Paginator = &pagination
+	//response.Detail = DataArray
+	response = DataArray
 	return
 }
 
