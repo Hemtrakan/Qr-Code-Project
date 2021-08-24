@@ -52,6 +52,7 @@ var CategoryFileData = []CategoryFile{
 type QrCode string
 
 const (
+	SaveFileTextLocation QrCode = "filetext"
 	SaveFileLocationQrCode QrCode = "fileqrcode"
 	SaveFileLocationZipFile QrCode = "zipfile"
 )

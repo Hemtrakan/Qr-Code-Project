@@ -5,7 +5,7 @@ package structure
 //	"time"
 //)
 //
-//type Template struct {
+//type template struct {
 //	OwnerId      int         `json:"owner_id"`
 //	TemplateName string      `json:"template_name"`
 //	QrCodeTypeId string      `json:"qr_code_type_id"`

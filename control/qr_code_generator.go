@@ -7,6 +7,8 @@ import (
 	uuid2 "github.com/gofrs/uuid"
 	"github.com/yeqown/go-qrcode"
 	"gorm.io/datatypes"
+	"image"
+	"image/png"
 	"io"
 	"os"
 	"qrcode/access/constant"
@@ -16,6 +18,36 @@ import (
 	"strconv"
 	"strings"
 )
+
+func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error error) {
+	var getQrCodeArray []structure.GetQrCode
+
+	data, err := ctrl.access.RDBMS.GetAllQrCode()
+	if err != nil {
+		Error = err
+		return
+	}
+	for _, res := range data {
+		dataOwner,err:= ctrl.GetAccount(int(res.OwnerId))
+		if err != nil {
+			Error = err
+			return
+		}
+		resGetQrCode := structure.GetQrCode{
+			OwnerId:      res.OwnerId,
+			OwnerName:    dataOwner.FirstName + " " + dataOwner.LastName,
+			CreatedAt:    res.CreatedAt,
+			UpdatedAt:    res.UpdatedAt,
+			TemplateName: res.TemplateName,
+			QrCodeId:     res.QrCodeUUID.String(),
+			CodeName:     res.Code + "-" + res.Count,
+		}
+		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
+	}
+	response = getQrCodeArray
+	return
+}
+
 
 func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
 	var getQrCodeArray []structure.GetQrCode
@@ -54,43 +86,28 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		Error = errors.New("ไม่มี QrCode นี้อยู่ในระบบ")
 		return
 	}
+	var HistoryArray []structure.GetHistory
+	History, err := ctrl.access.RDBMS.GetHistory(QrCodeId)
+
+	for _, h := range History {
+		dataHistory := structure.GetHistory{
+			HistoryInfo: h.HistoryInfo,
+			UserId:      h.UserId,
+			UpdatedAt:   h.UpdatedAt,
+		}
+		HistoryArray = append(HistoryArray, dataHistory)
+	}
+
 	response = structure.GetDataQrCode{
 		QrCodeId:     data.QrCodeUUID.String(),
 		Info:         data.Info,
 		Ops:          data.Ops,
-		HistoryInfo:  data.HistoryInfo,
 		OwnerId:      int(data.OwnerId),
 		TemplateName: data.TemplateName,
 		CodeName:     data.Code + "-" + data.Count,
+		HistoryInfo:  HistoryArray,
 	}
-	return
-}
 
-func (ctrl *APIControl) InsertDataQrCode(req *structure.UpdateDataQrCode) (response interface{} ,Error error)  {
-	data, err := ctrl.access.RDBMS.GetDataQrCode(req.QrCodeId)
-	if err != nil {
-		Error = errors.New("ไม่มี QrCode นี้อยู่ในระบบ")
-		return
-	}
-	if data.OwnerId != req.OwnerId {
-		Error = errors.New("เจ้าของ Qr-Code ไม่ถูกต้อง")
-		return
-	}
-	//DataQrCode := structure.GetDataQrCode{
-	//	QrCodeId:     data.QrCodeUUID.String(),
-	//	Info:         data.Info,
-	//	Ops:          data.Ops,
-	//	HistoryInfo:  data.HistoryInfo,
-	//	OwnerId:      int(data.OwnerId),
-	//	TemplateName: data.TemplateName,
-	//}
-
-	Check , err := utility.CheckStructureTemplate(req.TemplateName, req.Data.Info)
-	if err != nil {
-		Error = err
-		return
-	}
-	response = Check
 	return
 }
 
@@ -113,17 +130,16 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	return
 }
 
-func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
+func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (file string, Error error) {
 	req.CodeName = strings.Trim(req.CodeName, "\t \n")
 	req.TemplateName = strings.Trim(req.TemplateName, "\t \n")
-	if req.TemplateName == "" {
-		return errors.New("TemplateName ต้องไม่ว่าง")
-	}
 	if !(len(req.CodeName) <= 20) {
-		return errors.New("CodeName ต้องไม่เกิน 20 ตัว")
+		Error = errors.New("CodeName ต้องไม่เกิน 20 ตัว")
+		return
 	}
 	if req.CodeName == "" {
-		return errors.New("CodeName ต้องไม่ว่าง")
+		Error = errors.New("CodeName ต้องไม่ว่าง")
+		return
 	}
 
 	ownerId := int(req.OwnerId)
@@ -163,6 +179,7 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 		counts = len(count)
 	}
 
+	var arrayString []string
 	for i := 0 + 1; i <= req.Amount; i++ {
 		uuid, err := uuid2.NewV4()
 		if err != nil {
@@ -176,7 +193,6 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 			TemplateName: req.TemplateName,
 			Info:         datatypes.JSON(byteInfo),
 			Ops:          datatypes.JSON(""),
-			HistoryInfo:  datatypes.JSON(""),
 			QrCodeUUID:   uuid,
 			Code:         req.CodeName,
 			Count:        number,
@@ -187,7 +203,17 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 			Error = err
 			return
 		}
+		arrayString = append(arrayString, uuid.String())
 	}
+
+	fileZip := structure.FileZip{
+		OwnerId:  ownerId,
+		FileZip:  "zip",
+		QrCodeId: arrayString,
+	}
+
+	zip, err := ctrl.AddFileZipById(fileZip)
+	file = zip
 	return
 }
 
@@ -212,6 +238,7 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		Error = errors.New("ผู้ใช้คนนี้ไม่มีสิทธิ์ในการสร้าง QR-Code")
 		return
 	}
+
 	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
 	if err != nil {
 		Error = err
@@ -219,6 +246,7 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 	}
 	err = os.Mkdir(string(constant.SaveFileLocationQrCode), 0755)
 	err = os.Mkdir(string(constant.SaveFileLocationZipFile), 0755)
+	err = os.Mkdir(string(constant.SaveFileTextLocation), 0755)
 	if err != nil {
 		Error = err
 		return
@@ -237,16 +265,41 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 				Error = err
 				return
 			}
+			err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
+			if err != nil {
+				Error = err
+				return
+			}
 			return
 		}
+
 		filename := data.Code + "-" + data.Count
-		qrc, err := qrcode.New(constant.Http + "/" + data.QrCodeUUID.String())
+		text := string(constant.SaveFileTextLocation) + "/" + filename + ".PNG"
+		f, err := os.Create(text)
 		if err != nil {
 			Error = err
 			return
 		}
-		path := string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
+		defer f.Close()
+		img := image.NewRGBA(image.Rect(0, 0, 180, 180))
+		utility.AddLabel(img, 50, 50, filename)
+		if err := png.Encode(f, img); err != nil {
+			panic(err)
+		}
+		// gen QrCode
+
+		//logo := "./logo.jpeg"
+		//col := color.RGBA{150, 230, 148, 255}
+		qrc, err := qrcode.New(constant.Http+"/"+data.QrCodeUUID.String(),
+			qrcode.WithLogoImageFilePNG(text),
+			//qrcode.WithBgColor(col),
+		)
+		if err != nil {
+			Error = err
+			return
+		}
 		// save file
+		path := string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
 		if err = qrc.Save(path); err != nil {
 			Error = err
 			return
@@ -262,6 +315,11 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		return
 	}
 	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
+	if err != nil {
+		Error = err
+		return
+	}
+	err = os.RemoveAll(string(constant.SaveFileTextLocation))
 	if err != nil {
 		Error = err
 		return
@@ -303,7 +361,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		return
 	}
 	if len(data) == 0 {
-		Error = errors.New("ยังไม่สร้าง Qr-Code ใน Template ที่ถูกเลือก")
+		Error = errors.New("ยังไม่สร้าง Qr-Code ใน template ที่ถูกเลือก")
 		return
 	}
 	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))

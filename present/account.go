@@ -20,7 +20,7 @@ func registerOwner(context *fiber.Ctx) error {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 
-	err = validateStruct(*owner)
+	err = ValidateStruct(*owner)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -39,7 +39,7 @@ func registerOperator(context *fiber.Ctx) error {
 	if err != nil{
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*operator)
+	err = ValidateStruct(*operator)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -57,7 +57,7 @@ func login(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*Login)
+	err = ValidateStruct(*Login)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -76,7 +76,7 @@ func LoginAdmin(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*Login)
+	err = ValidateStruct(*Login)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -177,7 +177,7 @@ func updateProfile(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*Account)
+	err = ValidateStruct(*Account)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -200,7 +200,7 @@ func changePassword(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*ChangePassword)
+	err = ValidateStruct(*ChangePassword)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}

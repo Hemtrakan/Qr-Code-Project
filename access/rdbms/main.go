@@ -30,10 +30,17 @@ type FactoryInterface interface {
 	CheckCode(OwnerId uint,templateName ,Code string) (response rdbmsstructure.QrCode,Error error)
 	CountCode(OwnerId uint,templateName ,Code string) (response []rdbmsstructure.QrCode,Error error)
 	GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode,Error error)
+	GetAllQrCode() (response []rdbmsstructure.QrCode,Error error)
 	GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (response rdbmsstructure.QrCode,Error error)
 	UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 	UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error error)
 	DeleteQrCode(QrCodeUUID string) (Error error)
+
+
+	// Template
+	GetHistory(QrCodeUUID string) (response []rdbmsstructure.History,Error error)
+	InsertQrCode(QrCodeUUID string,QrCode rdbmsstructure.QrCode) (Error error)
+	InsertHistory(History rdbmsstructure.History) (Error error)
 
 	// Acconut
 	Register(Account rdbmsstructure.Account) (Error error)

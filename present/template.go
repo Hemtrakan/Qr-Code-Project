@@ -1,17 +1,10 @@
 package present
 
-import (
-	"github.com/gofiber/fiber/v2"
-	"net/http"
-	"qrcode/access/constant"
-	"qrcode/control"
-)
-
-func getTemplate(context *fiber.Ctx) error {
-	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	res := api.GetTemplate()
-	return context.Status(http.StatusOK).JSON(res)
-}
+//func getTemplate(context *fiber.Ctx) error {
+//	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+//	res := api.GetTemplate()
+//	return context.Status(http.StatusOK).JSON(res)
+//}
 
 //func getByIdTeamPage(context *fiber.Ctx) error {
 //	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
@@ -66,7 +59,7 @@ func getTemplate(context *fiber.Ctx) error {
 //
 //func insertTeamPage(context *fiber.Ctx) error {
 //	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-//	TeamPage := new([]structure.Template)
+//	TeamPage := new([]structure.template)
 //	err := context.BodyParser(TeamPage)
 //	if err != nil {
 //		return utility.FiberError(context, http.StatusBadRequest, err.Error())
@@ -80,7 +73,7 @@ func getTemplate(context *fiber.Ctx) error {
 //
 //func updateTeamPage(context *fiber.Ctx) error {
 //	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-//	TeamPage := new(structure.Template)
+//	TeamPage := new(structure.template)
 //	err := context.BodyParser(TeamPage)
 //	if err != nil {
 //		return utility.FiberError(context, http.StatusBadRequest, err.Error())

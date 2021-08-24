@@ -1,15 +1,31 @@
 package present
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
+	"image"
+	"image/color"
+	"image/png"
 	"net/http"
+	"os"
 	"qrcode/access/constant"
 	"qrcode/control"
 	"qrcode/present/structure"
 	"qrcode/utility"
 	"strconv"
 )
+
+
+func getTemplate(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	res := api.GetTemplate()
+	return context.Status(http.StatusOK).JSON(res)
+}
+
 
 func getQrCodeById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
@@ -19,6 +35,15 @@ func getQrCodeById(context *fiber.Ctx) error {
 		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
 	}
 	res, err := api.GetQrCodeById(ownerId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+	}
+	return context.JSON(res)
+}
+
+func getAllQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	res, err := api.GetAllQrCode()
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest,err.Error())
 	}
@@ -68,15 +93,16 @@ func createQrCode(context *fiber.Ctx) error {
 	if err := context.BodyParser(files); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
-	err := validateStruct(*files)
+	err := ValidateStruct(*files)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = api.CreateQrCode(*files)
+	fileZip,err := api.CreateQrCode(*files)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberError(context, http.StatusOK, "สร้าง QrCode สำเร็จ")
+	return context.Download(fileZip)
+	//return utility.FiberError(context, http.StatusOK, "สร้าง QrCode สำเร็จ")
 }
 
 func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
@@ -85,7 +111,7 @@ func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
 	if err := context.BodyParser(data); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest,"ส่งชนิดของข้อมูลมาผิด")
 	}
-	err := validateStruct(*data)
+	err := ValidateStruct(*data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -102,7 +128,7 @@ func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 	if err := context.BodyParser(data); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
-	err := validateStruct(*data)
+	err := ValidateStruct(*data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -113,31 +139,13 @@ func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 	return context.Download(fileZip)
 }
 
-func insertDataQrCode(context *fiber.Ctx) error  {
-	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	var DataQrCode = new(structure.UpdateDataQrCode)
-	if err := context.BodyParser(DataQrCode); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,"ส่งชนิดของข้อมูลมาผิด")
-	}
-	err := validateStruct(*DataQrCode)
-	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	res , err := api.InsertDataQrCode(DataQrCode)
-	if err != nil {
-		return utility.FiberError(context,http.StatusBadRequest,err.Error())
-	}
-	return context.Status(http.StatusOK).JSON(res)
-	//return utility.FiberSuccess(context,http.StatusOK, "บันทึกข้อมูลสำเร็จ")
-}
-
 func deleteQrCode(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var QrCode = new(structure.DelQrCode)
 	if err := context.BodyParser(QrCode); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
-	err := validateStruct(*QrCode)
+	err := ValidateStruct(*QrCode)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -146,6 +154,30 @@ func deleteQrCode(context *fiber.Ctx) error {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberSuccess(context, http.StatusOK, "ลบ QrCode สำเร็จ")
+}
+
+func Test(context *fiber.Ctx) error {
+	path := string(constant.SaveFileLocationQrCode) + "/" + "computer-1.PNG"
+	f, err := os.Create("path.PNG")
+	if err != nil {
+		// Handle error
+	}
+	defer f.Close()
+	img := image.NewRGBA(image.Rect(0, 0, 200, 200))
+	col := color.RGBA{68, 255, 236, 255}
+	point := fixed.Point26_6{fixed.Int26_6(200 * 64), fixed.Int26_6(200 * 64)}
+	d := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(col),
+		Face: basicfont.Face7x13,
+		Dot:  point,
+	}
+	d.DrawString("computer-1")
+	if err := png.Encode(f, img); err != nil {
+		fmt.Println("1")
+		panic(err)
+	}
+	return context.Download(path)
 }
 
 //func genQrCodeByName(context *fiber.Ctx) error {

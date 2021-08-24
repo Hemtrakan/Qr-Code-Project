@@ -26,7 +26,7 @@ func registerOperatorOwner(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*operator)
+	err = ValidateStruct(*operator)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -91,7 +91,7 @@ func ChangePasswordOperator(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*changePasswordOwner)
+	err = ValidateStruct(*changePasswordOwner)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -114,7 +114,7 @@ func ChangePasswordOwner(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = validateStruct(*changePasswordOwner)
+	err = ValidateStruct(*changePasswordOwner)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}

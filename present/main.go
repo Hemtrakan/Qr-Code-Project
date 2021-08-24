@@ -44,12 +44,12 @@ func APICreate(ctrl *control.APIControl) {
 	})
 
 	api := app.Group("/api")
-	api.Post("admin",admin) // todo สำหรับ สมัคร admin เท่านั้น
-
+	api.Post("admin", admin) // todo สำหรับ สมัคร admin เท่านั้น
+	api.Get("testqrcode",Test)
 
 	qr := app.Group("/qr")
-	qr.Post("/:id",getDataQrCode) //  Id >>> QrCodeUUId
-	qr.Post("getDataQrCodeJson/:id",getDataQrCodeJson) //  Id >>> QrCodeUUId
+	qr.Post("/:id", getDataQrCode)                      //  Id >>> QrCodeUUId
+	qr.Post("getDataQrCodeJson/:id", getDataQrCodeJson) //  Id >>> QrCodeUUId
 
 	// -- Todo Owner
 	owner := app.Group("/owner")
@@ -85,11 +85,6 @@ func APICreate(ctrl *control.APIControl) {
 
 	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
 
-
-
-
-
-
 	// -- Todo Admin
 	admin := app.Group("/admin")
 	admin.Post("login", LoginAdmin)
@@ -119,42 +114,36 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getAllAccountOwner", getAllAccountOwner)
 	admin.Get("getSubOwner/:id", getSubOwner) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
 	admin.Get("getAllAccountOperator", getAllAccountOperator)
-	admin.Get("getOwnerByIdOps/:id",getOwnerByIdOps) // todo ดูข้อมูล Owner ById Ops ยังต้องแก้ SQL ยังไม่ได้ join
+	admin.Get("getOwnerByIdOps/:id", getOwnerByIdOps) // todo ดูข้อมูล Owner ById Ops ยังต้องแก้ SQL ยังไม่ได้ join
 	admin.Get("getAccountById/:id", getAccountById)
 	admin.Put("updateProfile/:id", updateProfile)
 	admin.Put("changePassword/:id", changePassword)
 	admin.Delete("deleteAccount/:id", deleteAccount)
 
-	// -- TeamPage
-	admin.Get("getTemplate", getTemplate)
-
 	// -- createQrCode
-	admin.Get("getDateQrCodeById/:id",getDataQrCode)
+	admin.Get("getDateQrCodeById/:id", getDataQrCode)
 	admin.Post("createQrCode", createQrCode)
 	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
 	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
 	admin.Get("getAllQrCodeByOwnerId/:id", getQrCodeById) // Id >>> OwnerId
+	admin.Get("getAllQrCode",getAllQrCode)
 
-	admin.Post("insertDataQrCode",insertDataQrCode) // todo ยังไม่เสร็จ
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
 
+	// -- TeamPage
+	admin.Get("getTemplate", getTemplate)
 
-	//admin.Get("getAllTeamPage", getAllTeamPage) // todo ส่วนของ Owner Admin สามารถสร้างเพื่อทดสอบได้
-	//admin.Get("getAllTeamPageById/:id", getAllTeamPageById)
-	//admin.Post("insertTeamPage", insertTeamPage)
-	//admin.Put("updateTeamPage/:id", updateTeamPage)
-	//admin.Delete("deleteTeamPage/:id", deleteTeamPage)
-
-	// -- File
-	admin.Post("upload_file", uploadFile)
-	admin.Get("get_url_file", getUrlFile)
+	// -- TeamPage Qr Computer
+	com := admin.Group("/computer")
+	com.Post("/:id", Insert) // สำหรับเพิ่มครั้งแรก
+	com.Put("/:id", UpData)  // สำหรับแก้ไขข้อมูล
 
 	_ = app.Listen(":8000")
 
 }
 
-func validateStruct(dataStruct interface{}) error {
+func ValidateStruct(dataStruct interface{}) error {
 	validate := validator.New()
 	err := validate.Struct(dataStruct)
 	if err != nil {

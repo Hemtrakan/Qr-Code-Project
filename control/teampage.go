@@ -17,6 +17,7 @@ func (ctrl *APIControl) GetTemplate() templates2.Templatesdata {
 	return arrTemplates
 }
 
+
 //
 //func (ctrl *APIControl) GetHtml(id string) (URL string, Error error) {
 //	client := resty.New()
@@ -74,7 +75,7 @@ func (ctrl *APIControl) GetTemplate() templates2.Templatesdata {
 //	return
 //}
 
-//func (ctrl *APIControl) InsertTeamPage(reqTeamPage *[]structure.Template) (Error error) {
+//func (ctrl *APIControl) InsertTeamPage(reqTeamPage *[]structure.template) (Error error) {
 //	//for index, req := range *reqTeamPage {
 //	//	uuid, err := uuid.NewV4()
 //	//	if err != nil {
@@ -128,7 +129,7 @@ func (ctrl *APIControl) GetTemplate() templates2.Templatesdata {
 //	return
 //}
 
-//func (ctrl *APIControl) UpdateTeamPage(teamPageId structure.GetByIdTeamPage, reqTeamPage *structure.Template) (Error error) {
+//func (ctrl *APIControl) UpdateTeamPage(teamPageId structure.GetByIdTeamPage, reqTeamPage *structure.template) (Error error) {
 //	//data, err := ctrl.access.RDBMS.GetByIdTeamPage(teamPageId.TeamPageId)
 //	//file, _ := json.MarshalIndent(reqTeamPage, "", " ")
 //	//dataLog, err := ctrl.access.RDBMS.GetByIdLogTeamPage(teamPageId.Id)
@@ -200,7 +201,7 @@ func (ctrl *APIControl) GetTemplate() templates2.Templatesdata {
 //	return nil
 //}
 //
-//func (ctrl *APIControl) updateTeamPage(TeamPage rdbmsstructure.Template) error {
+//func (ctrl *APIControl) updateTeamPage(TeamPage rdbmsstructure.template) error {
 //	err := ctrl.access.RDBMS.UpdateTeamPage(TeamPage)
 //	if err != nil {
 //		return err

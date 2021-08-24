@@ -18,22 +18,29 @@ type FileZip struct {
 }
 
 type GetQrCode struct {
-	OwnerId      uint      `json:"owner_id"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	TemplateName string    `json:"template_name"`
-	QrCodeId     string    `json:"qr_code_id"`
-	CodeName     string    `json:"code_name"`
+	OwnerId       uint      `json:"owner_id"`
+	OwnerName     string    `json:"owner_name"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	TemplateName  string    `json:"template_name"`
+	QrCodeId      string    `json:"qr_code_id"`
+	CodeName      string    `json:"code_name"`
 }
 
 type GetDataQrCode struct {
 	QrCodeId     string         `json:"qr_code_id"`
 	Info         datatypes.JSON `json:"info"`
 	Ops          datatypes.JSON `json:"ops"`
-	HistoryInfo  datatypes.JSON `json:"history_info"`
+	HistoryInfo  []GetHistory   `json:"history_info"`
 	OwnerId      int            `json:"owner_id"`
 	TemplateName string         `json:"template_name"`
 	CodeName     string         `json:"code_name"`
+}
+
+type GetHistory struct {
+	HistoryInfo datatypes.JSON
+	UserId      uint
+	UpdatedAt   time.Time
 }
 
 type ArrayFileName struct {
@@ -47,7 +54,7 @@ type GetQrCodeImage struct {
 type GenQrCode struct {
 	OwnerId      uint   `json:"owner_id" validate:"required"`
 	CodeName     string `json:"code_name" validate:"required"`
-	TemplateName string `json:"template_name" validate:"required"`
+	TemplateName string `json:"template_name"`
 	Amount       int    `json:"amount" validate:"required"`
 }
 
