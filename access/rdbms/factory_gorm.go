@@ -165,7 +165,7 @@ func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Accou
 	//}
 	//response = data
 
-	err := factory.client.Where("role = ?", constant.Owner).Find(&data).Order("created_at asc").Error
+	err := factory.client.Where("role = ?", constant.Owner).Order("created_at asc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
