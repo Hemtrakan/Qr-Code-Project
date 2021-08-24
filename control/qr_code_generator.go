@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"errors"
+	"fmt"
 	uuid2 "github.com/gofrs/uuid"
 	"github.com/yeqown/go-qrcode"
 	"gorm.io/datatypes"
@@ -28,7 +29,7 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 		return
 	}
 	for _, res := range data {
-		dataOwner,err:= ctrl.GetAccount(int(res.OwnerId))
+		dataOwner, err := ctrl.GetAccount(int(res.OwnerId))
 		if err != nil {
 			Error = err
 			return
@@ -47,7 +48,6 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 	response = getQrCodeArray
 	return
 }
-
 
 func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
 	var getQrCodeArray []structure.GetQrCode
@@ -77,6 +77,43 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
 	response = getQrCodeArray
+	return
+}
+
+func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error error) {
+
+	check, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
+	if err != nil {
+		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
+		return
+	}
+
+	fmt.Println("check : ", check.TemplateName)
+	if check.TemplateName != "" {
+		Error = errors.New("QrCode ได้ถูกตั้งค่า Template แล้ว")
+		return
+	}
+
+
+	b, err := json.Marshal(req.Info)
+	if err != nil {
+		Error = err
+		return
+	}
+
+	data := rdbmsstructure.QrCode{
+		TemplateName: req.TemplateName,
+		Info:         datatypes.JSON(b),
+		QrCodeUUID:   req.QrCodeId,
+		First:        false,
+	}
+
+	err = ctrl.access.RDBMS.UpdateQrCodeById(data)
+	if err != nil {
+		Error = err
+		return
+	}
+
 	return
 }
 

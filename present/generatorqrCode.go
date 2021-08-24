@@ -50,6 +50,24 @@ func getAllQrCode(context *fiber.Ctx) error {
 	return context.JSON(res)
 }
 
+func insertDataQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var data = new(structure.InsertDataQrCode)
+	if err := context.BodyParser(data); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
+	}
+	err := ValidateStruct(*data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+
+	err = api.InsertDataQrCode(data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+	}
+	return utility.FiberSuccess(context , http.StatusOK,"บันทึกข้อมูลสำเร็จ")
+}
+
 func getDataQrCodeJson(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	id := context.Params("id")

@@ -1,6 +1,7 @@
 package structure
 
 import (
+	"github.com/gofrs/uuid"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -18,13 +19,13 @@ type FileZip struct {
 }
 
 type GetQrCode struct {
-	OwnerId       uint      `json:"owner_id"`
-	OwnerName     string    `json:"owner_name"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	TemplateName  string    `json:"template_name"`
-	QrCodeId      string    `json:"qr_code_id"`
-	CodeName      string    `json:"code_name"`
+	OwnerId      uint      `json:"owner_id"`
+	OwnerName    string    `json:"owner_name"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	TemplateName string    `json:"template_name"`
+	QrCodeId     string    `json:"qr_code_id"`
+	CodeName     string    `json:"code_name"`
 }
 
 type GetDataQrCode struct {
@@ -58,18 +59,12 @@ type GenQrCode struct {
 	Amount       int    `json:"amount" validate:"required"`
 }
 
-type UpdateDataQrCode struct {
-	OwnerId      uint   `json:"owner_id" validate:"required"`
-	QrCodeId     string `json:"qr_code_id" validate:"required"`
-	TemplateName string `json:"template_name" validate:"required"`
-	Data         Data   `json:"data" validate:"required"`
+type InsertDataQrCode struct {
+	OwnerId      uint        `json:"owner_id" validate:"required"`
+	QrCodeId     uuid.UUID   `json:"qr_code_id" validate:"required"`
+	TemplateName string      `json:"template_name" validate:"required"`
+	Info         interface{} `json:"info" validate:"required"`
 }
-
-type Data struct {
-	Info interface{} `json:"info"`
-	Ops  interface{} `json:"ops"`
-}
-
 type DelQrCode struct {
 	QrCodeId []string `json:"qr_code_id" validate:"required"`
 }

@@ -127,7 +127,7 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
 	admin.Get("getAllQrCodeByOwnerId/:id", getQrCodeById) // Id >>> OwnerId
 	admin.Get("getAllQrCode",getAllQrCode)
-
+	admin.Post("insertDataQrCode",insertDataQrCode)
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
 
