@@ -161,7 +161,7 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	return
 }
 
-func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (file string, Error error) {
+func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 	req.CodeName = strings.Trim(req.CodeName, "\t \n")
 	req.TemplateName = strings.Trim(req.TemplateName, "\t \n")
 	if !(len(req.CodeName) <= 20) {
@@ -237,14 +237,6 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (file string, Erro
 		arrayString = append(arrayString, uuid.String())
 	}
 
-	fileZip := structure.FileZip{
-		OwnerId:  ownerId,
-		FileZip:  "zip",
-		QrCodeId: arrayString,
-	}
-
-	zip, err := ctrl.AddFileZipById(fileZip)
-	file = zip
 	return
 }
 

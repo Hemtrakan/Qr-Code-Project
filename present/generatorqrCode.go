@@ -115,12 +115,12 @@ func createQrCode(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	fileZip,err := api.CreateQrCode(*files)
+	err = api.CreateQrCode(*files)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return context.Download(fileZip)
-	//return utility.FiberError(context, http.StatusOK, "สร้าง QrCode สำเร็จ")
+	//return context.Download(fileZip)
+	return utility.FiberError(context, http.StatusOK, "สร้าง QrCode สำเร็จ")
 }
 
 func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
