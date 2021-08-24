@@ -25,15 +25,11 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 
 	data, err := ctrl.access.RDBMS.GetAllQrCode()
 	if err != nil {
-		Error = err
+		Error = errors.New("ไม่มีข้อมูล")
 		return
 	}
 	for _, res := range data {
-		dataOwner, err := ctrl.GetAccount(int(res.OwnerId))
-		if err != nil {
-			Error = err
-			return
-		}
+		dataOwner, _ := ctrl.GetAccount(int(res.OwnerId))
 		resGetQrCode := structure.GetQrCode{
 			OwnerId:      res.OwnerId,
 			OwnerName:    dataOwner.FirstName + " " + dataOwner.LastName,
@@ -81,7 +77,6 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 }
 
 func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error error) {
-
 	check, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
 	if err != nil {
 		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
@@ -144,7 +139,6 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		CodeName:     data.Code + "-" + data.Count,
 		HistoryInfo:  HistoryArray,
 	}
-
 	return
 }
 
