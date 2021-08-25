@@ -32,10 +32,9 @@ type FactoryInterface interface {
 	GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode,Error error)
 	GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (response rdbmsstructure.QrCode,Error error)
 	GetAllQrCode() (response []rdbmsstructure.QrCode,Error error)
-	UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 	UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error error)
+	UpdateQrCodeActive(QrCode rdbmsstructure.QrCode) (Error error)
 	DeleteQrCode(QrCodeUUID string) (Error error)
-	UpdateStatusQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 
 
 	// Template

@@ -27,7 +27,7 @@ type GetQrCode struct {
 	QrCodeId      string    `json:"qr_code_id"`
 	CodeName      string    `json:"code_name"`
 	URL           string    `json:"url"`
-	Status        bool      `json:"status"`
+	Active        bool      `json:"active"`
 }
 
 type GetDataQrCode struct {
@@ -72,6 +72,5 @@ type DelQrCode struct {
 }
 
 type StatusQrCode struct {
-	QrCodeId uuid.UUID `json:"qr_code_id"   validate:"required"`
-	Status   bool      `json:"status"`
+	Active   *bool      `json:"active"`
 }

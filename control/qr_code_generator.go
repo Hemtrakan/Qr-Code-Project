@@ -39,7 +39,7 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 			QrCodeId:      res.QrCodeUUID.String(),
 			CodeName:      res.Code + "-" + res.Count,
 			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
-			Status:        res.Status,
+			Active:        res.Active,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
@@ -74,7 +74,7 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 			QrCodeId:      res.QrCodeUUID.String(),
 			CodeName:      res.Code + "-" + res.Count,
 			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
-			Status:        res.Status,
+			Active:        res.Active,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
@@ -89,7 +89,8 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 		return
 	}
 
-	fmt.Println("check : ", check.TemplateName)
+	fmt.Println(check.First)
+
 	if check.TemplateName != "" {
 		Error = errors.New("QrCode ได้ถูกตั้งค่า Template แล้ว")
 		return
@@ -105,7 +106,7 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 		TemplateName: req.TemplateName,
 		Info:         datatypes.JSON(b),
 		QrCodeUUID:   req.QrCodeId,
-		First:        false,
+		First:        true,
 	}
 
 	err = ctrl.access.RDBMS.UpdateQrCodeById(data)
@@ -166,21 +167,27 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	return
 }
 
-func (ctrl *APIControl) UpdateStatusQrCode(req structure.StatusQrCode) (Error error) {
-	res, err := ctrl.access.RDBMS.GetDataQrCode(req.QrCodeId.String())
+func (ctrl *APIControl) UpdateStatusQrCode(QrCodeId string, req structure.StatusQrCode) (Error error) {
+	res, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
 	if err != nil {
 		Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
 		return
 	}
 
-	fmt.Println("req : ",req.Status)
+	fmt.Println("Active : ", *req.Active)
 
 	data := rdbmsstructure.QrCode{
 		QrCodeUUID: res.QrCodeUUID,
-		Status: req.Status,
+		Active:     *req.Active,
 	}
+	//if *req.Active == true {
+	//	data.Active = true
+	//}
+	//if *req.Active == false{
+	//	data.Active = false
+	//}
 
-	err = ctrl.access.RDBMS.UpdateStatusQrCode(data)
+	err = ctrl.access.RDBMS.UpdateQrCodeActive(data)
 	if err != nil {
 		Error = err
 		return
@@ -255,7 +262,7 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 			Code:         req.CodeName,
 			Count:        number,
 			First:        false,
-			Status:       true,
+			Active:       true,
 		}
 
 		err = ctrl.access.RDBMS.CreateQrCode(save)

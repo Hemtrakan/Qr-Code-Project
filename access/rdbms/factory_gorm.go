@@ -25,6 +25,9 @@ func gormInstance(env *environment.Properties) GORMFactory {
 		panic(fmt.Sprintf("failed to connect database : %s", err.Error()))
 		//panic(fmt.Sprintf("failed to connect database : %s", err.Error()))
 	}
+	if env.Flavor != environment.Production {
+		db = db.Debug()
+	}
 
 	_ = db.AutoMigrate(
 		&rdbmsstructure.Account{},
@@ -358,13 +361,22 @@ func (factory GORMFactory) UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error
 	return nil
 }
 
-func (factory GORMFactory) UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error) {
-	db := factory.client.Where("id = ?", QrCode.ID).Updates(&QrCode).Error
+func (factory GORMFactory) UpdateQrCodeActive(QrCode rdbmsstructure.QrCode) (Error error) {
+	var data rdbmsstructure.QrCode
+	db := factory.client.Where("qr_code_uuid = ?",QrCode.QrCodeUUID).Take(&data).Error
+	if db != nil {
+		Error = db
+		return
+	}
+	data.Active = QrCode.Active
+
+	db = factory.client.Save(&data).Error
 	if db != nil {
 		return db
 	}
 	return nil
 }
+
 
 func (factory GORMFactory) CountCode(OwnerId uint, templateName, Code string) (response []rdbmsstructure.QrCode, Error error) {
 	var data []rdbmsstructure.QrCode
@@ -468,21 +480,6 @@ func (factory GORMFactory) GetQrCodeByQrCodeId(OwnerId int, QrCodeId string) (re
 func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 	var data rdbmsstructure.QrCode
 	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Delete(&data).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-			return
-		} else {
-			Error = errors.New("record not found")
-			return
-		}
-		return
-	}
-	return
-}
-
-func (factory GORMFactory) UpdateStatusQrCode(QrCode rdbmsstructure.QrCode) (Error error) {
-	err := factory.client.Where("qr_code_uuid = ?", QrCode.QrCodeUUID).Updates(&QrCode).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err

@@ -172,16 +172,19 @@ func updateStatusQrCode(context *fiber.Ctx) error {
 	if err := context.BodyParser(QrCode); err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
+	QrCodeId := context.Params("id")
 	err := ValidateStruct(*QrCode)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = api.UpdateStatusQrCode(*QrCode)
+	err = api.UpdateStatusQrCode(QrCodeId,*QrCode)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberSuccess(context, http.StatusOK, "เปลี่ยนสถานะ QrCode สำเร็จ")
 }
+
+
 
 //func genQrCodeByName(context *fiber.Ctx) error {
 //	name := context.Params("name")

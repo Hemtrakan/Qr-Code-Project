@@ -3,7 +3,7 @@ package present
 //func getTemplate(context *fiber.Ctx) error {
 //	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 //	res := api.GetTemplate()
-//	return context.Status(http.StatusOK).JSON(res)
+//	return context.Active(http.StatusOK).JSON(res)
 //}
 
 //func getByIdTeamPage(context *fiber.Ctx) error {
@@ -20,12 +20,12 @@ package present
 //		if err != nil {
 //			fmt.Println(url)
 //		}
-//		context.Status(http.StatusOK).SendString(url)
+//		context.Active(http.StatusOK).SendString(url)
 //	}
 //	if contentType == "application/json" {
-//		return context.Status(http.StatusOK).JSON(res)
+//		return context.Active(http.StatusOK).JSON(res)
 //	}
-//	//return context.Status(http.StatusOK).JSON(res)
+//	//return context.Active(http.StatusOK).JSON(res)
 //	return utility.FiberError(context, http.StatusBadRequest, "record not found")
 //}
 //
@@ -39,7 +39,7 @@ package present
 //	if err != nil {
 //		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 //	}
-//	return context.Status(http.StatusOK).JSON(res)
+//	return context.Active(http.StatusOK).JSON(res)
 //}
 //
 //
@@ -54,7 +54,7 @@ package present
 //	if err != nil {
 //		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 //	}
-//	return context.Status(http.StatusOK).JSON(res)
+//	return context.Active(http.StatusOK).JSON(res)
 //}
 //
 //func insertTeamPage(context *fiber.Ctx) error {
@@ -107,5 +107,5 @@ package present
 //	if err != nil {
 //		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 //	}
-//	return context.Status(http.StatusOK).JSON(res)
+//	return context.Active(http.StatusOK).JSON(res)
 //}

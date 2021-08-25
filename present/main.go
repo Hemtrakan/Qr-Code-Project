@@ -128,7 +128,7 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getAllQrCode",getAllQrCode)
 	admin.Post("insertDataQrCode",insertDataQrCode)
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
-	admin.Put("updateStatusQrCode",updateStatusQrCode)
+	admin.Put("updateStatusQrCode/:id",updateStatusQrCode)
 	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
 
 	// -- TeamPage
