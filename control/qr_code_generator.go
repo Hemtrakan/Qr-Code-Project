@@ -29,15 +29,17 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 		return
 	}
 	for _, res := range data {
-		dataOwner, _ := ctrl.GetAccount(int(res.OwnerId))
+		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
 		resGetQrCode := structure.GetQrCode{
-			OwnerId:      res.OwnerId,
-			OwnerName:    dataOwner.FirstName + " " + dataOwner.LastName,
-			CreatedAt:    res.CreatedAt,
-			UpdatedAt:    res.UpdatedAt,
-			TemplateName: res.TemplateName,
-			QrCodeId:     res.QrCodeUUID.String(),
-			CodeName:     res.Code + "-" + res.Count,
+			OwnerId:       res.OwnerId,
+			OwnerUsername: owner.Username,
+			CreatedAt:     res.CreatedAt,
+			UpdatedAt:     res.UpdatedAt,
+			TemplateName:  res.TemplateName,
+			QrCodeId:      res.QrCodeUUID.String(),
+			CodeName:      res.Code + "-" + res.Count,
+			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
+			Status:        res.Status,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
@@ -62,13 +64,17 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 		return
 	}
 	for _, res := range data {
+		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
 		resGetQrCode := structure.GetQrCode{
-			OwnerId:      res.OwnerId,
-			CreatedAt:    res.CreatedAt,
-			UpdatedAt:    res.UpdatedAt,
-			TemplateName: res.TemplateName,
-			QrCodeId:     res.QrCodeUUID.String(),
-			CodeName:     res.Code + "-" + res.Count,
+			OwnerId:       res.OwnerId,
+			OwnerUsername: owner.Username,
+			CreatedAt:     res.CreatedAt,
+			UpdatedAt:     res.UpdatedAt,
+			TemplateName:  res.TemplateName,
+			QrCodeId:      res.QrCodeUUID.String(),
+			CodeName:      res.Code + "-" + res.Count,
+			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
+			Status:        res.Status,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
@@ -88,7 +94,6 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 		Error = errors.New("QrCode ได้ถูกตั้งค่า Template แล้ว")
 		return
 	}
-
 
 	b, err := json.Marshal(req.Info)
 	if err != nil {
@@ -161,6 +166,28 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 	return
 }
 
+func (ctrl *APIControl) UpdateStatusQrCode(req structure.StatusQrCode) (Error error) {
+	res, err := ctrl.access.RDBMS.GetDataQrCode(req.QrCodeId.String())
+	if err != nil {
+		Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
+		return
+	}
+
+	fmt.Println("req : ",req.Status)
+
+	data := rdbmsstructure.QrCode{
+		QrCodeUUID: res.QrCodeUUID,
+		Status: req.Status,
+	}
+
+	err = ctrl.access.RDBMS.UpdateStatusQrCode(data)
+	if err != nil {
+		Error = err
+		return
+	}
+	return
+}
+
 func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 	req.CodeName = strings.Trim(req.CodeName, "\t \n")
 	req.TemplateName = strings.Trim(req.TemplateName, "\t \n")
@@ -227,6 +254,8 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 			QrCodeUUID:   uuid,
 			Code:         req.CodeName,
 			Count:        number,
+			First:        false,
+			Status:       true,
 		}
 
 		err = ctrl.access.RDBMS.CreateQrCode(save)

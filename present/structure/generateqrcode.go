@@ -19,13 +19,15 @@ type FileZip struct {
 }
 
 type GetQrCode struct {
-	OwnerId      uint      `json:"owner_id"`
-	OwnerName    string    `json:"owner_name"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	TemplateName string    `json:"template_name"`
-	QrCodeId     string    `json:"qr_code_id"`
-	CodeName     string    `json:"code_name"`
+	OwnerId       uint      `json:"owner_id"`
+	OwnerUsername string    `json:"owner_username"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	TemplateName  string    `json:"template_name"`
+	QrCodeId      string    `json:"qr_code_id"`
+	CodeName      string    `json:"code_name"`
+	URL           string    `json:"url"`
+	Status        bool      `json:"status"`
 }
 
 type GetDataQrCode struct {
@@ -67,4 +69,9 @@ type InsertDataQrCode struct {
 }
 type DelQrCode struct {
 	QrCodeId []string `json:"qr_code_id" validate:"required"`
+}
+
+type StatusQrCode struct {
+	QrCodeId uuid.UUID `json:"qr_code_id"   validate:"required"`
+	Status   bool      `json:"status"`
 }

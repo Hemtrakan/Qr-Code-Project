@@ -35,6 +35,7 @@ type FactoryInterface interface {
 	UpdateQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 	UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error error)
 	DeleteQrCode(QrCodeUUID string) (Error error)
+	UpdateStatusQrCode(QrCode rdbmsstructure.QrCode) (Error error)
 
 
 	// Template

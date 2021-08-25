@@ -15,8 +15,6 @@ type GORMFactory struct {
 	client *gorm.DB
 }
 
-
-
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -470,6 +468,21 @@ func (factory GORMFactory) GetQrCodeByQrCodeId(OwnerId int, QrCodeId string) (re
 func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 	var data rdbmsstructure.QrCode
 	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Delete(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	return
+}
+
+func (factory GORMFactory) UpdateStatusQrCode(QrCode rdbmsstructure.QrCode) (Error error) {
+	err := factory.client.Where("qr_code_uuid = ?", QrCode.QrCodeUUID).Updates(&QrCode).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err

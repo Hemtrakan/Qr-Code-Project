@@ -45,7 +45,6 @@ func APICreate(ctrl *control.APIControl) {
 
 	api := app.Group("/api")
 	api.Post("admin", admin) // todo สำหรับ สมัคร admin เท่านั้น
-	api.Get("testqrcode",Test)
 
 	qr := app.Group("/qr")
 	qr.Post("/:id", getDataQrCode)                      //  Id >>> QrCodeUUId
@@ -129,6 +128,7 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getAllQrCode",getAllQrCode)
 	admin.Post("insertDataQrCode",insertDataQrCode)
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
+	admin.Put("updateStatusQrCode",updateStatusQrCode)
 	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
 
 	// -- TeamPage

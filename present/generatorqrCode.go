@@ -1,17 +1,9 @@
 package present
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
-	"golang.org/x/image/math/fixed"
-	"image"
-	"image/color"
-	"image/png"
 	"net/http"
-	"os"
 	"qrcode/access/constant"
 	"qrcode/control"
 	"qrcode/present/structure"
@@ -174,28 +166,21 @@ func deleteQrCode(context *fiber.Ctx) error {
 	return utility.FiberSuccess(context, http.StatusOK, "ลบ QrCode สำเร็จ")
 }
 
-func Test(context *fiber.Ctx) error {
-	path := string(constant.SaveFileLocationQrCode) + "/" + "computer-1.PNG"
-	f, err := os.Create("path.PNG")
+func updateStatusQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var QrCode = new(structure.StatusQrCode)
+	if err := context.BodyParser(QrCode); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
+	}
+	err := ValidateStruct(*QrCode)
 	if err != nil {
-		// Handle error
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	defer f.Close()
-	img := image.NewRGBA(image.Rect(0, 0, 200, 200))
-	col := color.RGBA{68, 255, 236, 255}
-	point := fixed.Point26_6{fixed.Int26_6(200 * 64), fixed.Int26_6(200 * 64)}
-	d := &font.Drawer{
-		Dst:  img,
-		Src:  image.NewUniform(col),
-		Face: basicfont.Face7x13,
-		Dot:  point,
+	err = api.UpdateStatusQrCode(*QrCode)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	d.DrawString("computer-1")
-	if err := png.Encode(f, img); err != nil {
-		fmt.Println("1")
-		panic(err)
-	}
-	return context.Download(path)
+	return utility.FiberSuccess(context, http.StatusOK, "เปลี่ยนสถานะ QrCode สำเร็จ")
 }
 
 //func genQrCodeByName(context *fiber.Ctx) error {

@@ -41,6 +41,7 @@ type Properties struct {
 
 	//// --
 	URLFront string `env:"URL_FRONT,default=http://localhost:12000/viewdata/"`
+	URLQRCode string `env:"URL_QR_CODE,default=http://localhost:8080/qr/"`
 
 	//GRPC
 	//ServerGRPC string `env:"SERVER_GRPC,default=inventory-api:9090"`
