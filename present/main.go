@@ -123,6 +123,7 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Get("getDateQrCodeById/:id", getDataQrCode)
 	admin.Post("createQrCode", createQrCode)
 	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
+	admin.Post("genQrCodeToFileZipByOwner", genQrCodeToFileZipByOwner)
 	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
 	admin.Get("getAllQrCodeByOwnerId/:id", getQrCodeById) // Id >>> OwnerId
 	admin.Get("getAllQrCode",getAllQrCode)

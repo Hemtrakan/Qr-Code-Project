@@ -9,12 +9,14 @@ import (
 type FileZipByTemplateName struct {
 	OwnerId      uint   `json:"owner_id" validate:"required"`
 	TemplateName string `json:"template_name" validate:"required"`
-	FileZip      string `json:"file_zip" validate:"required"`
+}
+
+type FileZipByOwner struct {
+	OwnerId      uint   `json:"owner_id" validate:"required"`
 }
 
 type FileZip struct {
 	OwnerId  int      `json:"owner_id" validate:"required"`
-	FileZip  string   `json:"file_zip" validate:"required"`
 	QrCodeId []string `json:"qr_code_id" validate:"required"`
 }
 

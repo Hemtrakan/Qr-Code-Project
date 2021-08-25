@@ -278,12 +278,6 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 
 func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Error error) {
 	var arrayFileName []structure.ArrayFileName
-
-	req.FileZip = strings.Trim(req.FileZip, "\t \n")
-	if req.FileZip == "" {
-		Error = errors.New("FileZip ต้องไม่ว่าง")
-		return
-	}
 	if len(req.QrCodeId) == 0 {
 		Error = errors.New("QrCodeId ต้องไม่ว่าง")
 		return
@@ -368,7 +362,7 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		}
 		arrayFileName = append(arrayFileName, files)
 	}
-	output := string(constant.SaveFileLocationZipFile) + "/" + req.FileZip + ".zip"
+	output := string(constant.SaveFileLocationZipFile) + "/" + "FileZip.zip"
 	if err := ZipFilesById(output, arrayFileName); err != nil {
 		Error = err
 		return
@@ -387,15 +381,77 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 	return
 }
 
+
+func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file string, Error error) {
+	ownerId := int(req.OwnerId)
+	dataOwnerId, err := ctrl.access.RDBMS.GetAccount(ownerId)
+	if err != nil {
+		Error = errors.New("ไม่มีผู้ใช้คนนี้อยู่ในระบบ")
+		return
+	}
+	if dataOwnerId.Role != string(constant.Owner) {
+		Error = errors.New("ผู้ใช้คนนี้ไม่มีสิทธิ์ในการสร้าง QR-Code")
+		return
+	}
+	data, err := ctrl.access.RDBMS.GetQrCodeByOwnerId(ownerId)
+	if err != nil {
+		Error = err
+		return
+	}
+	if len(data) == 0 {
+		Error = errors.New("ยังไม่สร้าง Qr-Code ใน template ที่ถูกเลือก")
+		return
+	}
+	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
+	if err != nil {
+		Error = err
+		return
+	}
+	err = os.Mkdir(string(constant.SaveFileLocationQrCode), 0755)
+	err = os.Mkdir(string(constant.SaveFileLocationZipFile), 0755)
+	if err != nil {
+		Error = err
+		return
+	}
+	var path string
+	var arrayFileName []structure.ArrayFileName
+	for _, res := range data {
+		qrc, err := qrcode.New(constant.Http + "/" + res.QrCodeUUID.String())
+		if err != nil {
+			Error = err
+			return
+		}
+		filename := res.Code + "-" + res.Count
+		path = string(constant.SaveFileLocationQrCode) + "/" + filename + ".PNG"
+		// save file
+		if err = qrc.Save(path); err != nil {
+			Error = err
+			return
+		}
+		files := structure.ArrayFileName{
+			FileName: filename,
+		}
+		arrayFileName = append(arrayFileName, files)
+	}
+	output := string(constant.SaveFileLocationZipFile) + "/" + "FileZip.zip"
+	if err := ZipFilesByTemplateName(output, arrayFileName); err != nil {
+		Error = err
+		return
+	}
+
+	file = output
+	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
+	if err != nil {
+		Error = err
+		return
+	}
+	return
+}
+
 func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplateName) (file string, Error error) {
 	req.TemplateName = strings.Trim(req.TemplateName, "\t \n")
 	if req.TemplateName == "" {
 		Error = errors.New("TemplateName ต้องไม่ว่าง")
-		return
-	}
-	req.FileZip = strings.Trim(req.FileZip, "\t \n")
-	if req.FileZip == "" {
-		Error = errors.New("FileZip ต้องไม่ว่าง")
 		return
 	}
 	_, err := utility.CheckTemplate(req.TemplateName)
@@ -403,7 +459,6 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		Error = err
 		return
 	}
-
 	ownerId := int(req.OwnerId)
 	dataOwnerId, err := ctrl.access.RDBMS.GetAccount(ownerId)
 	if err != nil {
@@ -454,7 +509,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		}
 		arrayFileName = append(arrayFileName, files)
 	}
-	output := string(constant.SaveFileLocationZipFile) + "/" + req.FileZip + ".zip"
+	output := string(constant.SaveFileLocationZipFile) + "/" + "FileZip.zip"
 	if err := ZipFilesByTemplateName(output, arrayFileName); err != nil {
 		Error = err
 		return

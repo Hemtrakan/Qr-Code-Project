@@ -132,6 +132,23 @@ func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
 	return context.Download(fileZip)
 }
 
+func genQrCodeToFileZipByOwner(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var data = new(structure.FileZipByOwner)
+	if err := context.BodyParser(data); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
+	}
+	err := ValidateStruct(*data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	fileZip, err := api.AddFileZipByOwner(*data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Download(fileZip)
+}
+
 func genQrCodeToFileZipByTemplateName(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var data = new(structure.FileZipByTemplateName)
