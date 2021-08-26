@@ -2,13 +2,10 @@ package present
 
 import (
 	"fmt"
+	"github.com/fogleman/gg"
 	"github.com/gofiber/fiber/v2"
-	gim "github.com/ozankasikci/go-image-merge"
-	"github.com/pbnjay/pixfont"
-	"image"
 	"image/color"
 	"image/jpeg"
-	"image/png"
 	"net/http"
 	"os"
 	"qrcode/access/constant"
@@ -18,24 +15,22 @@ import (
 	"strconv"
 )
 
-
 func getTemplate(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	res := api.GetTemplate()
 	return context.Status(http.StatusOK).JSON(res)
 }
 
-
 func getQrCodeById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	id := context.Params("id")
 	ownerId, err := strconv.Atoi(id)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,"กรอกได้แต่ตัวเลขเท่านั้น")
+		return utility.FiberError(context, http.StatusBadRequest, "กรอกได้แต่ตัวเลขเท่านั้น")
 	}
 	res, err := api.GetQrCodeById(ownerId)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.JSON(res)
 }
@@ -44,7 +39,7 @@ func getAllQrCode(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	res, err := api.GetAllQrCode()
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return context.JSON(res)
 }
@@ -62,9 +57,9 @@ func insertDataQrCode(context *fiber.Ctx) error {
 
 	err = api.InsertDataQrCode(data)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,err.Error())
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	return utility.FiberSuccess(context , http.StatusOK,"บันทึกข้อมูลสำเร็จ")
+	return utility.FiberSuccess(context, http.StatusOK, "บันทึกข้อมูลสำเร็จ")
 }
 
 func getDataQrCodeJson(context *fiber.Ctx) error {
@@ -96,11 +91,11 @@ func getDataQrCode(context *fiber.Ctx) error {
 	//	}
 	//	return context.Status(http.StatusOK).JSON(res)
 	//} else {
-		res, err := api.GetDataQrCode(id)
-		if err != nil {
-			return utility.FiberError(context, http.StatusBadRequest, err.Error())
-		}
-		return context.Status(http.StatusOK).JSON(res)
+	res, err := api.GetDataQrCode(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
 	//}
 }
 
@@ -126,7 +121,7 @@ func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var data = new(structure.FileZip)
 	if err := context.BodyParser(data); err != nil {
-		return utility.FiberError(context, http.StatusBadRequest,"ส่งชนิดของข้อมูลมาผิด")
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
 	}
 	err := ValidateStruct(*data)
 	if err != nil {
@@ -201,7 +196,7 @@ func updateStatusQrCode(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = api.UpdateStatusQrCode(QrCodeId,*QrCode)
+	err = api.UpdateStatusQrCode(QrCodeId, *QrCode)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -226,6 +221,48 @@ func GetFileContentType(out *os.File) (string, error) {
 }
 
 func test(context *fiber.Ctx) error {
+
+	var BgImgPath = "fileqrcode/Computer-1.jpg"
+	var FontPath = ""
+	var FontSize = 20.0
+	var Text = "BELLKub442405"
+
+	bgImage, err := gg.LoadImage(BgImgPath)
+	if err != nil {
+		fmt.Println("1 : ",err)
+	}
+	imgWidth := bgImage.Bounds().Dx()
+	imgHeight := bgImage.Bounds().Dy()
+
+	dc := gg.NewContext(imgWidth, imgHeight)
+	dc.DrawImage(bgImage, 0, 0)
+
+	if err := dc.LoadFontFace(FontPath, FontSize); err != nil {
+		fmt.Println("2 : ",err)
+	}
+
+	x := float64(imgWidth / 2)
+	y := float64((imgHeight / 2) - 80)
+	maxWidth := float64(imgWidth) - 60.0
+	color := color.RGBA{
+		R: 0,
+		G: 0,
+		B: 0,
+		A: 255,
+	}
+	dc.SetColor(color)
+	dc.SetFillRuleWinding()
+	dc.DrawStringWrapped(Text, x, y, 0.5, -38.5, maxWidth, 5, gg.AlignCenter)
+	dc.Image()
+
+	out, err := os.Create("qr/output-2.jpg")
+	if err != nil {
+		fmt.Println(err)
+	}
+	var opt jpeg.Options
+	opt.Quality = 80
+	jpeg.Encode(out, dc.Image(), &opt)
+
 	//imgFile1, err := os.Open("fileqrcode/bell-1.jpeg")
 	//if err != nil {
 	//	fmt.Println(err)
@@ -256,7 +293,6 @@ func test(context *fiber.Ctx) error {
 	//opt.Quality = 80
 	//jpeg.Encode(out, rgba, &opt)
 
-
 	//f1, err := os.Open("qr/bell-1.jpeg")
 	//if err != nil {
 	//	panic(err)
@@ -271,36 +307,33 @@ func test(context *fiber.Ctx) error {
 	//
 	//fmt.Println("Content Type: " + contentType)
 
-
 	//
-	img := image.NewRGBA(image.Rect(0, 0, 100, 20))
-	pixfont.DrawString(img, 10, 10, "bell-1", color.White)
-	f, _ := os.OpenFile("qr/bell-5.PNG", os.O_CREATE|os.O_RDWR, 0644)
-	png.Encode(f, img)
-	file, err := os.Create("qr/computer-1.png")
-	if err != nil {
-		fmt.Println("2 : ",err.Error())
-	}
-
-
-	grids := []*gim.Grid{
-		{ImageFilePath: "fileqrcode/bell-1.jpg"},
-		{ImageFilePath: "qr/bell-5.png"},
-	}
-	rgba, err := gim.New(grids, 1, 2).Merge()
-	if err != nil {
-		fmt.Println("1 : ",err.Error())
-	}
-
-	err = jpeg.Encode(file, rgba, &jpeg.Options{Quality: 80})
-	if err != nil {
-		fmt.Println("3 : ",err.Error())
-
-	}
+	//img := image.NewRGBA(image.Rect(0, 0, 100, 20))
+	//pixfont.DrawString(img, 10, 10, "bell-1", color.White)
+	//f, _ := os.OpenFile("qr/bell-5.PNG", os.O_CREATE|os.O_RDWR, 0644)
+	//png.Encode(f, img)
+	//file, err := os.Create("qr/computer-1.png")
+	//if err != nil {
+	//	fmt.Println("2 : ",err.Error())
+	//}
+	//
+	//
+	//grids := []*gim.Grid{
+	//	{ImageFilePath: "fileqrcode/bell-1.jpg"},
+	//	{ImageFilePath: "qr/bell-5.png"},
+	//}
+	//rgba, err := gim.New(grids, 1, 2).Merge()
+	//if err != nil {
+	//	fmt.Println("1 : ",err.Error())
+	//}
+	//
+	//err = jpeg.Encode(file, rgba, &jpeg.Options{Quality: 80})
+	//if err != nil {
+	//	fmt.Println("3 : ",err.Error())
+	//
+	//}
 	return utility.FiberSuccess(context, http.StatusOK, "ทดสอบ")
 }
-
-
 
 //func genQrCodeByName(context *fiber.Ctx) error {
 //	name := context.Params("name")

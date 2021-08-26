@@ -5,6 +5,8 @@ go 1.16
 require (
 	github.com/Netflix/go-env v0.0.0-20210215222557-e437a7e7f9fb
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/fogleman/gg v1.3.0
+	github.com/ghiac/bimg v1.0.19
 	github.com/go-ini/ini v1.62.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
@@ -16,7 +18,6 @@ require (
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/ozankasikci/go-image-merge v0.2.2
-	github.com/pbnjay/pixfont v0.0.0-20200714042608-33b744692567
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/yeqown/go-qrcode v1.5.7
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
