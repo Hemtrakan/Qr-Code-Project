@@ -166,7 +166,7 @@ func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Accou
 	//}
 	//response = data
 
-	err := factory.client.Where("role = ?", constant.Owner).Order("created_at asc").Find(&data).Error
+	err := factory.client.Where("role = ?", constant.Owner).Order("created_at desc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -182,7 +182,7 @@ func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Accou
 
 func (factory GORMFactory) GetAllAccountOperatorByOwnerID(OwnerId uint) (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
-	err := factory.client.Where("sub_owner_id = ?", OwnerId).Order("created_at asc").Find(&data).Error
+	err := factory.client.Where("sub_owner_id = ?", OwnerId).Order("created_at desc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -198,7 +198,7 @@ func (factory GORMFactory) GetAllAccountOperatorByOwnerID(OwnerId uint) (respons
 
 func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Account,  Error error) {
 	var data []rdbmsstructure.Account
-	err := factory.client.Where("role = ?", constant.Operator).Order("created_at asc").Find(&data).Error
+	err := factory.client.Where("role = ?", constant.Operator).Order("created_at desc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -241,7 +241,7 @@ func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Ac
 
 func (factory GORMFactory) GetSubOwner(OwnerId int) (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
-	err := factory.client.Where("sub_owner_id = ?", OwnerId).Order("created_at asc").Find(&data).Error
+	err := factory.client.Where("sub_owner_id = ?", OwnerId).Order("created_at desc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -412,7 +412,7 @@ func (factory GORMFactory) CheckCode(OwnerId uint, templateName, Code string) (r
 
 func (factory GORMFactory) GetQrCode(OwnerId uint, templateName string) (response []rdbmsstructure.QrCode, Error error) {
 	var data []rdbmsstructure.QrCode
-	err := factory.client.Where("owner_id = ? and template_name = ?", OwnerId, templateName).Order("created_at asc").Find(&data).Error
+	err := factory.client.Where("owner_id = ? and template_name = ?", OwnerId, templateName).Order("created_at desc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -446,7 +446,7 @@ func (factory GORMFactory) GetAllQrCode() (response []rdbmsstructure.QrCode, Err
 
 func (factory GORMFactory) GetQrCodeByOwnerId(OwnerId int) (response []rdbmsstructure.QrCode, Error error) {
 	var data []rdbmsstructure.QrCode
-	err := factory.client.Where("owner_id = ?", OwnerId).Order("created_at asc").Find(&data).Error
+	err := factory.client.Where("owner_id = ?", OwnerId).Order("created_at desc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err

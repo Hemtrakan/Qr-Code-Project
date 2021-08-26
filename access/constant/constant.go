@@ -55,6 +55,7 @@ const (
 	SaveFileTextLocation QrCode = "filetext"
 	SaveFileLocationQrCode QrCode = "fileqrcode"
 	SaveFileLocationZipFile QrCode = "zipfile"
+	SaveFileLocationResQR QrCode = "qr"
 )
 
 
