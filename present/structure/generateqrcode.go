@@ -8,7 +8,7 @@ import (
 
 type FileZipByTemplateName struct {
 	OwnerId      uint   `json:"owner_id" validate:"required"`
-	TemplateName string `json:"template_name" validate:"required"`
+	TemplateName string `json:"template_name"`
 }
 
 type FileZipByOwner struct {

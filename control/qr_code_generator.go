@@ -275,47 +275,15 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		Error = errors.New("ผู้ใช้คนนี้ไม่มีสิทธิ์ในการสร้าง QR-Code")
 		return
 	}
-
-	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
-	if err != nil {
-		Error = err
-		return
-	}
-	err = os.Mkdir(string(constant.SaveFileLocationQrCode), 0755)
-	err = os.Mkdir(string(constant.SaveFileLocationZipFile), 0755)
-	err = os.Mkdir(string(constant.SaveFileLocationResQR), 0755)
-	if err != nil {
-		Error = err
-		return
-	}
 	for _, QrCodeId := range req.QrCodeId {
 		data, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(req.OwnerId, QrCodeId)
 		if err != nil {
 			Error = errors.New("ไม่มี Qr-Code ที่นี้อยู่ในระบบ")
-			err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
-			if err != nil {
-				Error = err
-				return
-			}
-			err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
-			if err != nil {
-				Error = err
-				return
-			}
-			err = os.RemoveAll(string(constant.SaveFileLocationResQR))
-			if err != nil {
-				Error = err
-				return
-			}
 			return
 		}
-
 		filename := data.Code + "-" + data.Count
 		//todo สร้าง QrCode
-		qrc, err := qrcode.New(constant.Http + "/" + data.QrCodeUUID.String(),
-			//qrcode.WithLogoImageFilePNG(text),
-			//qrcode.WithBgColor(col),
-		)
+		qrc, err := qrcode.New(constant.Http + "/" + data.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
@@ -328,7 +296,7 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		}
 
 		// todo เขียนข้อความ
-		ResQr := string(constant.SaveFileLocationResQR) + "/" + filename + ".png"
+		ResQr := string(constant.SaveFileLocationExposed) + "/" + filename + ".png"
 		RequestTextOnImg := utility.Request{
 			BgImgPath: pathQr,
 			Text:      filename,
@@ -347,16 +315,6 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 	}
 	output := string(constant.SaveFileLocationZipFile) + "/" + "FileZip.zip"
 	if err := ZipFilesById(output, arrayFileName); err != nil {
-		Error = err
-		return
-	}
-	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
-	if err != nil {
-		Error = err
-		return
-	}
-	err = os.RemoveAll(string(constant.SaveFileLocationResQR))
-	if err != nil {
 		Error = err
 		return
 	}
@@ -384,18 +342,6 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 		Error = errors.New("ยังไม่สร้าง Qr-Code ใน template ที่ถูกเลือก")
 		return
 	}
-	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
-	if err != nil {
-		Error = err
-		return
-	}
-	err = os.Mkdir(string(constant.SaveFileLocationQrCode), 0755)
-	err = os.Mkdir(string(constant.SaveFileLocationZipFile), 0755)
-	err = os.Mkdir(string(constant.SaveFileLocationResQR), 0755)
-	if err != nil {
-		Error = err
-		return
-	}
 	var pathQr string
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
@@ -411,7 +357,7 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 			Error = err
 			return
 		}
-		ResQr := string(constant.SaveFileLocationResQR) + "/" + filename + ".png"
+		ResQr := string(constant.SaveFileLocationExposed) + "/" + filename + ".png"
 		RequestTextOnImg := utility.Request{
 			BgImgPath: pathQr,
 			Text:      filename,
@@ -432,27 +378,12 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 		Error = err
 		return
 	}
-
 	file = output
-	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
-	if err != nil {
-		Error = err
-		return
-	}
-	err = os.RemoveAll(string(constant.SaveFileLocationResQR))
-	if err != nil {
-		Error = err
-		return
-	}
 	return
 }
 
 func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplateName) (file string, Error error) {
 	req.TemplateName = strings.Trim(req.TemplateName, "\t \n")
-	if req.TemplateName == "" {
-		Error = errors.New("TemplateName ต้องไม่ว่าง")
-		return
-	}
 	_, err := utility.CheckTemplate(req.TemplateName)
 	if err != nil {
 		Error = err
@@ -477,18 +408,6 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		Error = errors.New("ยังไม่สร้าง Qr-Code ใน template ที่ถูกเลือก")
 		return
 	}
-	err = os.RemoveAll(string(constant.SaveFileLocationZipFile))
-	if err != nil {
-		Error = err
-		return
-	}
-	err = os.Mkdir(string(constant.SaveFileLocationQrCode), 0755)
-	err = os.Mkdir(string(constant.SaveFileLocationZipFile), 0755)
-	err = os.Mkdir(string(constant.SaveFileLocationResQR), 0755)
-	if err != nil {
-		Error = err
-		return
-	}
 	var pathQr string
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
@@ -504,7 +423,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 			Error = err
 			return
 		}
-		ResQr := string(constant.SaveFileLocationResQR) + "/" + filename + ".png"
+		ResQr := string(constant.SaveFileLocationExposed) + "/" + filename + ".png"
 		RequestTextOnImg := utility.Request{
 			BgImgPath: pathQr,
 			Text:      filename,
@@ -526,18 +445,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 		Error = err
 		return
 	}
-
 	file = output
-	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
-	if err != nil {
-		Error = err
-		return
-	}
-	err = os.RemoveAll(string(constant.SaveFileLocationResQR))
-	if err != nil {
-		Error = err
-		return
-	}
 	return
 }
 
@@ -553,7 +461,7 @@ func ZipFilesById(filename string, files []structure.ArrayFileName) error {
 
 	// Add files to zip
 	for _, file := range files {
-		pathFile := string(constant.SaveFileLocationResQR) + "/" + file.FileName + ".png"
+		pathFile := string(constant.SaveFileLocationExposed) + "/" + file.FileName + ".png"
 		if err = AddFileToZip(zipWriter, pathFile); err != nil {
 			return err
 		}
@@ -573,7 +481,7 @@ func ZipFilesByTemplateName(filename string, files []structure.ArrayFileName) er
 
 	// Add files to zip
 	for _, file := range files {
-		pathFile := string(constant.SaveFileLocationResQR) + "/" + file.FileName + ".png"
+		pathFile := string(constant.SaveFileLocationExposed) + "/" + file.FileName + ".png"
 		if err = AddFileToZip(zipWriter, pathFile); err != nil {
 			return err
 		}
