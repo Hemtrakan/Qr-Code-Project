@@ -54,7 +54,7 @@ type QrCode string
 const (
 	SaveFileLocationQrCode QrCode = "fileqrcode"
 	SaveFileLocationZipFile QrCode = "zipfile"
-	SaveFileLocationResQR QrCode = "resqr"
+	SaveFileLocationResQR QrCode = "Exposed File QrCode"
 )
 
 
