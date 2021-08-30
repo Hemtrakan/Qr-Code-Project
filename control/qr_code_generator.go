@@ -48,7 +48,6 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 		Error = err
 		return
 	}
-
 	return
 }
 
@@ -349,7 +348,7 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		}
 		filename := data.Code + "-" + data.Count
 		//todo สร้าง QrCode
-		qrc, err := qrcode.New(constant.Http + "/" + data.QrCodeUUID.String())
+		qrc, err := qrcode.New(ctrl.access.ENV.URLQRCode + "/" + data.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
@@ -411,7 +410,7 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 	var pathQr string
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
-		qrc, err := qrcode.New(constant.Http + "/" + res.QrCodeUUID.String())
+		qrc, err := qrcode.New(ctrl.access.ENV.URLQRCode + "/" + res.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
@@ -477,7 +476,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 	var pathQr string
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
-		qrc, err := qrcode.New(constant.Http + "/" + res.QrCodeUUID.String())
+		qrc, err := qrcode.New(ctrl.access.ENV.URLQRCode + "/" + res.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
