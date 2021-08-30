@@ -57,6 +57,41 @@ func insertDataQrCode(context *fiber.Ctx) error {
 	return utility.FiberSuccess(context, http.StatusOK, "บันทึกข้อมูลสำเร็จ")
 }
 
+func updateHistoryInfoDataQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var data = new(structure.UpdateHistoryInfoDataQrCode)
+	if err := context.BodyParser(data); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
+	}
+	err := ValidateStruct(*data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+
+	err = api.UpdateHistoryInfoDataQrCode(data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "บันทึกข้อมูลสำเร็จ")
+}
+
+func updateOpsDataQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var data = new(structure.UpdateOpsDataQrCode)
+	if err := context.BodyParser(data); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
+	}
+	err := ValidateStruct(*data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+
+	err = api.UpdateOpsDataQrCode(data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "บันทึกข้อมูลสำเร็จ")
+}
 func getDataQrCodeJson(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	id := context.Params("id")
@@ -207,119 +242,16 @@ func updateStatusQrCode(context *fiber.Ctx) error {
 	return utility.FiberSuccess(context, http.StatusOK, "เปลี่ยนสถานะ QrCode สำเร็จ")
 }
 
-//func test(context *fiber.Ctx) error {
+
+// todo test
+//func TestQrCode(context *fiber.Ctx) error {
+//	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 //
-//	var BgImgPath = "fileqrcode/Computer-1.jpg"
-//	var FontPath = ""
-//	var FontSize = 20.0
-//	var Text = "BELLKub442405"
-//
-//	bgImage, err := gg.LoadImage(BgImgPath)
+//	res, err := api.TestQrCode()
 //	if err != nil {
-//		fmt.Println("1 : ",err)
+//		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 //	}
-//	imgWidth := bgImage.Bounds().Dx()
-//	imgHeight := bgImage.Bounds().Dy()
-//
-//	dc := gg.NewContext(imgWidth, imgHeight)
-//	dc.DrawImage(bgImage, 0, 0)
-//
-//	if err := dc.LoadFontFace(FontPath, FontSize); err != nil {
-//		fmt.Println("2 : ",err)
-//	}
-//
-//	x := float64(imgWidth / 2)
-//	y := float64((imgHeight / 2) - 80)
-//	maxWidth := float64(imgWidth) - 60.0
-//	color := color.RGBA{
-//		R: 0,
-//		G: 0,
-//		B: 0,
-//		A: 255,
-//	}
-//	dc.SetColor(color)
-//	dc.SetFillRuleWinding()
-//	dc.DrawStringWrapped(Text, x, y, 0.5, -38.5, maxWidth, 5, gg.AlignCenter)
-//	dc.Image()
-//
-//	out, err := os.Create("qr/output-2.jpg")
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//	var opt jpeg.Options
-//	opt.Quality = 80
-//	jpeg.Encode(out, dc.Image(), &opt)
-//
-//	//imgFile1, err := os.Open("fileqrcode/bell-1.jpeg")
-//	//if err != nil {
-//	//	fmt.Println(err)
-//	//}
-//	//imgFile2, err := os.Open("filetext/bell-1.jpeg")
-//	//if err != nil {
-//	//	fmt.Println(err)
-//	//}
-//	//img1, _, err := image.Decode(imgFile1)
-//	//if err != nil {
-//	//	fmt.Println(err)
-//	//}
-//	//img2, _, err := image.Decode(imgFile2)
-//	//if err != nil {
-//	//	fmt.Println(err)
-//	//}
-//	//sp2 := image.Point{img1.Bounds().Dx(), 0}
-//	//r2 := image.Rectangle{sp2, sp2.Add(img2.Bounds().Size())}
-//	//r := image.Rectangle{image.Point{0, 0}, r2.Max}
-//	//rgba := image.NewRGBA(r)
-//	//draw.Draw(rgba, img1.Bounds(), img1, image.Point{0, 0}, draw.Src)
-//	//draw.Draw(rgba, r2, img2, image.Point{100, 0}, draw.Src)
-//	//out, err := os.Create("qr/output.jpg")
-//	//if err != nil {
-//	//	fmt.Println(err)
-//	//}
-//	//var opt jpeg.Options
-//	//opt.Quality = 80
-//	//jpeg.Encode(out, rgba, &opt)
-//
-//	//f1, err := os.Open("qr/bell-1.jpeg")
-//	//if err != nil {
-//	//	panic(err)
-//	//}
-//	//defer f1.Close()
-//	//
-//	//// Get the content
-//	//contentType, err := GetFileContentType(f1)
-//	//if err != nil {
-//	//	panic(err)
-//	//}
-//	//
-//	//fmt.Println("Content Type: " + contentType)
-//
-//	//
-//	//img := image.NewRGBA(image.Rect(0, 0, 100, 20))
-//	//pixfont.DrawString(img, 10, 10, "bell-1", color.White)
-//	//f, _ := os.OpenFile("qr/bell-5.PNG", os.O_CREATE|os.O_RDWR, 0644)
-//	//png.Encode(f, img)
-//	//file, err := os.Create("qr/computer-1.png")
-//	//if err != nil {
-//	//	fmt.Println("2 : ",err.Error())
-//	//}
-//	//
-//	//
-//	//grids := []*gim.Grid{
-//	//	{ImageFilePath: "fileqrcode/bell-1.jpg"},
-//	//	{ImageFilePath: "qr/bell-5.png"},
-//	//}
-//	//rgba, err := gim.New(grids, 1, 2).Merge()
-//	//if err != nil {
-//	//	fmt.Println("1 : ",err.Error())
-//	//}
-//	//
-//	//err = jpeg.Encode(file, rgba, &jpeg.Options{Quality: 80})
-//	//if err != nil {
-//	//	fmt.Println("3 : ",err.Error())
-//	//
-//	//}
-//	return utility.FiberSuccess(context, http.StatusOK, "ทดสอบ")
+//	return context.Status(http.StatusOK).JSON(res)
 //}
 
 //func genQrCodeByName(context *fiber.Ctx) error {

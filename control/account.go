@@ -104,6 +104,12 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 		return err
 	}
 
+	res , err := ctrl.access.RDBMS.GetAccount(1)
+	if res.Username == "admin"{
+		Error = errors.New("สมัครไปแล้ว")
+		return
+	}
+
 	admin := rdbmsstructure.Account{
 		Username:    "admin",
 		Password:    string(hashPassword),
@@ -165,7 +171,7 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 		Error = err
 		return
 	}
-	OwnerId := int(reqOperator.SubOwnerId)
+	OwnerId := int(*reqOperator.SubOwnerId)
 	data, err := ctrl.access.RDBMS.GetAccount(OwnerId)
 	if err != nil {
 		Error = errors.New("ไม่มีเจ้าของคนนี้ในระบบ")
@@ -256,25 +262,19 @@ func (ctrl *APIControl) LoginAdmin(reqLogin *structure.Login) (Token string, Err
 }
 
 func (ctrl *APIControl) GetAccount(id int) (response structure.UserAccount, Error error) {
-	_, err := ctrl.access.RDBMS.CheckAccountId(uint(id))
+	data, err := ctrl.access.RDBMS.CheckAccountId(uint(id))
 	if err != nil {
-		Error = errors.New("record not found")
+		Error = errors.New("ไม่พบผู้ใช้งาน")
 		return
 	}
-	data, err := ctrl.access.RDBMS.GetAccount(id)
-	if err != nil {
-		Error = err
-		return
-	}
-	id = int(data.ID)
 	response = structure.UserAccount{
-		Id:          id,
+		Id:          int(data.ID),
 		FirstName:   data.FirstName,
 		LastName:    data.LastName,
 		PhoneNumber: data.PhoneNumber,
 		LineId:      data.LineId,
 		Role:        data.Role,
-		SubOwnerId:  int(data.SubOwnerId),
+		SubOwnerId:  data.SubOwnerId,
 	}
 	return
 }
@@ -307,7 +307,6 @@ func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOw
 }
 
 func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner, Error error) {
-	var DataArray []structure.Operators
 	res, err := ctrl.access.RDBMS.CheckAccountId(uint(OwnerId))
 	if err != nil {
 		Error = errors.New("record not found")
@@ -322,34 +321,33 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner
 		Error = err
 		return
 	}
-	owner, err := ctrl.access.RDBMS.GetAccount(OwnerId)
-	if err != nil {
-		Error = err
-		return
+	UserAccountStructure := structure.GetSubOwner{}
+	var UserAccountOperatorArray []structure.Operators
+	{
 	}
-	ownerId := int(owner.ID)
 	for _, data := range ops {
-		id := int(data.ID)
-		UserAccountOperator := structure.Operators{
-			OperatorId:          id,
-			OperatorUserName:    data.Username,
-			OperatorFirstName:   data.FirstName,
-			OperatorLastName:    data.LastName,
-			OperatorPhoneNumber: data.PhoneNumber,
-			OperatorLineId:      data.LineId,
-			CreatedAt:           data.CreatedAt,
-			UpdatedAt:           data.UpdatedAt,
+		for _, dataOps := range data.OpsAccount {
+			UserAccountOperator := structure.Operators{
+				OperatorId:          dataOps.ID,
+				OperatorUserName:    dataOps.Username,
+				OperatorFirstName:   dataOps.FirstName,
+				OperatorLastName:    dataOps.LastName,
+				OperatorPhoneNumber: dataOps.PhoneNumber,
+				OperatorLineId:      dataOps.LineId,
+				CreatedAt:           dataOps.CreatedAt,
+				UpdatedAt:           dataOps.UpdatedAt,
+			}
+			UserAccountOperatorArray = append(UserAccountOperatorArray, UserAccountOperator)
 		}
-		DataArray = append(DataArray, UserAccountOperator)
-	}
-	var UserAccountStructure = structure.GetSubOwner{
-		OwnerId:             ownerId,
-		OwnerUserName:       owner.Username,
-		OwnerFirstName:      owner.FirstName,
-		OwnerLastName:       owner.LastName,
-		OwnerPhoneNumber:    owner.PhoneNumber,
-		OwnerLineId:         owner.LineId,
-		UserAccountOperator: DataArray,
+		UserAccountStructure = structure.GetSubOwner{
+			OwnerId:             data.ID,
+			OwnerUserName:       data.Username,
+			OwnerFirstName:      data.FirstName,
+			OwnerLastName:       data.LastName,
+			OwnerPhoneNumber:    data.PhoneNumber,
+			OwnerLineId:         data.LineId,
+			UserAccountOperator: UserAccountOperatorArray,
+		}
 	}
 	response = UserAccountStructure
 	return
@@ -365,7 +363,7 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 	for _, data := range res {
 		id := int(data.ID)
 
-		owner, err := ctrl.access.RDBMS.GetAccount(int(data.SubOwnerId))
+		owner, err := ctrl.access.RDBMS.GetAccount(int(*data.SubOwnerId))
 		if err != nil {
 			Error = err
 			return
@@ -378,24 +376,26 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 			OperatorLastName:    data.LastName,
 			OperatorPhoneNumber: data.PhoneNumber,
 			OperatorLineId:      data.LineId,
-			OwnerId:             data.SubOwnerId,
+			OwnerId:             *data.SubOwnerId,
 			OwnerName:           owner.FirstName + " " + owner.LastName,
 			CreatedAt:           data.CreatedAt,
 			UpdatedAt:           data.UpdatedAt,
 		}
 		DataArray = append(DataArray, UserAccountStructure)
 	}
-	//response.Paginator = &pagination
-	//response.Detail = DataArray
 	response = DataArray
 	return
 }
 
 func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetOwnerByOperator, Error error) {
 
-	_, err := ctrl.access.RDBMS.CheckAccountId(uint(OperatorId))
+	check, err := ctrl.access.RDBMS.CheckAccountId(uint(OperatorId))
 	if err != nil {
 		Error = errors.New("record not found")
+		return
+	}
+	if check.Role != string(constant.Operator) {
+		Error = errors.New("สิทธิ์ของคุณไม่ถูกต้อง")
 		return
 	}
 	ops, err := ctrl.access.RDBMS.GetOwnerByIdOps(OperatorId)
@@ -403,21 +403,16 @@ func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetO
 		Error = err
 		return
 	}
-	if ops.Role != string(constant.Operator) {
-		Error = errors.New("สิทธิ์ของคุณไม่ถูกต้อง")
-		return
-	}
 
-	opsId := int(ops.SubOwnerId)
+	opsId := int(*ops.SubOwnerId)
 	owner, err := ctrl.access.RDBMS.GetAccount(opsId)
 	if err != nil {
 		Error = err
 		return
 	}
-	OwnerId := int(owner.ID)
 	response = structure.GetOwnerByOperator{
 		Operator: structure.Operator{
-			Id:         int(ops.SubOwnerId),
+			Id:          ops.ID,
 			UserName:    ops.Username,
 			FirstName:   ops.FirstName,
 			LastName:    ops.LastName,
@@ -426,7 +421,7 @@ func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetO
 			CreatedAt:   ops.CreatedAt,
 			UpdatedAt:   ops.UpdatedAt,
 			Owner: structure.Owner{
-				OwnerId:     OwnerId,
+				OwnerId:     owner.ID,
 				FirstName:   owner.FirstName,
 				LastName:    owner.LastName,
 				PhoneNumber: owner.PhoneNumber,
@@ -556,10 +551,12 @@ func (ctrl *APIControl) DeleteAccount(id uint) (Error error) {
 			return
 		}
 		for _, data := range ops {
-			err = ctrl.access.RDBMS.DeleteAccount(data.ID)
-			if err != nil {
-				Error = err
-				return
+			for _, delOps := range data.OpsAccount{
+				err = ctrl.access.RDBMS.DeleteAccount(delOps.ID)
+				if err != nil {
+					Error = err
+					return
+				}
 			}
 		}
 	} else {

@@ -4,9 +4,11 @@ import "errors"
 
 const (
 	LocalsKeyControl string = "CTRL"
+	SecretKey = "T-DEV Co., Ltd."
+	Http = "http://www.localhost:8080/qr"
 )
-const SecretKey = "T-DEV Co., Ltd."
-const Http = "http://www.localhost:8080/qr"
+
+
 
 type UserRole string
 

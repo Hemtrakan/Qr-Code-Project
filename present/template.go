@@ -1,9 +1,13 @@
 package present
 
-//func getTemplate(context *fiber.Ctx) error {
+//func TestQrCode(context *fiber.Ctx) error {
 //	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-//	res := api.GetTemplate()
-//	return context.Active(http.StatusOK).JSON(res)
+//	res,err := api.TestQrCode()
+//	if err != nil {
+//			return utility.FiberError(context, http.StatusBadRequest, "record not found")
+//
+//	}
+//	return context.Status(http.StatusOK).JSON(res)
 //}
 
 //func getByIdTeamPage(context *fiber.Ctx) error {

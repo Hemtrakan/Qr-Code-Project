@@ -3,6 +3,7 @@ package structure
 import (
 	"github.com/gofrs/uuid"
 	"gorm.io/datatypes"
+	rdbmsstructure "qrcode/access/rdbms/structure"
 	"time"
 )
 
@@ -12,7 +13,7 @@ type FileZipByTemplateName struct {
 }
 
 type FileZipByOwner struct {
-	OwnerId      uint   `json:"owner_id" validate:"required"`
+	OwnerId uint `json:"owner_id" validate:"required"`
 }
 
 type FileZip struct {
@@ -33,13 +34,19 @@ type GetQrCode struct {
 }
 
 type GetDataQrCode struct {
-	QrCodeId     string         `json:"qr_code_id"`
-	Info         datatypes.JSON `json:"info"`
-	Ops          datatypes.JSON `json:"ops"`
-	HistoryInfo  []GetHistory   `json:"history_info"`
-	OwnerId      int            `json:"owner_id"`
-	TemplateName string         `json:"template_name"`
-	CodeName     string         `json:"code_name"`
+	QrCodeId     string                       `json:"qr_code_id"`
+	Info         datatypes.JSON               `json:"info"`
+	HistoryInfo  []rdbmsstructure.HistoryInfo `json:"history_info"`
+	Ops          []rdbmsstructure.Ops         `json:"ops"`
+	OwnerId      int                          `json:"owner_id"`
+	TemplateName string                       `json:"template_name"`
+	CodeName     string                       `json:"code_name"`
+}
+
+type GetOps struct {
+	Ops       datatypes.JSON
+	UserId    uint
+	UpdatedAt time.Time
 }
 
 type GetHistory struct {
@@ -69,10 +76,25 @@ type InsertDataQrCode struct {
 	TemplateName string      `json:"template_name" validate:"required"`
 	Info         interface{} `json:"info" validate:"required"`
 }
+
+type UpdateHistoryInfoDataQrCode struct {
+	UserId      uint        `json:"user_id" validate:"required"`
+	OwnerId     uint        `json:"owner_id" validate:"required"`
+	QrCodeId    uuid.UUID   `json:"qr_code_id" validate:"required"`
+	HistoryInfo interface{} `json:"history_info" validate:"required"`
+}
+
+type UpdateOpsDataQrCode struct {
+	UserId   uint        `json:"user_id" validate:"required"`
+	OwnerId  uint        `json:"owner_id" validate:"required"`
+	QrCodeId uuid.UUID   `json:"qr_code_id" validate:"required"`
+	Ops      interface{} `json:"ops" validate:"required"`
+}
+
 type DelQrCode struct {
 	QrCodeId []string `json:"qr_code_id" validate:"required"`
 }
 
 type StatusQrCode struct {
-	Active   *bool      `json:"active"`
+	Active *bool `json:"active"`
 }

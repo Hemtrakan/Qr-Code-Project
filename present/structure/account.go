@@ -28,7 +28,7 @@ type UserAccount struct {
 	PhoneNumber string `json:"phonenumber"`
 	LineId      string `json:"lineid"`
 	Role        string `json:"role"`
-	SubOwnerId  int    `json:"sub_owner_id"`
+	SubOwnerId  *uint  `json:"sub_owner_id"`
 }
 
 type GetOwnerByOperator struct {
@@ -36,7 +36,7 @@ type GetOwnerByOperator struct {
 }
 
 type Operator struct {
-	Id          int       `json:"operator_id"`
+	Id          uint      `json:"operator_id"`
 	UserName    string    `json:"operator_username"`
 	FirstName   string    `json:"operator_firstname"`
 	LastName    string    `json:"operator_lastname"`
@@ -48,7 +48,7 @@ type Operator struct {
 }
 
 type Owner struct {
-	OwnerId     int       `json:"owner_id"`
+	OwnerId     uint      `json:"owner_id"`
 	FirstName   string    `json:"owner_firstname"`
 	LastName    string    `json:"owner_lastname"`
 	PhoneNumber string    `json:"owner_phonenumber"`
@@ -80,7 +80,7 @@ type UserAccountOwner struct {
 }
 
 type GetSubOwner struct {
-	OwnerId             int         `json:"owner_id"`
+	OwnerId             uint        `json:"owner_id"`
 	OwnerUserName       string      `json:"owner_user_name"`
 	OwnerFirstName      string      `json:"owner_first_name"`
 	OwnerLastName       string      `json:"owner_last_name"`
@@ -90,7 +90,7 @@ type GetSubOwner struct {
 }
 
 type Operators struct {
-	OperatorId          int       `json:"operator_id"`
+	OperatorId          uint      `json:"operator_id"`
 	OperatorUserName    string    `json:"operator_user_name"`
 	OperatorFirstName   string    `json:"operator_first_name"`
 	OperatorLastName    string    `json:"operator_last_name"`

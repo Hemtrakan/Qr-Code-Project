@@ -11,5 +11,5 @@ type RegisterOperator struct {
 	Phonenumber string `json:"phonenumber" validate:"required"`
 	Lineid      string `json:"lineid" validate:"required"`
 	Role        string `json:"role"`
-	SubOwnerId  uint   `json:"sub_owner_id"`
+	SubOwnerId  *uint   `json:"sub_owner_id"`
 }

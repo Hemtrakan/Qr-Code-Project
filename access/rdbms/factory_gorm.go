@@ -32,7 +32,11 @@ func gormInstance(env *environment.Properties) GORMFactory {
 	_ = db.AutoMigrate(
 		&rdbmsstructure.Account{},
 		&rdbmsstructure.QrCode{},
-		&rdbmsstructure.History{},
+		&rdbmsstructure.HistoryInfo{},
+		&rdbmsstructure.Ops{},
+		//&rdbmsstructure.TestHistory{},
+		//&rdbmsstructure.TestOps{},
+		//&rdbmsstructure.TestQrCode{},
 	)
 	return GORMFactory{env: env, client: db}
 }
@@ -106,7 +110,7 @@ func (factory GORMFactory) CheckAccountId(id uint) (response *rdbmsstructure.Acc
 
 func (factory GORMFactory) GetOperatorById(OperatorId int, OwnerId uint) (response rdbmsstructure.Account, Error error) {
 	var data rdbmsstructure.Account
-	err := factory.client.Where("id = ? and sub_owner_id = ? ", OperatorId,OwnerId).First(&data).Error
+	err := factory.client.Where("id = ? and sub_owner_id = ? ", OperatorId, OwnerId).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -122,7 +126,7 @@ func (factory GORMFactory) GetOperatorById(OperatorId int, OwnerId uint) (respon
 
 func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account, Error error) {
 	var data rdbmsstructure.Account
-	err := factory.client.Where("id = ?", id).First(&data).Error
+	err := factory.client.Where("id = ?", id).Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -136,7 +140,7 @@ func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account, 
 	return
 }
 
-func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Account,  Error error) {
+func (factory GORMFactory) GetAllAccountOwner() (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
 	//db := factory.client.Where("role = ?", constant.Owner)
 	//if Firstname != nil {
@@ -196,7 +200,7 @@ func (factory GORMFactory) GetAllAccountOperatorByOwnerID(OwnerId uint) (respons
 	return
 }
 
-func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Account,  Error error) {
+func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
 	err := factory.client.Where("role = ?", constant.Operator).Order("created_at desc").Find(&data).Error
 	if err != nil {
@@ -241,7 +245,7 @@ func (factory GORMFactory) GetAllAccountOperator() (response []rdbmsstructure.Ac
 
 func (factory GORMFactory) GetSubOwner(OwnerId int) (response []rdbmsstructure.Account, Error error) {
 	var data []rdbmsstructure.Account
-	err := factory.client.Where("sub_owner_id = ?", OwnerId).Order("created_at desc").Find(&data).Error
+	err := factory.client.Preload("OpsAccount").Where("id = ?", OwnerId).Order("created_at desc").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -257,7 +261,6 @@ func (factory GORMFactory) GetSubOwner(OwnerId int) (response []rdbmsstructure.A
 
 func (factory GORMFactory) GetOwnerByIdOps(OperatorId int) (response rdbmsstructure.Account, Error error) {
 	var data rdbmsstructure.Account
-	//err := factory.client.Raw("SELECT * FROM accounts as ownerAccount INNER JOIN accounts as OpsAccount ON ownerAccount.id = OpsAccount.sub_owner_id").Where("sub_owner_id = ?", OperatorId).Find(&data).Error
 	err := factory.client.Where("id = ?", OperatorId).Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -329,9 +332,11 @@ func (factory GORMFactory) DeleteAccountByOwner(OwnerId uint, OperatorId int) (E
 
 // -- QR-Code
 
-func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response rdbmsstructure.QrCode, Error error) {
-	var data rdbmsstructure.QrCode
-	err := factory.client.Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
+func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response []rdbmsstructure.QrCode, Error error) {
+	var data []rdbmsstructure.QrCode
+	db := factory.client
+
+	err := db.Preload("DataHistory").Preload("DataOps").Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -350,20 +355,35 @@ func (factory GORMFactory) CreateQrCode(QrCode rdbmsstructure.QrCode) (Error err
 	if db != nil {
 		return db
 	}
-	return nil
+	return
 }
 
-func (factory GORMFactory) UpdateQrCodeById(QrCode rdbmsstructure.QrCode) (Error error) {
+func (factory GORMFactory) InsertDataQrCodeById(QrCode rdbmsstructure.QrCode) (Error error) {
 	db := factory.client.Where("qr_code_uuid = ?", QrCode.QrCodeUUID).Updates(&QrCode).Error
 	if db != nil {
 		return db
 	}
-	return nil
+	return
+}
+
+func (factory GORMFactory) UpdateHistoryInfoQrCodeById(HistoryInfo rdbmsstructure.HistoryInfo) (Error error) {
+	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&HistoryInfo).Error
+	if db != nil {
+		return db
+	}
+	return
+}
+func (factory GORMFactory) UpdateOpsQrCodeById(Ops rdbmsstructure.Ops) (Error error) {
+	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Ops).Error
+	if db != nil {
+		return db
+	}
+	return
 }
 
 func (factory GORMFactory) UpdateQrCodeActive(QrCode rdbmsstructure.QrCode) (Error error) {
 	var data rdbmsstructure.QrCode
-	db := factory.client.Where("qr_code_uuid = ?",QrCode.QrCodeUUID).Take(&data).Error
+	db := factory.client.Where("qr_code_uuid = ?", QrCode.QrCodeUUID).Take(&data).Error
 	if db != nil {
 		Error = db
 		return
@@ -376,7 +396,6 @@ func (factory GORMFactory) UpdateQrCodeActive(QrCode rdbmsstructure.QrCode) (Err
 	}
 	return nil
 }
-
 
 func (factory GORMFactory) CountCode(OwnerId uint, templateName, Code string) (response []rdbmsstructure.QrCode, Error error) {
 	var data []rdbmsstructure.QrCode
@@ -425,7 +444,6 @@ func (factory GORMFactory) GetQrCode(OwnerId uint, templateName string) (respons
 	response = data
 	return
 }
-
 
 func (factory GORMFactory) GetAllQrCode() (response []rdbmsstructure.QrCode, Error error) {
 	var data []rdbmsstructure.QrCode
@@ -495,8 +513,8 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 
 // -- TeamPage
 
-func (factory GORMFactory) GetHistory(QrCodeUUID string) (response []rdbmsstructure.History, Error error) {
-	var data []rdbmsstructure.History
+func (factory GORMFactory) GetHistory(QrCodeUUID string) (response []rdbmsstructure.HistoryInfo, Error error) {
+	var data []rdbmsstructure.HistoryInfo
 	err := factory.client.Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -511,7 +529,7 @@ func (factory GORMFactory) GetHistory(QrCodeUUID string) (response []rdbmsstruct
 	return
 }
 
-func (factory GORMFactory) InsertQrCode(QrCodeUUID string,QrCode rdbmsstructure.QrCode) (Error error) {
+func (factory GORMFactory) InsertQrCode(QrCodeUUID string, QrCode rdbmsstructure.QrCode) (Error error) {
 	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Updates(QrCode).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -526,10 +544,43 @@ func (factory GORMFactory) InsertQrCode(QrCodeUUID string,QrCode rdbmsstructure.
 	return
 }
 
-func (factory GORMFactory) InsertHistory(History rdbmsstructure.History) (Error error) {
-	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&History).Error
-	if db != nil {
-		return db
-	}
-	return nil
-}
+
+
+
+// test
+//func (factory GORMFactory) TestGetQrData() (response []rdbmsstructure.TestQrCode, Error error) {
+//	var data []rdbmsstructure.TestQrCode
+//	db := factory.client
+//	err := db.Preload("DataHistory").Preload("DataOps").Where("qr_code_id = ?", 1).Find(&data).Error
+//
+//	if err != nil {
+//		Error = errors.New("record not found")
+//		return
+//	}
+//	response = data
+//	return
+//}
+//
+//func (factory GORMFactory) TestInsertHistory(History rdbmsstructure.TestHistory) (Error error) {
+//	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&History).Error
+//	if db != nil {
+//		return db
+//	}
+//	return nil
+//}
+//
+//func (factory GORMFactory) TestInsertQR(Qr rdbmsstructure.TestQrCode) (Error error) {
+//	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Qr).Error
+//	if db != nil {
+//		return db
+//	}
+//	return nil
+//}
+//
+//func (factory GORMFactory) TestInsertOps(Ops rdbmsstructure.TestOps) (Error error) {
+//	db := factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Ops).Error
+//	if db != nil {
+//		return db
+//	}
+//	return nil
+//}

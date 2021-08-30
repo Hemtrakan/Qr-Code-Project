@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOperator, OwnerId uint) (Error error) {
+func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOperator, OwnerId *uint) (Error error) {
 	reqOperator.Username = strings.ToLower(reqOperator.Username)
 	reqOperator.Password = strings.Trim(reqOperator.Password, "\t \n")
 	reqOperator.Firstname = strings.Trim(reqOperator.Firstname, "\t \n")
@@ -100,7 +100,7 @@ func (ctrl *APIControl) GetOperatorById(OperatorId int, OwnerId uint) (response 
 		PhoneNumber: data.PhoneNumber,
 		LineId:      data.LineId,
 		Role:        data.Role,
-		SubOwnerId:  int(data.SubOwnerId),
+		SubOwnerId:  data.SubOwnerId,
 	}
 	return
 }
@@ -113,9 +113,8 @@ func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.Operator
 		return
 	}
 	for _, data := range res {
-		id := int(data.ID)
 		UserAccountStructure := structure.Operators{
-			OperatorId:          id,
+			OperatorId:          data.ID,
 			OperatorUserName:    data.Username,
 			OperatorFirstName:   data.FirstName,
 			OperatorLastName:    data.LastName,

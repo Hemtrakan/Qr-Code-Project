@@ -235,7 +235,7 @@ func admin(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	err := api.RegisterAdmin()
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, "สมัครไปแล้ว")
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberError(context, http.StatusOK, "สำหรับ UserAdmin")
 }

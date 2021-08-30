@@ -1,6 +1,8 @@
 package structure
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Account struct {
 	gorm.Model
@@ -11,5 +13,6 @@ type Account struct {
 	PhoneNumber string
 	LineId      string
 	Role        string
-	SubOwnerId  uint
+	SubOwnerId  *uint
+	OpsAccount  []Account `gorm:"foreignKey:SubOwnerId"`
 }

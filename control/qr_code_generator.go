@@ -7,6 +7,7 @@ import (
 	uuid2 "github.com/gofrs/uuid"
 	"github.com/yeqown/go-qrcode"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 	"io"
 	"os"
 	"qrcode/access/constant"
@@ -15,69 +16,8 @@ import (
 	"qrcode/utility"
 	"strconv"
 	"strings"
+	"time"
 )
-
-func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error error) {
-	var getQrCodeArray []structure.GetQrCode
-
-	data, err := ctrl.access.RDBMS.GetAllQrCode()
-	if err != nil {
-		Error = errors.New("ไม่มีข้อมูล")
-		return
-	}
-	for _, res := range data {
-		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
-		resGetQrCode := structure.GetQrCode{
-			OwnerId:       res.OwnerId,
-			OwnerUsername: owner.Username,
-			CreatedAt:     res.CreatedAt,
-			UpdatedAt:     res.UpdatedAt,
-			TemplateName:  res.TemplateName,
-			QrCodeId:      res.QrCodeUUID.String(),
-			CodeName:      res.Code + "-" + res.Count,
-			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
-			Active:        res.Active,
-		}
-		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
-	}
-	response = getQrCodeArray
-	return
-}
-
-func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
-	var getQrCodeArray []structure.GetQrCode
-	check, err := ctrl.access.RDBMS.CheckAccountId(uint(OwnerId))
-	if err != nil {
-		Error = errors.New("ไม่มีผู้ใช้คนนี้ในระบบ")
-		return
-	}
-	if !(check.Role == string(constant.Owner)) {
-		Error = errors.New("สิทธิ์ผู้ใช้งานไม่ถูกต้อง")
-		return
-	}
-	data, err := ctrl.access.RDBMS.GetQrCodeByOwnerId(OwnerId)
-	if err != nil {
-		Error = err
-		return
-	}
-	for _, res := range data {
-		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
-		resGetQrCode := structure.GetQrCode{
-			OwnerId:       res.OwnerId,
-			OwnerUsername: owner.Username,
-			CreatedAt:     res.CreatedAt,
-			UpdatedAt:     res.UpdatedAt,
-			TemplateName:  res.TemplateName,
-			QrCodeId:      res.QrCodeUUID.String(),
-			CodeName:      res.Code + "-" + res.Count,
-			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
-			Active:        res.Active,
-		}
-		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
-	}
-	response = getQrCodeArray
-	return
-}
 
 func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error error) {
 	check, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
@@ -103,12 +43,76 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 		First:        true,
 	}
 
-	err = ctrl.access.RDBMS.UpdateQrCodeById(data)
+	err = ctrl.access.RDBMS.InsertDataQrCodeById(data)
 	if err != nil {
 		Error = err
 		return
 	}
 
+	return
+}
+
+func (ctrl *APIControl) UpdateHistoryInfoDataQrCode(req *structure.UpdateHistoryInfoDataQrCode) (Error error) {
+	check, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
+	if err != nil {
+		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
+		return
+	}
+
+	b, err := json.Marshal(req.HistoryInfo)
+	if err != nil {
+		Error = err
+		return
+	}
+
+	data := rdbmsstructure.HistoryInfo{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+		QrCodeID:    req.QrCodeId,
+		HistoryInfo: datatypes.JSON(b),
+		UserId:      req.UserId, // id คนที่มาอัพเดทข้อมูล
+		QrCodeRefer: check.ID,
+	}
+
+	err = ctrl.access.RDBMS.UpdateHistoryInfoQrCodeById(data)
+	if err != nil {
+		Error = err
+		return
+	}
+	return
+}
+
+func (ctrl *APIControl) UpdateOpsDataQrCode(req *structure.UpdateOpsDataQrCode) (Error error) {
+	check, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
+	if err != nil {
+		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
+		return
+	}
+
+	b, err := json.Marshal(req.Ops)
+	if err != nil {
+		Error = err
+		return
+	}
+
+	data := rdbmsstructure.Ops{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+		QrCodeID:    req.QrCodeId,
+		Operator:    datatypes.JSON(b),
+		UserId:      req.UserId, // id คนที่มาอัพเดทข้อมูล
+		QrCodeRefer: check.ID,
+	}
+
+	err = ctrl.access.RDBMS.UpdateOpsQrCodeById(data)
+	if err != nil {
+		Error = err
+		return
+	}
 	return
 }
 
@@ -118,66 +122,26 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		Error = errors.New("ไม่มี QrCode นี้อยู่ในระบบ")
 		return
 	}
-	var HistoryArray []structure.GetHistory
-	History, err := ctrl.access.RDBMS.GetHistory(QrCodeId)
+	//var HistoryArray []structure.GetHistory
+	//var OpsArray []structure.GetOps
 
-	for _, h := range History {
-		dataHistory := structure.GetHistory{
-			HistoryInfo: h.HistoryInfo,
-			UserId:      h.UserId,
-			UpdatedAt:   h.UpdatedAt,
-		}
-		HistoryArray = append(HistoryArray, dataHistory)
-	}
 
-	response = structure.GetDataQrCode{
-		QrCodeId:     data.QrCodeUUID.String(),
-		Info:         data.Info,
-		Ops:          data.Ops,
-		OwnerId:      int(data.OwnerId),
-		TemplateName: data.TemplateName,
-		CodeName:     data.Code + "-" + data.Count,
-		HistoryInfo:  HistoryArray,
-	}
-	return
-}
 
-func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
-	if len(req.QrCodeId) == 0 {
-		Error = errors.New("ไม่มี Qr-Code ถูกส่งมา")
-	}
-	for _, del := range req.QrCodeId {
-		_, err := ctrl.access.RDBMS.GetDataQrCode(del)
-		if err != nil {
-			Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
-			return
-		}
-		err = ctrl.access.RDBMS.DeleteQrCode(del)
-		if err != nil {
-			Error = err
-			return
+	for _, qr := range data {
+		response = structure.GetDataQrCode{
+			QrCodeId:     qr.QrCodeUUID.String(),
+			Info:         qr.Info,
+			OwnerId:      int(qr.OwnerId),
+			TemplateName: qr.TemplateName,
+			CodeName:     qr.Code + "-" + qr.Count,
+			HistoryInfo:  qr.DataHistory,
+			Ops:          qr.DataOps,
 		}
 	}
 	return
 }
 
-func (ctrl *APIControl) UpdateStatusQrCode(QrCodeId string, req structure.StatusQrCode) (Error error) {
-	res, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
-	if err != nil {
-		Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
-		return
-	}
-	data := rdbmsstructure.QrCode{
-		QrCodeUUID: res.QrCodeUUID,
-		Active:     *req.Active,
-	}
-	err = ctrl.access.RDBMS.UpdateQrCodeActive(data)
-	if err != nil {
-		Error = err
-		return
-	}
-	return
-}
+//  todo ส่วนของการ CRUD QrCode
 
 func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 	req.CodeName = strings.Trim(req.CodeName, "\t \n")
@@ -241,7 +205,6 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 			OwnerId:      req.OwnerId,
 			TemplateName: req.TemplateName,
 			Info:         datatypes.JSON(byteInfo),
-			Ops:          datatypes.JSON(""),
 			QrCodeUUID:   uuid,
 			Code:         req.CodeName,
 			Count:        number,
@@ -259,6 +222,109 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 
 	return
 }
+
+func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error error) {
+	var getQrCodeArray []structure.GetQrCode
+
+	data, err := ctrl.access.RDBMS.GetAllQrCode()
+	if err != nil {
+		Error = errors.New("ไม่มีข้อมูล")
+		return
+	}
+	for _, res := range data {
+		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
+		resGetQrCode := structure.GetQrCode{
+			OwnerId:       res.OwnerId,
+			OwnerUsername: owner.Username,
+			CreatedAt:     res.CreatedAt,
+			UpdatedAt:     res.UpdatedAt,
+			TemplateName:  res.TemplateName,
+			QrCodeId:      res.QrCodeUUID.String(),
+			CodeName:      res.Code + "-" + res.Count,
+			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
+			Active:        res.Active,
+		}
+		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
+	}
+	response = getQrCodeArray
+	return
+}
+
+func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
+	var getQrCodeArray []structure.GetQrCode
+	check, err := ctrl.access.RDBMS.CheckAccountId(uint(OwnerId))
+	if err != nil {
+		Error = errors.New("ไม่มีผู้ใช้คนนี้ในระบบ")
+		return
+	}
+	if !(check.Role == string(constant.Owner)) {
+		Error = errors.New("สิทธิ์ผู้ใช้งานไม่ถูกต้อง")
+		return
+	}
+	data, err := ctrl.access.RDBMS.GetQrCodeByOwnerId(OwnerId)
+	if err != nil {
+		Error = err
+		return
+	}
+	for _, res := range data {
+		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
+		resGetQrCode := structure.GetQrCode{
+			OwnerId:       res.OwnerId,
+			OwnerUsername: owner.Username,
+			CreatedAt:     res.CreatedAt,
+			UpdatedAt:     res.UpdatedAt,
+			TemplateName:  res.TemplateName,
+			QrCodeId:      res.QrCodeUUID.String(),
+			CodeName:      res.Code + "-" + res.Count,
+			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
+			Active:        res.Active,
+		}
+		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
+	}
+	response = getQrCodeArray
+	return
+}
+
+func (ctrl *APIControl) UpdateStatusQrCode(QrCodeId string, req structure.StatusQrCode) (Error error) {
+	res, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
+	if err != nil {
+		Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
+		return
+	}
+	for _ , data := range  res {
+		Qr := rdbmsstructure.QrCode{
+			QrCodeUUID: data.QrCodeUUID,
+			Active:     *req.Active,
+		}
+		err = ctrl.access.RDBMS.UpdateQrCodeActive(Qr)
+		if err != nil {
+			Error = err
+			return
+		}
+	}
+	return
+}
+
+func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
+	if len(req.QrCodeId) == 0 {
+		Error = errors.New("ไม่มี Qr-Code ถูกส่งมา")
+	}
+	for _, del := range req.QrCodeId {
+		_, err := ctrl.access.RDBMS.GetDataQrCode(del)
+		if err != nil {
+			Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
+			return
+		}
+		err = ctrl.access.RDBMS.DeleteQrCode(del)
+		if err != nil {
+			Error = err
+			return
+		}
+	}
+	return
+}
+
+//  todo Exposed file QrCode
 
 func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Error error) {
 	var arrayFileName []structure.ArrayFileName
