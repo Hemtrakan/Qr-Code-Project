@@ -81,6 +81,7 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Put("changePasswordOwner", ChangePasswordOwner)
 	owner.Put("changePasswordOperator", ChangePasswordOperator)
 	owner.Delete("deleteAccount/:id", deleteAccountOperator)
+	owner.Put("updateStatusQrCode/:id", updateStatusQrCodeOwner)
 
 	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
 

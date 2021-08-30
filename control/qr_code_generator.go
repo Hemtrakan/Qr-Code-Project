@@ -287,7 +287,7 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 func (ctrl *APIControl) UpdateStatusQrCode(QrCodeId string, req structure.StatusQrCode) (Error error) {
 	res, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
 	if err != nil {
-		Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
+		Error = errors.New("Qr-Code ที่จะเปลี่ยนสถานะไม่มีอยู่ในระบบ")
 		return
 	}
 	for _ , data := range  res {

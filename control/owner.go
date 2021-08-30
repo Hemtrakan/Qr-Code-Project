@@ -209,3 +209,29 @@ func (ctrl *APIControl) ChangePasswordOwner(OwnerId uint, password structure.Cha
 	}
 	return
 }
+
+func (ctrl *APIControl) UpdateStatusQrCodeOwner(ownerId uint,QrCodeId string, req structure.StatusQrCode) (Error error) {
+	res, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
+	if err != nil {
+		Error = errors.New("Qr-Code ที่จะเปลี่ยนสถานะไม่มีอยู่ในระบบ")
+		return
+	}
+	for _ , data := range  res {
+		if data.OwnerId != ownerId{
+			Error = errors.New("ผู้ใช้งานไม่ถูกต้อง")
+			return
+		}
+
+
+		Qr := rdbmsstructure.QrCode{
+			QrCodeUUID: data.QrCodeUUID,
+			Active:     *req.Active,
+		}
+		err = ctrl.access.RDBMS.UpdateQrCodeActive(Qr)
+		if err != nil {
+			Error = err
+			return
+		}
+	}
+	return
+}

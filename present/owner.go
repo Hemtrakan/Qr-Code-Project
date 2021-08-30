@@ -126,7 +126,24 @@ func ChangePasswordOwner(context *fiber.Ctx) error {
 }
 
 
-
+func updateStatusQrCodeOwner(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var QrCode = new(structure.StatusQrCode)
+	if err := context.BodyParser(QrCode); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
+	}
+	QrCodeId := context.Params("id")
+	err := ValidateStruct(*QrCode)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	ownerId, err := getOwnerId(context)
+	err = api.UpdateStatusQrCodeOwner(ownerId,QrCodeId, *QrCode)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "เปลี่ยนสถานะ QrCode สำเร็จ")
+}
 
 func getQrCodeOwnerById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
