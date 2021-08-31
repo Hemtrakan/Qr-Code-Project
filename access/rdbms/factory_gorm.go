@@ -336,7 +336,7 @@ func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response []rdbmsstr
 	var data []rdbmsstructure.QrCode
 	db := factory.client
 
-	err := db.Preload("DataHistory").Preload("DataOps").Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
+	err := db.Preload("DataOps").Preload("DataHistory").Where("qr_code_uuid= ?", QrCodeUUID).Order("created_at desc").First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -346,6 +346,7 @@ func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response []rdbmsstr
 		}
 		return
 	}
+
 	response = data
 	return
 }
@@ -543,9 +544,6 @@ func (factory GORMFactory) InsertQrCode(QrCodeUUID string, QrCode rdbmsstructure
 	}
 	return
 }
-
-
-
 
 // test
 //func (factory GORMFactory) TestGetQrData() (response []rdbmsstructure.TestQrCode, Error error) {

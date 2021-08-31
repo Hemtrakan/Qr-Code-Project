@@ -6,11 +6,17 @@ import (
 )
 
 type Flavor string
+type URL string
 
 const (
 	Develop    Flavor = "DEVELOP"
 	Devspace   Flavor = "DEVSPACE"
 	Production Flavor = "PRODUCTION"
+)
+
+const(
+	URLFront URL = "https://4eb2-1-47-146-211.ngrok.io/viewdata/"
+	URLQRCode URL = "https://d055-1-47-146-211.ngrok.io/qr/"
 )
 
 type Properties struct {
@@ -27,25 +33,16 @@ type Properties struct {
 	GormUser string `env:"GORM_USER,default=postgres"`
 	GormPass string `env:"GORM_PASS,default=pgpassword"`
 	// --
-
-	// -- Minio
-	MinioBucketName string `env:"MINIO_BUCKET_NAME,default=tepa-implement"`
-	MinioEndpoint   string `env:"MINIO_ENDPOINT,default=sgp1.digitaloceanspaces.com"`
-	MinioKeyID      string `env:"MINIO_KEY_ID,default=BHARQKX7CH35NGKFRJ34"`
-	MinioSecretKey  string `env:"MINIO_SECRET_KEY,default=2wGM61EEeo3sjZyL16esk/YXvV5xrWNTe5t+1X/Hp28"`
-	// --
-
+	
 	//// -- authentication
 	//SecurityKey string `env:"SECURITY_KEY,default=t-T-DEV Co., Ltd."`
 	//// --
 
-	//// --
-	URLFront string `env:"URL_FRONT,default=http://localhost:12000/viewdata"`
-	URLQRCode string `env:"URL_QR_CODE,default=http://localhost:8080/qr"`
-
-	//GRPC
-	//ServerGRPC string `env:"SERVER_GRPC,default=inventory-api:9090"`
-	// --
+	//// -- URL
+	URLFront string `env:"URL_FRONT,default=http://localhost:12000/viewdata/"`
+	//URLFront URL `env:"URL_FRONT,default=https://4eb2-1-47-146-211.ngrok.io/viewdata/"`
+	URLQRCode string `env:"URL_QR_CODE,default=http://localhost:8080/qr/"`
+	//URLQRCode URL `env:"URL_QR_CODE,default=https://d055-1-47-146-211.ngrok.io/qr/"`
 
 }
 

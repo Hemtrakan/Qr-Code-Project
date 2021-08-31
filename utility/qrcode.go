@@ -2,6 +2,7 @@ package utility
 
 import (
 	"errors"
+	"log"
 	"os"
 	"qrcode/access/constant"
 )
@@ -25,21 +26,12 @@ func CreatesNewDirectory() (Error error) {
 	return
 }
 
-func RemoveAllFileLocation() (Error error) {
-	err := os.RemoveAll(string(constant.SaveFileLocationZipFile))
-	if err != nil {
-		Error = err
-		return
-	}
+func RemoveAllFileLocation() {
+	err :=os.RemoveAll(string(constant.SaveFileLocationZipFile))
 	err = os.RemoveAll(string(constant.SaveFileLocationQrCode))
-	if err != nil {
-		Error = err
-		return
-	}
 	err = os.RemoveAll(string(constant.SaveFileLocationExposed))
 	if err != nil {
-		Error = err
-		return
+		log.Println("err",err.Error())
 	}
 	return
 }

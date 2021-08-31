@@ -19,6 +19,8 @@ import (
 	"time"
 )
 
+// todo ส่วนของการ เพิ่มข้อมูล แก้ไขข้อมูล ลง Qr-Code
+
 func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error error) {
 	check, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
 	if err != nil {
@@ -121,20 +123,41 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		Error = errors.New("ไม่มี QrCode นี้อยู่ในระบบ")
 		return
 	}
-	//var HistoryArray []structure.GetHistory
-	//var OpsArray []structure.GetOps
-
-
-
+	var opsArray []structure.GetOps
+	var HistoryArray []structure.GetHistory
 	for _, qr := range data {
+		res, _ := ctrl.access.RDBMS.GetAccount(int(qr.OwnerId))
+		for _, DataOps := range qr.DataOps {
+			User, _ := ctrl.access.RDBMS.GetAccount(int(DataOps.UserId))
+			ops := structure.GetOps{
+				Ops:       DataOps.Operator,
+				User:      User.Username,
+				UpdatedAt: DataOps.CreatedAt,
+				Role: User.Role,
+			}
+			opsArray = append(opsArray, ops)
+		}
+
+		for _, DataHistory := range qr.DataHistory {
+			User, _ := ctrl.access.RDBMS.GetAccount(int(DataHistory.UserId))
+			History := structure.GetHistory{
+				HistoryInfo: DataHistory.HistoryInfo,
+				User:        User.Username,
+				UpdatedAt:   DataHistory.CreatedAt,
+				Role: User.Role,
+			}
+			HistoryArray = append(HistoryArray, History)
+		}
+
 		response = structure.GetDataQrCode{
 			QrCodeId:     qr.QrCodeUUID.String(),
 			Info:         qr.Info,
 			OwnerId:      int(qr.OwnerId),
 			TemplateName: qr.TemplateName,
 			CodeName:     qr.Code + "-" + qr.Count,
-			HistoryInfo:  qr.DataHistory,
-			Ops:          qr.DataOps,
+			HistoryInfo:  HistoryArray,
+			Ops:          opsArray,
+			OwnerName:    res.FirstName + " " + res.LastName,
 		}
 	}
 	return
@@ -240,7 +263,7 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 			TemplateName:  res.TemplateName,
 			QrCodeId:      res.QrCodeUUID.String(),
 			CodeName:      res.Code + "-" + res.Count,
-			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
+			URL:           string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String(),
 			Active:        res.Active,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
@@ -275,7 +298,7 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 			TemplateName:  res.TemplateName,
 			QrCodeId:      res.QrCodeUUID.String(),
 			CodeName:      res.Code + "-" + res.Count,
-			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
+			URL:           string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String(),
 			Active:        res.Active,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
@@ -290,7 +313,7 @@ func (ctrl *APIControl) UpdateStatusQrCode(QrCodeId string, req structure.Status
 		Error = errors.New("Qr-Code ที่จะเปลี่ยนสถานะไม่มีอยู่ในระบบ")
 		return
 	}
-	for _ , data := range  res {
+	for _, data := range res {
 		Qr := rdbmsstructure.QrCode{
 			QrCodeUUID: data.QrCodeUUID,
 			Active:     *req.Active,
@@ -348,7 +371,7 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		}
 		filename := data.Code + "-" + data.Count
 		//todo สร้าง QrCode
-		qrc, err := qrcode.New(ctrl.access.ENV.URLQRCode + "/" + data.QrCodeUUID.String())
+		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + data.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
@@ -410,7 +433,7 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 	var pathQr string
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
-		qrc, err := qrcode.New(ctrl.access.ENV.URLQRCode + "/" + res.QrCodeUUID.String())
+		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
@@ -476,7 +499,7 @@ func (ctrl *APIControl) AddFileZipByTemplateName(req structure.FileZipByTemplate
 	var pathQr string
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
-		qrc, err := qrcode.New(ctrl.access.ENV.URLQRCode + "/" + res.QrCodeUUID.String())
+		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
