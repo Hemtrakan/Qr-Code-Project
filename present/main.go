@@ -121,7 +121,7 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Delete("deleteAccount/:id", deleteAccount)
 
 	// -- createQrCode
-	admin.Get("getDateQrCodeById/:id", getDataQrCode)
+	admin.Get("getDateQrCodeById/:id", getDataQrCodeJson)
 	admin.Post("createQrCode", createQrCode)
 	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
 	admin.Post("genQrCodeToFileZipByOwner", genQrCodeToFileZipByOwner)
@@ -134,7 +134,7 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("updateOpsDataQrCode", updateOpsDataQrCode)
 
 
-	admin.Delete("deQrCode", deleteQrCode) // todo ลบ QrCode
+	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 	admin.Put("updateStatusQrCode/:id", updateStatusQrCode)
 	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
 
