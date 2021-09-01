@@ -13,7 +13,7 @@ import (
 )
 
 type GORMFactory struct {
-	env    *environment.Properties
+	env *environment.Properties
 }
 
 func getTemplate(context *fiber.Ctx) error {
@@ -110,30 +110,19 @@ func getDataQrCodeJson(context *fiber.Ctx) error {
 }
 
 func getDataQrCode(context *fiber.Ctx) error {
-	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	id := context.Params("id")
+	//api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	//id := context.Params("id")
 	contentType := context.Get("Content-Type")
 	if contentType == "" {
-		url := string(environment.URLFront) + id
+		url := string(environment.URLFront) + context.Params("*")
 		if err := proxy.Do(context, url); err != nil {
 			return err
 		}
 		// Remove Server header from response
 		context.Response().Header.Del(fiber.HeaderServer)
 		return nil
-	} else if contentType == "application/json;charset=UTF-8" {
-		res, err := api.GetDataQrCode(id)
-		if err != nil {
-			return utility.FiberError(context, http.StatusBadRequest, err.Error())
-		}
-		return context.Status(http.StatusOK).JSON(res)
-	} else {
-		res, err := api.GetDataQrCode(id)
-		if err != nil {
-			return utility.FiberError(context, http.StatusBadRequest, err.Error())
-		}
-		return context.Status(http.StatusOK).JSON(res)
 	}
+	return utility.FiberError(context,http.StatusBadRequest,"ไม่สามารถแสดงหน้านี้ได้")
 }
 
 func createQrCode(context *fiber.Ctx) error {
@@ -153,7 +142,6 @@ func createQrCode(context *fiber.Ctx) error {
 	//return context.Download(fileZip)
 	return utility.FiberError(context, http.StatusOK, "สร้าง QrCode สำเร็จ")
 }
-
 
 func genQrCodeToFileZipByQrCodeId(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)

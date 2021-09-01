@@ -47,9 +47,11 @@ func APICreate(ctrl *control.APIControl) {
 	api.Post("admin", admin) // todo สำหรับ สมัคร admin เท่านั้น
 
 	qr := app.Group("/qr")
-	qr.Get("/:id", getDataQrCode)                      //  Id >>> QrCodeUUId
+	qr.Get("*", getDataQrCode)                    //  Id >>> QrCodeUUId
 	qr.Get("getDataQrCodeJson/:id", getDataQrCodeJson) //  Id >>> QrCodeUUId
 
+	qrApi := app.Group("/qr-api")
+	qrApi.Get("getDataQrCodeJson/:id", getDataQrCodeJson)
 	// -- Todo Owner
 	owner := app.Group("/owner")
 	owner.Post("login", login)
@@ -84,6 +86,10 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Put("updateStatusQrCode/:id", updateStatusQrCodeOwner)
 
 	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
+	owner.Post("insertDataQrCode", insertDataQrCode)
+	owner.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
+	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)
+
 
 	// -- Todo Admin
 	admin := app.Group("/admin")

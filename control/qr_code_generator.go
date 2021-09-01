@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"errors"
+	"fmt"
 	uuid2 "github.com/gofrs/uuid"
 	"github.com/yeqown/go-qrcode"
 	"gorm.io/datatypes"
@@ -59,6 +60,9 @@ func (ctrl *APIControl) UpdateHistoryInfoDataQrCode(req *structure.UpdateHistory
 		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
 		return
 	}
+
+	//checkAccount , err := ctrl.access.RDBMS.GetAccount(int(req.UserId))
+	//if checkAccount
 
 	b, err := json.Marshal(req.HistoryInfo)
 	if err != nil {
@@ -434,6 +438,8 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
 		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
+		fmt.Println("qr c:",qrc)
+		fmt.Println("Url c:",string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
