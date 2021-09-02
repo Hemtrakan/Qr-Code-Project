@@ -9,11 +9,13 @@ type Templates string
 const (
 	ServiceWashingMachine Templates = "serviceWashingMachine"
 	Computer              Templates = "computer"
+	OfficeEquipment       Templates = "officeEquipment"
 )
 
 var Template = []Templates{
 	ServiceWashingMachine,
 	Computer,
+	OfficeEquipment,
 }
 
 func (Templates Templates) Templates() (result *string, Errors error) {
@@ -24,10 +26,11 @@ func (Templates Templates) Templates() (result *string, Errors error) {
 	case Computer:
 		TemplatesName := "computer"
 		result = &TemplatesName
+	case OfficeEquipment:
+		TemplatesName := "officeEquipment"
+		result = &TemplatesName
 	default:
 		Errors = errors.New("unimplemented")
 	}
 	return
 }
-
-
