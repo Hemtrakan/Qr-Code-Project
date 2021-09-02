@@ -4,7 +4,7 @@ import (
 	"errors"
 	"qrcode/access/constant"
 	"qrcode/present/structure/templates/computer"
-	"qrcode/present/structure/templates/knex"
+	"qrcode/present/structure/templates/officeequipment"
 )
 
 func CheckTemplate(Templates string) (result interface{}, Error error) {
@@ -16,8 +16,8 @@ func CheckTemplate(Templates string) (result interface{}, Error error) {
 		result = computer.Info{}
 		return
 	}
-	if Templates == string(constant.ServiceWashingMachine) {
-		result = knex.WashingMachineInfo{}
+	if Templates == string(constant.OfficeEquipment) {
+		result = officeequipment.Info{}
 		return
 	}
 	Error = errors.New("ไม่มี template นี้อยู่ในระบบ")

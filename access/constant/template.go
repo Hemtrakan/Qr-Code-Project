@@ -7,22 +7,22 @@ import (
 type Templates string
 
 const (
-	ServiceWashingMachine Templates = "serviceWashingMachine"
+	//ServiceWashingMachine Templates = "serviceWashingMachine"
 	Computer              Templates = "computer"
 	OfficeEquipment       Templates = "officeEquipment"
 )
 
 var Template = []Templates{
-	ServiceWashingMachine,
+	//ServiceWashingMachine,
 	Computer,
 	OfficeEquipment,
 }
 
 func (Templates Templates) Templates() (result *string, Errors error) {
 	switch Templates {
-	case ServiceWashingMachine:
-		TemplatesName := "serviceWashingMachine"
-		result = &TemplatesName
+	//case ServiceWashingMachine:
+	//	TemplatesName := "serviceWashingMachine"
+	//	result = &TemplatesName
 	case Computer:
 		TemplatesName := "computer"
 		result = &TemplatesName
