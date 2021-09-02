@@ -75,6 +75,7 @@ func APICreate(ctrl *control.APIControl) {
 	}))
 	// -- API Owner Account
 	owner.Get("getAccount", getAccount)
+
 	owner.Post("register_operator", registerOperatorOwner)
 
 	owner.Get("getOperator", getOperator) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner

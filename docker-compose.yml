@@ -2,11 +2,11 @@ version: '3'
 
 services:
   qrcode-rdbms:
-    image: kartoza/postgis:latest
+    image: postgres
     environment:
+      POSTGRES_DB: qr_code
       POSTGRES_USER: postgres
-      POSTGRES_PASS: pgpassword
-      POSTGRES_DBNAME: qr_code
+      POSTGRES_PASSWORD: pgpassword
     volumes:
       - './.postgresql/:/var/lib/postgresql'
     ports:

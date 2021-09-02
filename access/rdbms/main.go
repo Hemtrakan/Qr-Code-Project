@@ -40,7 +40,6 @@ type FactoryInterface interface {
 
 
 	// Template
-	GetHistory(QrCodeUUID string) (response []rdbmsstructure.HistoryInfo,Error error)
 	InsertQrCode(QrCodeUUID string,QrCode rdbmsstructure.QrCode) (Error error)
 
 	// Acconut

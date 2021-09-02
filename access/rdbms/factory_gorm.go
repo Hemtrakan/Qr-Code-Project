@@ -25,9 +25,10 @@ func gormInstance(env *environment.Properties) GORMFactory {
 		panic(fmt.Sprintf("failed to connect database : %s", err.Error()))
 		//panic(fmt.Sprintf("failed to connect database : %s", err.Error()))
 	}
-	if env.Flavor != environment.Production {
-		db = db.Debug()
-	}
+
+	//if env.Flavor != environment.Production {
+	//	db = db.Debug()
+	//}
 
 	_ = db.AutoMigrate(
 		&rdbmsstructure.Account{},
@@ -94,6 +95,8 @@ func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsst
 func (factory GORMFactory) CheckAccountId(id uint) (response *rdbmsstructure.Account, Error error) {
 	var data *rdbmsstructure.Account
 	err := factory.client.Where("id = ?", id).First(&data).Error
+	fmt.Println("rdbms2 : ",data)
+
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -105,6 +108,7 @@ func (factory GORMFactory) CheckAccountId(id uint) (response *rdbmsstructure.Acc
 		return
 	}
 	response = data
+	fmt.Println("rdbms3 : ")
 	return
 }
 
@@ -126,7 +130,7 @@ func (factory GORMFactory) GetOperatorById(OperatorId int, OwnerId uint) (respon
 
 func (factory GORMFactory) GetAccount(id int) (response rdbmsstructure.Account, Error error) {
 	var data rdbmsstructure.Account
-	err := factory.client.Where("id = ?", id).Find(&data).Error
+	err := factory.client.Where("id = ?", id).Take(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -514,21 +518,6 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 
 // -- TeamPage
 
-func (factory GORMFactory) GetHistory(QrCodeUUID string) (response []rdbmsstructure.HistoryInfo, Error error) {
-	var data []rdbmsstructure.HistoryInfo
-	err := factory.client.Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-		} else {
-			Error = errors.New("record not found")
-			return
-		}
-		return
-	}
-	response = data
-	return
-}
 
 func (factory GORMFactory) InsertQrCode(QrCodeUUID string, QrCode rdbmsstructure.QrCode) (Error error) {
 	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Updates(QrCode).Error

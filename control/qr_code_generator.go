@@ -258,7 +258,11 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 		return
 	}
 	for _, res := range data {
-		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
+		owner, err := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
+		if err != nil {
+			Error = err
+			return
+		}
 		resGetQrCode := structure.GetQrCode{
 			OwnerId:       res.OwnerId,
 			OwnerUsername: owner.Username,
@@ -267,18 +271,20 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 			TemplateName:  res.TemplateName,
 			QrCodeId:      res.QrCodeUUID.String(),
 			CodeName:      res.Code + "-" + res.Count,
-			URL:           string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String(),
+			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
 			Active:        res.Active,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
 	response = getQrCodeArray
+
 	return
 }
 
 func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
 	var getQrCodeArray []structure.GetQrCode
-	check, err := ctrl.access.RDBMS.CheckAccountId(uint(OwnerId))
+	fmt.Println("1 : ", OwnerId)
+	check, err := ctrl.access.RDBMS.GetAccount(OwnerId)
 	if err != nil {
 		Error = errors.New("ไม่มีผู้ใช้คนนี้ในระบบ")
 		return
@@ -292,22 +298,23 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 		Error = err
 		return
 	}
+	fmt.Println("2 : ",check)
 	for _, res := range data {
-		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
 		resGetQrCode := structure.GetQrCode{
 			OwnerId:       res.OwnerId,
-			OwnerUsername: owner.Username,
+			OwnerUsername: check.Username,
 			CreatedAt:     res.CreatedAt,
 			UpdatedAt:     res.UpdatedAt,
 			TemplateName:  res.TemplateName,
 			QrCodeId:      res.QrCodeUUID.String(),
 			CodeName:      res.Code + "-" + res.Count,
-			URL:           string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String(),
+			URL:           ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String(),
 			Active:        res.Active,
 		}
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
 	response = getQrCodeArray
+	fmt.Println("3")
 	return
 }
 
@@ -439,7 +446,6 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 	for _, res := range data {
 		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
 		fmt.Println("qr c:",qrc)
-		fmt.Println("Url c:",string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return

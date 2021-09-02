@@ -15,8 +15,9 @@ const (
 )
 
 const(
-	URLFront URL = "https://4eb2-1-47-146-211.ngrok.io/viewdata/"
-	URLQRCode URL = "https://d055-1-47-146-211.ngrok.io/qr/"
+	//URLQRCode URL = "https://d055-1-47-146-211.ngrok.io/qr/"
+	//URLFront URL = "https://9013-1-47-146-211.ngrok.io"
+	URLFront URL = "http://192.168.1.105:12000/qr/"
 )
 
 type Properties struct {
@@ -41,9 +42,8 @@ type Properties struct {
 	//// -- URL
 	URLFront string `env:"URL_FRONT,default=http://localhost:12000/viewdata/"`
 	//URLFront URL `env:"URL_FRONT,default=https://4eb2-1-47-146-211.ngrok.io/viewdata/"`
-	URLQRCode string `env:"URL_QR_CODE,default=http://localhost:8080/qr/"`
-	//URLQRCode URL `env:"URL_QR_CODE,default=https://d055-1-47-146-211.ngrok.io/qr/"`
-
+	URLQRCode string `env:"URL_QR_CODE,default=https://liff.line.me/1656370351-WKQEdz4Y?param="`
+	//URLQRCode URL `env:"URL_QR_CODE,default=https://192.168.1.105:8080/qr/"`
 }
 
 func Build() *Properties {
