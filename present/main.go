@@ -91,6 +91,7 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
 	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)
 
+	owner.Get("getTemplate", getTemplate)
 
 	// -- Todo Admin
 	admin := app.Group("/admin")
