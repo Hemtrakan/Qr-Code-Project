@@ -54,6 +54,68 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 	return
 }
 
+func (ctrl *APIControl) UpdateDataQrCode(req *structure.UpdateDataQrCode) (Error error){
+	OldInfo, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
+	if err != nil {
+		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
+		return
+	}
+
+	infoJson, err := json.Marshal(req.Info)
+	if err != nil {
+		Error = err
+		return
+	}
+	infoQr := rdbmsstructure.QrCode{
+		Info:         datatypes.JSON(infoJson),
+		QrCodeUUID:   req.QrCodeId,
+		First:        true,
+	}
+
+	HistoryJson, err := json.Marshal(OldInfo.Info)
+	if err != nil {
+		Error = err
+		return
+	}
+
+	HistoryInfo := rdbmsstructure.HistoryInfo{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+		QrCodeID:    req.QrCodeId,
+		HistoryInfo: datatypes.JSON(HistoryJson),
+		UserId:      req.UserId, // id คนที่มาอัพเดทข้อมูล
+		QrCodeRefer: OldInfo.ID,
+	}
+
+
+	OpsJson, err := json.Marshal(req.Ops)
+	if err != nil {
+		Error = err
+		return
+	}
+
+	Ops := rdbmsstructure.Ops{
+		Model: gorm.Model{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+		QrCodeID:    req.QrCodeId,
+		Operator:    datatypes.JSON(OpsJson),
+		UserId:      req.UserId, // id คนที่มาอัพเดทข้อมูล
+		QrCodeRefer: OldInfo.ID,
+	}
+
+	err = ctrl.access.RDBMS.UpdateDataQrCode(infoQr,HistoryInfo,Ops)
+	if err != nil {
+		Error = err
+		return
+	}
+
+	return
+}
+
 func (ctrl *APIControl) UpdateHistoryInfoDataQrCode(req *structure.UpdateHistoryInfoDataQrCode) (Error error) {
 	check, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
 	if err != nil {

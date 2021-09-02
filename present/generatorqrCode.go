@@ -63,6 +63,26 @@ func insertDataQrCode(context *fiber.Ctx) error {
 	return utility.FiberSuccess(context, http.StatusOK, "บันทึกข้อมูลสำเร็จ")
 }
 
+func updateDataQrCode(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	var data = new(structure.UpdateDataQrCode)
+	if err := context.BodyParser(data); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, "ส่งชนิดของข้อมูลมาผิด")
+	}
+	err := ValidateStruct(*data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+
+	err = api.UpdateDataQrCode(data)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "บันทึกข้อมูลสำเร็จ")
+
+
+}
+
 func updateHistoryInfoDataQrCode(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	var data = new(structure.UpdateHistoryInfoDataQrCode)

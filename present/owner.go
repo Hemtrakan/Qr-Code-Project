@@ -154,3 +154,4 @@ func getQrCodeOwnerById(context *fiber.Ctx) error {
 	}
 	return context.JSON(res)
 }
+

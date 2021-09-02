@@ -72,6 +72,15 @@ type GenQrCode struct {
 	Amount       int    `json:"amount" validate:"required"`
 }
 
+type UpdateDataQrCode struct {
+	OwnerId     uint        `json:"owner_id" validate:"required"`
+	QrCodeId    uuid.UUID   `json:"qr_code_id" validate:"required"`
+	UserId      uint        `json:"user_id" validate:"required"`
+	Info        interface{} `json:"info" validate:"required"`
+	Ops         interface{} `json:"ops" validate:"required"`
+	//HistoryInfo interface{} `json:"history_info" validate:"required"`
+}
+
 type InsertDataQrCode struct {
 	OwnerId      uint        `json:"owner_id" validate:"required"`
 	QrCodeId     uuid.UUID   `json:"qr_code_id" validate:"required"`

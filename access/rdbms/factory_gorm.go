@@ -363,6 +363,23 @@ func (factory GORMFactory) CreateQrCode(QrCode rdbmsstructure.QrCode) (Error err
 	return
 }
 
+func (factory GORMFactory) UpdateDataQrCode(Info rdbmsstructure.QrCode,HistoryInfo rdbmsstructure.HistoryInfo,Ops rdbmsstructure.Ops) (Error error){
+	db := factory.client
+	err := db.Where("qr_code_uuid = ?", Info.QrCodeUUID).Updates(&Info).Error
+	if err != nil {
+		return err
+	}
+	err = factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&HistoryInfo).Error
+	if err != nil {
+		return err
+	}
+	err = factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Ops).Error
+	if err != nil {
+		return err
+	}
+	return
+}
+
 func (factory GORMFactory) InsertDataQrCodeById(QrCode rdbmsstructure.QrCode) (Error error) {
 	db := factory.client.Where("qr_code_uuid = ?", QrCode.QrCodeUUID).Updates(&QrCode).Error
 	if db != nil {
