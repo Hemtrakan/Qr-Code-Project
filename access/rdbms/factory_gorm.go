@@ -95,8 +95,6 @@ func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsst
 func (factory GORMFactory) CheckAccountId(id uint) (response *rdbmsstructure.Account, Error error) {
 	var data *rdbmsstructure.Account
 	err := factory.client.Where("id = ?", id).First(&data).Error
-	fmt.Println("rdbms2 : ",data)
-
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -108,7 +106,6 @@ func (factory GORMFactory) CheckAccountId(id uint) (response *rdbmsstructure.Acc
 		return
 	}
 	response = data
-	fmt.Println("rdbms3 : ")
 	return
 }
 
@@ -340,7 +337,13 @@ func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response []rdbmsstr
 	var data []rdbmsstructure.QrCode
 	db := factory.client
 
-	err := db.Preload("DataOps").Preload("DataHistory").Where("qr_code_uuid= ?", QrCodeUUID).Order("created_at desc").First(&data).Error
+	err := db.Debug().Preload("DataOps", func(db *gorm.DB) *gorm.DB {
+		return db.Order("ops.updated_at desc")
+	}).Preload("DataHistory", func(db *gorm.DB) *gorm.DB {
+		return db.Order("history_infos.updated_at desc")
+	}).Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
+	//.Order("ops.updated_at desc")
+	//.Order("history_infos.updated_at desc")
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
