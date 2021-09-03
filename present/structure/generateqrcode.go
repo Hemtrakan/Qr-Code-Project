@@ -25,7 +25,7 @@ type GetQrCode struct {
 	OwnerUsername string    `json:"owner_username"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
-	TemplateName  *string    `json:"template_name"`
+	TemplateName  string    `json:"template_name"`
 	QrCodeId      string    `json:"qr_code_id"`
 	CodeName      string    `json:"code_name"`
 	URL           string    `json:"url"`
@@ -39,7 +39,7 @@ type GetDataQrCode struct {
 	Ops          []GetOps       `json:"ops"`
 	OwnerId      int            `json:"owner_id"`
 	OwnerName    string         `json:"owner_name"`
-	TemplateName *string         `json:"template_name"`
+	TemplateName string         `json:"template_name"`
 	CodeName     string         `json:"code_name"`
 }
 
@@ -84,7 +84,7 @@ type UpdateDataQrCode struct {
 type InsertDataQrCode struct {
 	OwnerId      uint        `json:"owner_id" validate:"required"`
 	QrCodeId     uuid.UUID   `json:"qr_code_id" validate:"required"`
-	TemplateName *string      `json:"template_name" validate:"required"`
+	TemplateName  string      `json:"template_name" validate:"required"`
 	Info         interface{} `json:"info" validate:"required"`
 }
 
