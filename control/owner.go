@@ -171,7 +171,7 @@ func (ctrl *APIControl) ChangePasswordOperator(OwnerId uint, password structure.
 	return
 }
 
-func (ctrl *APIControl) ChangePasswordOwner(OwnerId uint, password structure.ChangePasswordOwner) (Error error) {
+func (ctrl *APIControl) ChangePasswordOwnerAndOperator(OwnerId uint, password structure.ChangePasswordOwnerAndOperator) (Error error) {
 	_, err := ctrl.access.RDBMS.CheckAccountId(OwnerId)
 	if err != nil {
 		Error = errors.New("record not found")
@@ -221,7 +221,6 @@ func (ctrl *APIControl) UpdateStatusQrCodeOwner(ownerId uint,QrCodeId string, re
 			Error = errors.New("ผู้ใช้งานไม่ถูกต้อง")
 			return
 		}
-
 
 		Qr := rdbmsstructure.QrCode{
 			QrCodeUUID: data.QrCodeUUID,

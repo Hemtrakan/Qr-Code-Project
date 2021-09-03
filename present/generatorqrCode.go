@@ -55,7 +55,6 @@ func insertDataQrCode(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-
 	err = api.InsertDataQrCode(data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
@@ -73,14 +72,11 @@ func updateDataQrCode(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-
 	err = api.UpdateDataQrCode(data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
 	return utility.FiberSuccess(context, http.StatusOK, "บันทึกข้อมูลสำเร็จ")
-
-
 }
 
 func updateHistoryInfoDataQrCode(context *fiber.Ctx) error {

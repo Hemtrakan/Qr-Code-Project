@@ -50,25 +50,6 @@ func registerOperator(context *fiber.Ctx) error {
 	return utility.FiberError(context, http.StatusOK, "สมัครสมาชิกสำเร็จ")
 }
 
-func login(context *fiber.Ctx) error {
-	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	Login := new(structure.Login)
-	err := context.BodyParser(Login)
-	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	err = ValidateStruct(*Login)
-	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	Token, err := api.Login(Login)
-	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	return utility.FiberError(context, http.StatusOK, Token)
-}
-
-
 func LoginAdmin(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	Login := new(structure.Login)

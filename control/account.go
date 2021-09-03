@@ -32,6 +32,23 @@ next:
 	return nil
 }
 
+func (ctrl *APIControl) CheckAccountOperator(OperatorId uint, OwnerId uint) (Error error){
+	owner ,err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
+	if err != nil {
+		Error = err
+		return
+	}
+	Operator , err := ctrl.access.RDBMS.GetAccount(int(OperatorId))
+	if err !=nil {
+		Error = err
+		return
+	}
+	if owner.ID != *Operator.SubOwnerId {
+		Error = errors.New("ผู้ใช้งานไม่มีสิทธิในการในเข้าถึง QrCode นี้")
+	}
+	return
+}
+
 func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error error) {
 	reqOwner.Username = strings.ToLower(reqOwner.Username)
 	reqOwner.Password = strings.Trim(reqOwner.Password, "\t \n")
@@ -104,8 +121,8 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 		return err
 	}
 
-	res , err := ctrl.access.RDBMS.GetAccount(1)
-	if res.Username == "admin"{
+	res, err := ctrl.access.RDBMS.GetAccount(1)
+	if res.Username == "admin" {
 		Error = errors.New("สมัครไปแล้ว")
 		return
 	}
@@ -209,7 +226,7 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 	return
 }
 
-func (ctrl *APIControl) Login(reqLogin *structure.Login) (Token string, Error error) {
+func (ctrl *APIControl) LoginOwner(reqLogin *structure.LoginOwner) (Token string, Error error) {
 	login := rdbmsstructure.Account{
 		Username: reqLogin.Username,
 		Password: reqLogin.Password,
@@ -219,15 +236,58 @@ func (ctrl *APIControl) Login(reqLogin *structure.Login) (Token string, Error er
 		Error = err
 		return
 	}
-	err = utility.VerifyPassword(data.Password, login.Password)
-	if err != nil {
-		Error = errors.New("incorrect password")
-		return
+	if data.Role == string(constant.Owner) {
+		err = utility.VerifyPassword(data.Password, login.Password)
+		if err != nil {
+			Error = errors.New("รหัสผ่านไม่ถูกต้อง")
+			return
+		}
+		Token, err = utility.AuthenticationLogin(data.ID, data.Role)
+		if err != nil {
+			Error = err
+			return
+		}
 	}
-	Token, err = utility.AuthenticationLogin(data.ID, data.Role)
+	return Token, nil
+}
+
+func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token string, Error error) {
+	login := rdbmsstructure.Account{
+		Username: reqLogin.Username,
+		Password: reqLogin.Password,
+	}
+	data, err := ctrl.access.RDBMS.Login(login)
 	if err != nil {
 		Error = err
 		return
+	}
+
+	fmt.Println("data : ",data)
+	if data.Role == string(constant.Operator) {
+		err = utility.VerifyPassword(data.Password, login.Password)
+		if err != nil {
+			Error = errors.New("รหัสผ่านไม่ถูกต้อง")
+			return
+		}
+		Token, err = utility.AuthenticationLogin(data.ID, data.Role)
+		if err != nil {
+			Error = err
+			return
+		}
+
+		if data.LineUserId == nil {
+			acconut := rdbmsstructure.Account{
+				Model:       gorm.Model{
+					ID: data.ID,
+				},
+				LineUserId:  reqLogin.UID,
+			}
+			err := ctrl.access.RDBMS.UpdateProfile(acconut)
+			if err != nil {
+				Error = err
+				return
+			}
+		}
 	}
 	return Token, nil
 }
@@ -245,7 +305,7 @@ func (ctrl *APIControl) LoginAdmin(reqLogin *structure.Login) (Token string, Err
 	if data.Role == string(constant.Admin) {
 		err = utility.VerifyPassword(data.Password, login.Password)
 		if err != nil {
-			Error = errors.New("incorrect password")
+			Error = errors.New("รหัสผ่านไม่ถูกต้อง")
 			return
 		}
 		Token, err = utility.AuthenticationLogin(data.ID, data.Role)
@@ -551,7 +611,7 @@ func (ctrl *APIControl) DeleteAccount(id uint) (Error error) {
 			return
 		}
 		for _, data := range ops {
-			for _, delOps := range data.OpsAccount{
+			for _, delOps := range data.OpsAccount {
 				err = ctrl.access.RDBMS.DeleteAccount(delOps.ID)
 				if err != nil {
 					Error = err

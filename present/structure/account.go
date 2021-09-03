@@ -10,6 +10,19 @@ type Login struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type LoginOwner struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	UID      *string `json:"uid"`
+}
+
+
+type LoginOperator struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	UID      *string `json:"uid"`
+}
+
 type ChangePassword struct {
 	Password string `json:"password" validate:"required"`
 }

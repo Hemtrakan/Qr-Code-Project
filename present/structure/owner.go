@@ -13,7 +13,7 @@ type RegisterOwners struct {
 	Role        string `json:"role"`
 }
 
-type ChangePasswordOwner struct {
+type ChangePasswordOwnerAndOperator struct {
 	OldPassword string `json:"old_password" validate:"required"`
 	NewPassword string `json:"new_password" validate:"required"`
 }

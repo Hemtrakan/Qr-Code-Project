@@ -9,6 +9,9 @@ type Info struct {
 	//ProductName ชื่อสินค้า
 	ProductName string
 
+	//EmployeeID รหัสพนักงาน
+	EmployeeID string
+
 	//ProductType ประเภทสินค้า
 	ProductType string
 

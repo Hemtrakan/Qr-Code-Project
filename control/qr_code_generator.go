@@ -28,7 +28,7 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
 		return
 	}
-	if check.TemplateName != "" {
+	if check.TemplateName != nil {
 		Error = errors.New("QrCode ได้ถูกตั้งค่า Template แล้ว")
 		return
 	}
@@ -291,7 +291,7 @@ func (ctrl *APIControl) CreateQrCode(req structure.GenQrCode) (Error error) {
 
 		save := rdbmsstructure.QrCode{
 			OwnerId:      req.OwnerId,
-			TemplateName: req.TemplateName,
+			TemplateName: &req.TemplateName,
 			Info:         datatypes.JSON(byteInfo),
 			QrCodeUUID:   uuid,
 			Code:         req.CodeName,

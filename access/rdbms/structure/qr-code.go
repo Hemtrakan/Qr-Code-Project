@@ -11,7 +11,7 @@ type QrCode struct {
 	// OwnerId ไอดีของเจ้าของ QrCode
 	OwnerId uint
 	// TemplateName ระบุแม่แบบของ QrCode
-	TemplateName string
+	TemplateName *string
 	// Info ข้อมูลของ QrCode นั้นๆ
 	Info datatypes.JSON
 	//  QrCodeUUID QrCodeId ที่เป็น uuid

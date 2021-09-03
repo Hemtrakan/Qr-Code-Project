@@ -46,15 +46,15 @@ func APICreate(ctrl *control.APIControl) {
 	api := app.Group("/api")
 	api.Post("admin", admin) // todo สำหรับ สมัคร admin เท่านั้น
 
-	qr := app.Group("/qr")
+	qr := api.Group("/qr")
 	qr.Get("*", getDataQrCode)                    //  Id >>> QrCodeUUId
 	qr.Get("getDataQrCodeJson/:id", getDataQrCodeJson) //  Id >>> QrCodeUUId
 
-	qrApi := app.Group("/qr-api")
+	qrApi := api.Group("/qr-api")
 	qrApi.Get("getDataQrCodeJson/:id", getDataQrCodeJson)
 	// -- Todo Owner
-	owner := app.Group("/owner")
-	owner.Post("login", login)
+	owner := api.Group("/owner")
+	owner.Post("login", LoginOwner)
 	owner.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(constant.SecretKey),
 		SuccessHandler: func(context *fiber.Ctx) error {
@@ -75,26 +75,55 @@ func APICreate(ctrl *control.APIControl) {
 	}))
 	// -- API Owner Account
 	owner.Get("getAccount", getAccount)
-
 	owner.Post("register_operator", registerOperatorOwner)
-
 	owner.Get("getOperator", getOperator) // todo ดูข้อมูลทั่งหมดของ Operator ById Owner
 	owner.Get("getOperatorById/:id", getOperatorById)
 	owner.Put("updateProfile/:id", updateProfile)
 	owner.Put("changePasswordOwner", ChangePasswordOwner)
-	owner.Put("changePasswordOperator", ChangePasswordOperator)
+	owner.Put("changePasswordOperator", ChangePasswordOperatorByOwner)
 	owner.Delete("deleteAccount/:id", deleteAccountOperator)
+
+
+	// QrCode
 	owner.Put("updateStatusQrCode/:id", updateStatusQrCodeOwner)
 	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
 	owner.Post("updateDataQrCode",updateDataQrCode)
 	owner.Post("insertDataQrCode", insertDataQrCode)
 	owner.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
 	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)
-
 	owner.Get("getTemplate", getTemplate)
 
+
+	ops := api.Group("/ops")
+	ops.Post("login", LoginOperator)
+	ops.Use(jwtware.New(jwtware.Config{
+		SigningKey: []byte(constant.SecretKey),
+		SuccessHandler: func(context *fiber.Ctx) error {
+			user := context.Locals("user").(*jwt.Token)
+			claims := user.Claims.(jwt.MapClaims)
+			var userRole = claims["role"]
+			if userRole == string(constant.Operator) {
+				return context.Next()
+			} else {
+				return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+					"error": "Unauthorized",
+				})
+			}
+			return context.Next()
+		},
+		ErrorHandler: AuthError,
+		AuthScheme:   "Bearer",
+	}))
+
+	ops.Get("getAccount", getAccount)
+	ops.Post("updateDataQrCode",updateDataQrCodeOps)
+	ops.Post("insertDataQrCode", insertDataQrCodeOps)
+	ops.Get("getTemplate", getTemplate)
+	ops.Put("updateProfile",updateProfile)
+	ops.Put("changePasswordOperator", ChangePasswordOperator)
+
 	// -- Todo Admin
-	admin := app.Group("/admin")
+	admin := api.Group("/admin")
 	admin.Post("login", LoginAdmin)
 	admin.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(constant.SecretKey),

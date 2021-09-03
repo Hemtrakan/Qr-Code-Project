@@ -12,7 +12,7 @@ type Account struct {
 	LastName    string
 	PhoneNumber string
 	LineId      string
-	LineUserId  string
+	LineUserId  *string
 	Role        string
 	SubOwnerId  *uint
 	OpsAccount  []Account `gorm:"foreignKey:SubOwnerId"`
