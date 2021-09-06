@@ -23,7 +23,7 @@ func getAccountByLineId(context *fiber.Ctx) error {
 	lineId := context.Params("id")
 	responses, err := api.GetAccountByLineId(lineId)
 	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		return context.Status(http.StatusOK).JSON("")
 	}
 	return context.JSON(responses)
 }
