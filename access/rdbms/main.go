@@ -47,7 +47,7 @@ type FactoryInterface interface {
 	Register(Account rdbmsstructure.Account) (Error error)
 	Login(login rdbmsstructure.Account) (response rdbmsstructure.Account,Error error)
 	GetAccount(id int) (response rdbmsstructure.Account,Error error)
-
+	GetAccountByLineId(lineId string) (response rdbmsstructure.Account,Error error)
 
 	CheckAccountId(id uint) (response *rdbmsstructure.Account,Error error)
 	CheckUserRegister(Username , PhoneNumber ,LineId  string,UserId uint) (response *rdbmsstructure.Account,Error error)

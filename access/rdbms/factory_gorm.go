@@ -15,6 +15,8 @@ type GORMFactory struct {
 	client *gorm.DB
 }
 
+
+
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -82,6 +84,23 @@ func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsst
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) GetAccountByLineId(lineId string) (response rdbmsstructure.Account, Error error) {
+	var data rdbmsstructure.Account
+	err := factory.client.Where("line_user_id = ?", lineId).First(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
 		} else {
 			Error = errors.New("record not found")
 			return

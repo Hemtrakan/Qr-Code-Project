@@ -44,6 +44,10 @@ type Properties struct {
 	//URLFront URL `env:"URL_FRONT,default=https://4eb2-1-47-146-211.ngrok.io/viewdata/"`
 	URLQRCode string `env:"URL_QR_CODE,default=https://liff.line.me/1656370351-WKQEdz4Y?param="`
 	//URLQRCode URL `env:"URL_QR_CODE,default=https://192.168.1.105:8080/qr/"`
+
+	//// -- ServiceLine
+	Authorization string `env:"AUTHORIZATION,default=Bearer DGU1iPfGFo+AxcHEG+ScpZoo3jrSr3Jgg52rbUaxDdnRh03Hk7sDK2U5aul7fja2shVtuGlDhoLD4MQE2E53GfprdKHycAfaO3gi9fspthZzfW6hD0B2bxwpqDLbJO2lneptUxn7U2zPygwUDAD2SgdB04t89/1O/w1cDnyilFU="`
+
 }
 
 func Build() *Properties {

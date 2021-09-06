@@ -18,6 +18,16 @@ func getOperatorId(context *fiber.Ctx) (id uint, Error error) {
 	return
 }
 
+func getAccountByLineId(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	lineId := context.Params("id")
+	responses, err := api.GetAccountByLineId(lineId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.JSON(responses)
+}
+
 func ChangePasswordOperator(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	OwnerId, err := getOwnerId(context)

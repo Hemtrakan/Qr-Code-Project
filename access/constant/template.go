@@ -7,13 +7,11 @@ import (
 type Templates string
 
 const (
-	//ServiceWashingMachine Templates = "serviceWashingMachine"
 	Computer              Templates = "computer"
 	OfficeEquipment       Templates = "officeEquipment"
 )
 
 var Template = []Templates{
-	//ServiceWashingMachine,
 	Computer,
 	OfficeEquipment,
 }

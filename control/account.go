@@ -321,6 +321,24 @@ func (ctrl *APIControl) LoginAdmin(reqLogin *structure.Login) (Token string, Err
 	return Token, nil
 }
 
+func (ctrl *APIControl) GetAccountByLineId(lineId string) (response structure.UserAccount, Error error){
+	data, err := ctrl.access.RDBMS.GetAccountByLineId(lineId)
+	if err != nil {
+		Error = errors.New("ไม่พบผู้ใช้งาน")
+		return
+	}
+	response = structure.UserAccount{
+		Id:          int(data.ID),
+		FirstName:   data.FirstName,
+		LastName:    data.LastName,
+		PhoneNumber: data.PhoneNumber,
+		LineId:      data.LineId,
+		Role:        data.Role,
+		SubOwnerId:  data.SubOwnerId,
+	}
+	return
+}
+
 func (ctrl *APIControl) GetAccount(id int) (response structure.UserAccount, Error error) {
 	data, err := ctrl.access.RDBMS.CheckAccountId(uint(id))
 	if err != nil {

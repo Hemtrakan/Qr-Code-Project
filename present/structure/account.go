@@ -34,6 +34,8 @@ type UpdateProFile struct {
 	LineId      string `json:"lineid" validate:"required"`
 }
 
+
+
 type UserAccount struct {
 	Id          int    `json:"id"`
 	FirstName   string `json:"firstname"`

@@ -96,6 +96,7 @@ func APICreate(ctrl *control.APIControl) {
 
 	ops := api.Group("/ops")
 	ops.Post("login", LoginOperator)
+	ops.Get("getAccount/:id", getAccountByLineId)
 	ops.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(constant.SecretKey),
 		SuccessHandler: func(context *fiber.Ctx) error {
@@ -115,7 +116,6 @@ func APICreate(ctrl *control.APIControl) {
 		AuthScheme:   "Bearer",
 	}))
 
-	ops.Get("getAccount", getAccount)
 	ops.Post("updateDataQrCode",updateDataQrCodeOps)
 	ops.Post("insertDataQrCode", insertDataQrCodeOps)
 	ops.Get("getTemplate", getTemplate)
