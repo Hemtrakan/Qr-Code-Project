@@ -251,7 +251,7 @@ func (ctrl *APIControl) LoginOwner(reqLogin *structure.LoginOwner) (Token string
 		Error = errors.New("สิทธิ์ในการเข้าสู่ระบบไม่ถูกต้อง")
 		return
 	}
-	return Token, nil
+	return
 }
 
 func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token string, Error error) {
@@ -264,12 +264,7 @@ func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token 
 		Error = err
 		return
 	}
-	if data.LineUserId != nil{
-		Error = errors.New("ผู้ใช้งานคนนี้ได้เข้าสู่ระบบแล้ว")
-		return
-	}
 	fmt.Println(*reqLogin)
-	fmt.Println("LineId : ", &reqLogin.UID)
 	if data.Role == string(constant.Operator) {
 		err = utility.VerifyPassword(data.Password, login.Password)
 		if err != nil {
@@ -282,45 +277,38 @@ func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token 
 			return
 		}
 
-		allAccount,err := ctrl.access.RDBMS.GetAllAccountOperator()
-		if err != nil {
-			Error = err
-			return
-		}
-		fmt.Println("2")
-
-		for _ , all := range allAccount{
-			fmt.Println("All : ",all.LineUserId)
-			fmt.Println("Req : ",reqLogin.UID)
-
-			if *all.LineUserId == reqLogin.UID{
-				Error = errors.New("ผู้ใช้งานคนนี้ได้เข้าสู่ระบบแล้ว")
+		if data.LineUserId == nil {
+			allAccount,err := ctrl.access.RDBMS.GetAllAccountOperator()
+			if err != nil {
+				Error = err
 				return
 			}
-		}
-		fmt.Println("3")
-
-		if data.LineUserId == nil {
+			for _ , all := range allAccount{
+				if *all.LineUserId == *reqLogin.UID{
+					Error = errors.New("ผู้ใช้งานคนนี้ได้เข้าสู่ระบบแล้ว")
+					return
+				}
+			}
 			acconut := rdbmsstructure.Account{
 				Model:       gorm.Model{
 					ID: data.ID,
 				},
-				LineUserId:  &reqLogin.UID,
+				LineUserId:  reqLogin.UID,
 			}
-			fmt.Println("4")
-			err := ctrl.access.RDBMS.UpdateProfile(acconut)
+			err = ctrl.access.RDBMS.UpdateProfile(acconut)
+			if err != nil {
+				Error = err
+				return
+			}
+			err = ctrl.access.SERVICELINE.LinkRichMenuToUser(*reqLogin.UID)
 			if err != nil {
 				Error = err
 				return
 			}
 		}
 	}
-	 err = ctrl.access.SERVICELINE.LinkRichMenuToUser(reqLogin.UID)
-	 if err != nil {
-	 	Error = err
-	 	return
-	 }
-	return Token, nil
+
+	return
 }
 
 func (ctrl *APIControl) LoginAdmin(reqLogin *structure.Login) (Token string, Error error) {
@@ -349,7 +337,7 @@ func (ctrl *APIControl) LoginAdmin(reqLogin *structure.Login) (Token string, Err
 		return
 	}
 
-	return Token, nil
+	return
 }
 
 func (ctrl *APIControl) GetAccountByLineId(lineId string) (response structure.UserAccount, Error error){
