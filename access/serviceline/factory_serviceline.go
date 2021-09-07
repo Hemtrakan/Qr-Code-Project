@@ -11,7 +11,7 @@ type Properties struct {
 
 func (r Properties) LinkRichMenuToUser(lineId string) (Error error) {
 	client := resty.New()
-	URL := "https://api.line.me/v2/bot/user/" + lineId + "/richmenu/richmenu-eb4525a5ab9565300868f0036793759b"
+	URL := "https://api.line.me/v2/bot/user/" + lineId + "/richmenu/richmenu-df16539b985df893c26365e34c4a2cfa"
 	_, err := client.R().
 		SetHeader("Authorization", r.prop.Authorization).
 		Post(URL)

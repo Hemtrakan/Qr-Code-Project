@@ -264,6 +264,11 @@ func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token 
 		Error = err
 		return
 	}
+	if data.LineUserId != nil {
+		Error = errors.New("ผู้ใช้งานคนนี้ได้เข้าสู่ระบบแล้ว")
+		return
+	}
+
 	if data.Role == string(constant.Operator) {
 		err = utility.VerifyPassword(data.Password, login.Password)
 		if err != nil {
@@ -275,19 +280,7 @@ func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token 
 			Error = err
 			return
 		}
-
 		if data.LineUserId == nil {
-			allAccount,err := ctrl.access.RDBMS.GetAllAccountOperator()
-			if err != nil {
-				Error = err
-				return
-			}
-			for _ , all := range allAccount{
-				if *all.LineUserId == *reqLogin.UID{
-					Error = errors.New("ผู้ใช้งานคนนี้ได้เข้าสู่ระบบแล้ว")
-					return
-				}
-			}
 			acconut := rdbmsstructure.Account{
 				Model:       gorm.Model{
 					ID: data.ID,
