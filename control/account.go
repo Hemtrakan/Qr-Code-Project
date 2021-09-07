@@ -264,7 +264,6 @@ func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token 
 		Error = err
 		return
 	}
-	fmt.Println(*reqLogin)
 	if data.Role == string(constant.Operator) {
 		err = utility.VerifyPassword(data.Password, login.Password)
 		if err != nil {
