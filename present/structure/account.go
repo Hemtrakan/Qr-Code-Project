@@ -11,16 +11,15 @@ type Login struct {
 }
 
 type LoginOwner struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
-	UID      *string `json:"uid"`
+	Username string  `json:"username" validate:"required"`
+	Password string  `json:"password" validate:"required"`
+	UID      string `json:"uid"`
 }
-
 
 type LoginOperator struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
-	UID      *string `json:"uid"`
+	UID      string `json:"uid" validate:"required"`
 }
 
 type ChangePassword struct {
@@ -33,8 +32,6 @@ type UpdateProFile struct {
 	PhoneNumber string `json:"phonenumber" validate:"required"`
 	LineId      string `json:"lineid" validate:"required"`
 }
-
-
 
 type UserAccount struct {
 	Id          int    `json:"id"`

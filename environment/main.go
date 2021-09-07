@@ -46,7 +46,7 @@ type Properties struct {
 	//URLQRCode URL `env:"URL_QR_CODE,default=https://192.168.1.105:8080/qr/"`
 
 	//// -- ServiceLine
-	Authorization string `env:"AUTHORIZATION,default=Bearer DGU1iPfGFo+AxcHEG+ScpZoo3jrSr3Jgg52rbUaxDdnRh03Hk7sDK2U5aul7fja2shVtuGlDhoLD4MQE2E53GfprdKHycAfaO3gi9fspthZzfW6hD0B2bxwpqDLbJO2lneptUxn7U2zPygwUDAD2SgdB04t89/1O/w1cDnyilFU="`
+	Authorization string `env:"AUTHORIZATION,default=Bearer gkFHAAtmlfClxm0//s233eQb6eTaksrvKzJ+p171IpINsonSX2JV0LMlnKTxTRbdPAc/1fU27N/77/nv+vjffmBJBCOUKbYME0fZ3HOLlM7rlfnF8uddV4JMjjXAuRVN/9YnU4XjDnp2vgrjVAoTtQdB04t89/1O/w1cDnyilFU="`
 
 }
 
