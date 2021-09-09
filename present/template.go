@@ -37,8 +37,8 @@ package present
 //	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 //	user := context.Locals("user").(*jwt.Token)
 //	claims := user.Claims.(jwt.MapClaims)
-//	var UserId = claims["id"].(float64)
-//	var id = int(UserId)
+//	var Ops = claims["id"].(float64)
+//	var id = int(Ops)
 //	res, err := api.GetAllTeamPage(id)
 //	if err != nil {
 //		return utility.FiberError(context, http.StatusBadRequest, err.Error())

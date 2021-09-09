@@ -24,7 +24,7 @@ type Worksheet struct {
 	Info             interface{}      `json:"info,omitempty"`
 	Text             string           `json:"text,omitempty"`
 	Type             string           `json:"type,omitempty"`
-	UserId           *string          `json:"ops,omitempty"`
+	Ops              *string          `json:"ops,omitempty"`
 	OwnerId          uint             `json:"owner_id,omitempty"`
 	StatusWorksheet1 StatusWorksheet1 `json:"status_worksheet_1"`
 	StatusWorksheet2 StatusWorksheet2 `json:"status_worksheet_2"`

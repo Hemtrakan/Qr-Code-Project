@@ -568,7 +568,7 @@ func (factory GORMFactory) GetDataQrCodeInfo(QrCodeUUID string) (response rdbmss
 
 func (factory GORMFactory) GetDataQrCodeOps() (response []rdbmsstructure.Ops, Error error) {
 	var data []rdbmsstructure.Ops
-	err := factory.client.Find(&data).Error
+	err := factory.client.Order("created_at DESC").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err

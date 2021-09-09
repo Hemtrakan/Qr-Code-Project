@@ -107,7 +107,7 @@ func APICreate(ctrl *control.APIControl) {
 	ops.Get("typeReport", getTypeWorksheet)
 	ops.Get("report", getWorksheet)
 	ops.Get("report/:id", getWorksheetById)
-	ops.Post("report/:id", insertWorksheet)
+	ops.Post("report", insertWorksheet)
 	ops.Put("worksheet/:id", worksheet)
 	ops.Get("getDataUpdate/:id", getUpdateWorksheet)
 	ops.Put("report/:id", updateWorksheet)

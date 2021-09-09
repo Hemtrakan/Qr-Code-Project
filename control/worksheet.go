@@ -39,7 +39,6 @@ func (ctrl *APIControl) GetWorksheet(req *structure.LineUserId) (response []stru
 		return
 	}
 	for _, qr := range ops {
-
 		err = json2.Unmarshal(qr.Operator, &Worksheet)
 		if err != nil {
 			Error = err
@@ -51,7 +50,7 @@ func (ctrl *APIControl) GetWorksheet(req *structure.LineUserId) (response []stru
 				QrCodeID: Worksheet.QrCodeID,
 				Text:     Worksheet.Text,
 				Type:     Worksheet.Type,
-				UserId:   Worksheet.UserId,
+				Ops:      Worksheet.Ops,
 				StatusWorksheet1: structure.StatusWorksheet1{
 					Status:   Worksheet.StatusWorksheet1.Status,
 					UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
@@ -100,7 +99,7 @@ func (ctrl *APIControl) GetWorksheetById(reportId uint, req *structure.LineUserI
 		Info:     datatypes.JSON(info),
 		Text:     Worksheet.Text,
 		Type:     Worksheet.Type,
-		UserId:   Worksheet.UserId,
+		Ops:      Worksheet.Ops,
 		StatusWorksheet1: structure.StatusWorksheet1{
 			Status:   Worksheet.StatusWorksheet1.Status,
 			UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
@@ -197,7 +196,7 @@ func (ctrl *APIControl) Worksheet(reportId uint, req structure.LineUserId) (Erro
 		QrCodeID: Worksheet.QrCodeID,
 		Text:     Worksheet.Text,
 		Type:     Worksheet.Type,
-		UserId:   &line.Username,
+		Ops:      &line.Username,
 		OwnerId:  Worksheet.OwnerId,
 		StatusWorksheet1: structure.StatusWorksheet1{
 			Status:   Worksheet.StatusWorksheet1.Status,
@@ -259,7 +258,7 @@ func (ctrl *APIControl) GetUpdateWorksheet(QrCodeId string) (res structure.GetWo
 				Text:     Worksheet.Text,
 				QrCodeID: Worksheet.QrCodeID,
 				Type:     Worksheet.Type,
-				UserId:   Worksheet.UserId,
+				Ops:      Worksheet.Ops,
 				StatusWorksheet1: structure.StatusWorksheet1{
 					Status:   Worksheet.StatusWorksheet1.Status,
 					UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
@@ -313,7 +312,7 @@ func (ctrl *APIControl) UpdateWorksheet(reportId uint, req structure.UpdateWorks
 		QrCodeID: Worksheet.QrCodeID,
 		Text:     Worksheet.Text,
 		Type:     Worksheet.Type,
-		UserId:   &line.Username,
+		Ops:      &line.Username,
 		OwnerId:  Worksheet.OwnerId,
 		StatusWorksheet1: structure.StatusWorksheet1{
 			Status:   Worksheet.StatusWorksheet1.Status,
@@ -377,7 +376,7 @@ func (ctrl *APIControl) DeleteWorksheet(reportId uint, req structure.UpdateWorks
 		QrCodeID: Worksheet.QrCodeID,
 		Text:     Worksheet.Text,
 		Type:     Worksheet.Type,
-		UserId:   &line.Username,
+		Ops:      &line.Username,
 		OwnerId:  Worksheet.OwnerId,
 		StatusWorksheet1: structure.StatusWorksheet1{
 			Status:   Worksheet.StatusWorksheet1.Status,
