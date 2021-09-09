@@ -1,11 +1,14 @@
 package control
 
 import (
+	"errors"
 	"qrcode/access/constant"
 	templates2 "qrcode/present/structure/templates"
+	"qrcode/present/structure/templates/computer"
+	"qrcode/present/structure/templates/officeequipment"
 )
 
-func (ctrl *APIControl) GetTemplate() templates2.Templatesdata {
+func (ctrl *APIControl) GetTemplateList() templates2.Templatesdata {
 	templates := constant.Template
 	var arrTemplates templates2.Templatesdata
 	for _, item := range templates {
@@ -16,6 +19,26 @@ func (ctrl *APIControl) GetTemplate() templates2.Templatesdata {
 	}
 	return arrTemplates
 }
+
+func (ctrl *APIControl) GetTemplate(Template string) (result interface{},Error error) {
+	//if Template == string(constant.OfficeEquipment) {
+	//	result = officeequipment.Info{}
+	//	return
+	//}
+	switch Template {
+	case string(constant.OfficeEquipment):
+		result = officeequipment.Info{}
+		return
+	case string(constant.Computer):
+		result = computer.Info{}
+		return
+	default:
+		Error = errors.New("unimplemented")
+		return
+	}
+}
+
+
 
 
 //

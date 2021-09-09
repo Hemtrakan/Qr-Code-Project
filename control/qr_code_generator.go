@@ -54,22 +54,27 @@ func (ctrl *APIControl) InsertDataQrCode(req *structure.InsertDataQrCode) (Error
 	return
 }
 
-func (ctrl *APIControl) UpdateDataQrCode(req *structure.UpdateDataQrCode) (Error error){
+func (ctrl *APIControl) UpdateDataQrCode(req *structure.UpdateDataQrCode) (Error error) {
 	OldInfo, err := ctrl.access.RDBMS.GetQrCodeByQrCodeId(int(req.OwnerId), req.QrCodeId.String())
 	if err != nil {
 		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
 		return
 	}
 
+	ops, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
+	if err != nil {
+		Error = err
+		return
+	}
 	infoJson, err := json.Marshal(req.Info)
 	if err != nil {
 		Error = err
 		return
 	}
 	infoQr := rdbmsstructure.QrCode{
-		Info:         datatypes.JSON(infoJson),
-		QrCodeUUID:   req.QrCodeId,
-		First:        true,
+		Info:       datatypes.JSON(infoJson),
+		QrCodeUUID: req.QrCodeId,
+		First:      true,
 	}
 
 	HistoryJson, err := json.Marshal(OldInfo.Info)
@@ -85,29 +90,11 @@ func (ctrl *APIControl) UpdateDataQrCode(req *structure.UpdateDataQrCode) (Error
 		},
 		QrCodeID:    req.QrCodeId,
 		HistoryInfo: datatypes.JSON(HistoryJson),
-		UserId:      req.UserId, // id คนที่มาอัพเดทข้อมูล
+		UserId:      ops.ID, // id คนที่มาอัพเดทข้อมูล
 		QrCodeRefer: OldInfo.ID,
 	}
 
-
-	OpsJson, err := json.Marshal(req.Ops)
-	if err != nil {
-		Error = err
-		return
-	}
-
-	Ops := rdbmsstructure.Ops{
-		Model: gorm.Model{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		},
-		QrCodeID:    req.QrCodeId,
-		Operator:    datatypes.JSON(OpsJson),
-		UserId:      req.UserId, // id คนที่มาอัพเดทข้อมูล
-		QrCodeRefer: OldInfo.ID,
-	}
-
-	err = ctrl.access.RDBMS.UpdateDataQrCode(infoQr,HistoryInfo,Ops)
+	err = ctrl.access.RDBMS.UpdateDataQrCode(infoQr, HistoryInfo)
 	if err != nil {
 		Error = err
 		return
@@ -122,9 +109,6 @@ func (ctrl *APIControl) UpdateHistoryInfoDataQrCode(req *structure.UpdateHistory
 		Error = errors.New("ไม่พบ QrCode นี้อยู่ในระบบ")
 		return
 	}
-
-	//checkAccount , err := ctrl.access.RDBMS.GetAccount(int(req.UserId))
-	//if checkAccount
 
 	b, err := json.Marshal(req.HistoryInfo)
 	if err != nil {
@@ -195,11 +179,22 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 		res, _ := ctrl.access.RDBMS.GetAccount(int(qr.OwnerId))
 		for _, DataOps := range qr.DataOps {
 			User, _ := ctrl.access.RDBMS.GetAccount(int(DataOps.UserId))
+			var Username string
+			var Role string
+			if User.Username == "" {
+				Username = "ผู้ใช้งานทั้วไป"
+			}else {
+				Username = User.Username
+			}
+			if User.Role == "" {
+				Role = "Viewer"
+			}else {
+				Role = User.Role
+			}
 			ops := structure.GetOps{
-				Ops:       DataOps.Operator,
-				User:      User.Username,
-				UpdatedAt: DataOps.CreatedAt,
-				Role: User.Role,
+				Ops:  DataOps.Operator,
+				User: Username,
+				Role: Role,
 			}
 			opsArray = append(opsArray, ops)
 		}
@@ -210,7 +205,7 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 				HistoryInfo: DataHistory.HistoryInfo,
 				User:        User.Username,
 				UpdatedAt:   DataHistory.CreatedAt,
-				Role: User.Role,
+				Role:        User.Role,
 			}
 			HistoryArray = append(HistoryArray, History)
 		}
@@ -345,7 +340,6 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 
 func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCode, Error error) {
 	var getQrCodeArray []structure.GetQrCode
-	fmt.Println("1 : ", OwnerId)
 	check, err := ctrl.access.RDBMS.GetAccount(OwnerId)
 	if err != nil {
 		Error = errors.New("ไม่มีผู้ใช้คนนี้ในระบบ")
@@ -360,7 +354,6 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 		Error = err
 		return
 	}
-	fmt.Println("2 : ",check)
 	for _, res := range data {
 		resGetQrCode := structure.GetQrCode{
 			OwnerId:       res.OwnerId,
@@ -376,7 +369,6 @@ func (ctrl *APIControl) GetQrCodeById(OwnerId int) (response []structure.GetQrCo
 		getQrCodeArray = append(getQrCodeArray, resGetQrCode)
 	}
 	response = getQrCodeArray
-	fmt.Println("3")
 	return
 }
 
@@ -444,7 +436,7 @@ func (ctrl *APIControl) AddFileZipById(req structure.FileZip) (file string, Erro
 		}
 		filename := data.Code + "-" + data.Count
 		//todo สร้าง QrCode
-		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + data.QrCodeUUID.String())
+		qrc, err := qrcode.New(ctrl.access.ENV.URLQRCode + data.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
@@ -507,7 +499,7 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
 		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
-		fmt.Println("qr c:",qrc)
+		fmt.Println("qr c:", qrc)
 		if err != nil {
 			Error = err
 			return

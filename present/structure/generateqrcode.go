@@ -46,7 +46,6 @@ type GetDataQrCode struct {
 type GetOps struct {
 	Ops       datatypes.JSON
 	User      string
-	UpdatedAt time.Time
 	Role      string
 }
 
@@ -73,18 +72,18 @@ type GenQrCode struct {
 }
 
 type UpdateDataQrCode struct {
-	OwnerId     uint        `json:"owner_id" validate:"required"`
-	QrCodeId    uuid.UUID   `json:"qr_code_id" validate:"required"`
-	UserId      uint        `json:"user_id" validate:"required"`
-	Info        interface{} `json:"info" validate:"required"`
-	Ops         interface{} `json:"ops" validate:"required"`
+	OwnerId  uint        `json:"owner_id" validate:"required"`
+	QrCodeId uuid.UUID   `json:"qr_code_id" validate:"required"`
+	Info     interface{} `json:"info" validate:"required"`
+	LineUserId string `json:"line_user_id" validate:"required"`
 	//HistoryInfo interface{} `json:"history_info" validate:"required"`
 }
 
 type InsertDataQrCode struct {
 	OwnerId      uint        `json:"owner_id" validate:"required"`
 	QrCodeId     uuid.UUID   `json:"qr_code_id" validate:"required"`
-	TemplateName  string      `json:"template_name" validate:"required"`
+	TemplateName string      `json:"template_name" validate:"required"`
+	LineUserId   string      `json:"line_user_id" validate:"required"`
 	Info         interface{} `json:"info" validate:"required"`
 }
 

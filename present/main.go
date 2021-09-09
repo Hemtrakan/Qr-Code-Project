@@ -47,11 +47,11 @@ func APICreate(ctrl *control.APIControl) {
 	api.Post("admin", admin) // todo สำหรับ สมัคร admin เท่านั้น
 
 	qr := api.Group("/qr")
-	qr.Get("*", getDataQrCode)                    //  Id >>> QrCodeUUId
-	qr.Get("getDataQrCodeJson/:id", getDataQrCodeJson) //  Id >>> QrCodeUUId
+	qr.Get("*", getDataQrCode) // ตอน ScanQrCode
 
 	qrApi := api.Group("/qr-api")
 	qrApi.Get("getDataQrCodeJson/:id", getDataQrCodeJson)
+
 	// -- Todo Owner
 	owner := api.Group("/owner")
 	owner.Post("login", LoginOwner)
@@ -83,44 +83,54 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Put("changePasswordOperator", ChangePasswordOperatorByOwner)
 	owner.Delete("deleteAccount/:id", deleteAccountOperator)
 
-
 	// QrCode
 	owner.Put("updateStatusQrCode/:id", updateStatusQrCodeOwner)
 	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
-	owner.Post("updateDataQrCode",updateDataQrCode)
+	owner.Post("updateDataQrCode", updateDataQrCode)
 	owner.Post("insertDataQrCode", insertDataQrCode)
 	owner.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
 	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)
 	owner.Get("getTemplate", getTemplate)
 
-
 	ops := api.Group("/ops")
 	ops.Post("login", LoginOperator)
 	ops.Get("getAccount/:id", getAccountByLineId)
-	ops.Get("getTemplate", getTemplate)
-	ops.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(constant.SecretKey),
-		SuccessHandler: func(context *fiber.Ctx) error {
-			user := context.Locals("user").(*jwt.Token)
-			claims := user.Claims.(jwt.MapClaims)
-			var userRole = claims["role"]
-			if userRole == string(constant.Operator) {
-				return context.Next()
-			} else {
-				return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-					"error": "Unauthorized",
-				})
-			}
-			return context.Next()
-		},
-		ErrorHandler: AuthError,
-		AuthScheme:   "Bearer",
-	}))
+	//ops.Put("updateProfile",updateProfile)
+	//ops.Put("changePasswordOperator", ChangePasswordOperator)
 
-	ops.Post("updateDataQrCode",updateDataQrCodeOps)
+	ops.Post("getWorksheet/:id", getWorksheet)
+	ops.Get("getTemplate", getTemplateList)
+	ops.Get("getTemplate/:id", getTemplate)
 	ops.Post("insertDataQrCode", insertDataQrCodeOps)
-	ops.Put("updateProfile",updateProfile)
-	ops.Put("changePasswordOperator", ChangePasswordOperator)
+	ops.Put("updateDataQrCode", updateDataQrCodeOps)
+
+	ops.Get("typeReport", getTypeWorksheet)
+	ops.Get("report", getWorksheet)
+	ops.Get("report/:id", getWorksheetById)
+	ops.Post("report/:id", insertWorksheet)
+	ops.Put("worksheet/:id", worksheet)
+	ops.Get("getDataUpdate/:id", getUpdateWorksheet)
+	ops.Put("report/:id", updateWorksheet)
+	ops.Delete("report/:id", deleteWorksheet)
+
+	//ops.Use(jwtware.New(jwtware.Config{
+	//	SigningKey: []byte(constant.SecretKey),
+	//	SuccessHandler: func(context *fiber.Ctx) error {
+	//		user := context.Locals("user").(*jwt.Token)
+	//		claims := user.Claims.(jwt.MapClaims)
+	//		var userRole = claims["role"]
+	//		if userRole == string(constant.Operator) {
+	//			return context.Next()
+	//		} else {
+	//			return context.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+	//				"error": "Unauthorized",
+	//			})
+	//		}
+	//		return context.Next()
+	//	},
+	//	ErrorHandler: AuthError,
+	//	AuthScheme:   "Bearer",
+	//}))
 
 	// -- Todo Admin
 	admin := api.Group("/admin")
@@ -169,7 +179,6 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("insertDataQrCode", insertDataQrCode)
 	admin.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
 	admin.Post("updateOpsDataQrCode", updateOpsDataQrCode)
-
 
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 	admin.Put("updateStatusQrCode/:id", updateStatusQrCode)

@@ -78,14 +78,15 @@ func insertDataQrCodeOps(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	OperatorId , err := getOperatorId(context)
-	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
-	err = api.CheckAccountOperator(OperatorId,data.OwnerId)
-	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
+	//OperatorId , err := getOperatorId(context)
+	//
+	//if err != nil {
+	//	return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	//}
+	//err = api.CheckAccountOperator(OperatorId,data.OwnerId)
+	//if err != nil {
+	//	return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	//}
 	err = api.InsertDataQrCode(data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
@@ -103,14 +104,14 @@ func updateDataQrCodeOps(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	OperatorId , err := getOperatorId(context)
+	//OperatorId , err := getOperatorId(context)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = api.CheckAccountOperator(OperatorId,data.OwnerId)
-	if err != nil {
-		return utility.FiberError(context, http.StatusBadRequest, err.Error())
-	}
+	//err = api.CheckAccountOperator(OperatorId,data.OwnerId)
+	//if err != nil {
+	//	return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	//}
 	err = api.UpdateDataQrCode(data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())

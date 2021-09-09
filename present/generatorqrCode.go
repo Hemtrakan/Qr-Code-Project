@@ -16,9 +16,19 @@ type GORMFactory struct {
 	env *environment.Properties
 }
 
+func getTemplateList(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	res := api.GetTemplateList()
+	return context.Status(http.StatusOK).JSON(res)
+}
+
 func getTemplate(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	res := api.GetTemplate()
+	Template := context.Params("id")
+	res ,err:= api.GetTemplate(Template)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
 	return context.Status(http.StatusOK).JSON(res)
 }
 
@@ -89,7 +99,6 @@ func updateHistoryInfoDataQrCode(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-
 	err = api.UpdateHistoryInfoDataQrCode(data)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())

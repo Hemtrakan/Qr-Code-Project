@@ -33,11 +33,18 @@ type FactoryInterface interface {
 	GetQrCodeByQrCodeId(OwnerId int,QrCodeId string) (response rdbmsstructure.QrCode,Error error)
 	GetAllQrCode() (response []rdbmsstructure.QrCode,Error error)
 	InsertDataQrCodeById(QrCode rdbmsstructure.QrCode) (Error error)
-	UpdateDataQrCode(Info rdbmsstructure.QrCode,HistoryInfo rdbmsstructure.HistoryInfo,Ops rdbmsstructure.Ops) (Error error)
+	UpdateDataQrCode(Info rdbmsstructure.QrCode,HistoryInfo rdbmsstructure.HistoryInfo) (Error error)
 	UpdateHistoryInfoQrCodeById(QrCode rdbmsstructure.HistoryInfo) (Error error)
 	UpdateOpsQrCodeById(QrCode rdbmsstructure.Ops) (Error error)
 	UpdateQrCodeActive(QrCode rdbmsstructure.QrCode) (Error error)
 	DeleteQrCode(QrCodeUUID string) (Error error)
+
+
+	GetDataQrCodeInfo(QrCodeUUID string) (response rdbmsstructure.QrCode , Error error)
+	GetDataQrCodeOps() (response []rdbmsstructure.Ops, Error error)
+	UpdateDataQrCodeOps(ops rdbmsstructure.Ops) (Error error)
+	GetDataQrCodeOpsById(ID uint) (response rdbmsstructure.Ops, Error error)
+
 
 
 	// Template
@@ -57,6 +64,7 @@ type FactoryInterface interface {
 	//TestInsertQR(Qr rdbmsstructure.TestQrCode) (Error error)
 	//TestInsertHistory(History rdbmsstructure.TestHistory) (Error error)
 	//TestInsertOps(Ops rdbmsstructure.TestOps) (Error error)
+
 
 
 }

@@ -96,13 +96,13 @@ func (factory GORMFactory) Login(login rdbmsstructure.Account) (response rdbmsst
 
 func (factory GORMFactory) GetAccountByLineId(lineId string) (response rdbmsstructure.Account, Error error) {
 	var data rdbmsstructure.Account
-	err := factory.client.Where("line_user_id = ?", lineId).First(&data).Error
+	err := factory.client.Where("line_user_id = ?", lineId).Take(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
 			return
 		} else {
-			Error = errors.New("record not found")
+			Error = errors.New("ไม่มีข้อมูลผู้ใช้งานคนนี้")
 			return
 		}
 		return
@@ -361,8 +361,6 @@ func (factory GORMFactory) GetDataQrCode(QrCodeUUID string) (response []rdbmsstr
 	}).Preload("DataHistory", func(db *gorm.DB) *gorm.DB {
 		return db.Order("history_infos.updated_at desc")
 	}).Where("qr_code_uuid= ?", QrCodeUUID).First(&data).Error
-	//.Order("ops.updated_at desc")
-	//.Order("history_infos.updated_at desc")
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -385,17 +383,13 @@ func (factory GORMFactory) CreateQrCode(QrCode rdbmsstructure.QrCode) (Error err
 	return
 }
 
-func (factory GORMFactory) UpdateDataQrCode(Info rdbmsstructure.QrCode,HistoryInfo rdbmsstructure.HistoryInfo,Ops rdbmsstructure.Ops) (Error error){
+func (factory GORMFactory) UpdateDataQrCode(Info rdbmsstructure.QrCode,HistoryInfo rdbmsstructure.HistoryInfo) (Error error){
 	db := factory.client
 	err := db.Where("qr_code_uuid = ?", Info.QrCodeUUID).Updates(&Info).Error
 	if err != nil {
 		return err
 	}
 	err = factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&HistoryInfo).Error
-	if err != nil {
-		return err
-	}
-	err = factory.client.Session(&gorm.Session{FullSaveAssociations: true}).Save(&Ops).Error
 	if err != nil {
 		return err
 	}
@@ -555,6 +549,65 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 	return
 }
 
+func (factory GORMFactory) GetDataQrCodeInfo(QrCodeUUID string) (response rdbmsstructure.QrCode, Error error) {
+	var data rdbmsstructure.QrCode
+	err := factory.client.Where("qr_code_uuid = ?",QrCodeUUID).Take(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) GetDataQrCodeOps() (response []rdbmsstructure.Ops, Error error) {
+	var data []rdbmsstructure.Ops
+	err := factory.client.Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) GetDataQrCodeOpsById(ID uint) (response rdbmsstructure.Ops, Error error) {
+	var data rdbmsstructure.Ops
+	err := factory.client.Where("id = ?",ID).First(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
+func (factory GORMFactory) UpdateDataQrCodeOps(ops rdbmsstructure.Ops) (Error error) {
+	db := factory.client.Where("id = ?", ops.ID).Updates(&ops).Error
+	if db != nil {
+		return db
+	}
+	return
+}
+
 // -- TeamPage
 
 
@@ -572,6 +625,8 @@ func (factory GORMFactory) InsertQrCode(QrCodeUUID string, QrCode rdbmsstructure
 	}
 	return
 }
+
+
 
 // test
 //func (factory GORMFactory) TestGetQrData() (response []rdbmsstructure.TestQrCode, Error error) {

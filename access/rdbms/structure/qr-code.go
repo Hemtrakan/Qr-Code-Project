@@ -50,6 +50,7 @@ type Ops struct {
 	QrCodeRefer uint
 }
 
+
 //type TestQrCode struct {
 //	gorm.Model
 //	QrCodeName  string
