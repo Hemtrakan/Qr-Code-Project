@@ -19,13 +19,17 @@ type GetWorksheet struct {
 }
 
 type Worksheet struct {
-	ID               uint             `json:"id,omitempty"`
-	QrCodeID         uuid.UUID        `json:"qr_code_id,omitempty"`
-	Info             interface{}      `json:"info,omitempty"`
-	Text             string           `json:"text,omitempty"`
-	Type             string           `json:"type,omitempty"`
-	Ops              *string          `json:"ops,omitempty"`
-	OwnerId          uint             `json:"owner_id,omitempty"`
+	ID              uint            `json:"id,omitempty"`
+	QrCodeID        uuid.UUID       `json:"qr_code_id,omitempty"`
+	Info            interface{}     `json:"info,omitempty"`
+	Text            string          `json:"text,omitempty"`
+	Type            string          `json:"type,omitempty"`
+	Ops             *string         `json:"ops,omitempty"`
+	OwnerId         uint            `json:"owner_id,omitempty"`
+	StatusWorksheet []StatusWorksheet `json:"status_worksheet"`
+}
+
+type StatusWorksheet struct {
 	StatusWorksheet1 StatusWorksheet1 `json:"status_worksheet_1"`
 	StatusWorksheet2 StatusWorksheet2 `json:"status_worksheet_2"`
 	StatusWorksheet3 StatusWorksheet3 `json:"status_worksheet_3"`
@@ -38,13 +42,13 @@ type StatusWorksheet1 struct {
 
 type StatusWorksheet2 struct {
 	Status   string    `json:"status"`
-	UpdateAt time.Time `json:"update_at"`
+	UpdateAt *time.Time `json:"update_at"`
 }
 
 type StatusWorksheet3 struct {
 	Status   string    `json:"status"`
-	UpdateAt time.Time `json:"update_at"`
-	Text     string    `json:"text"`
+	UpdateAt *time.Time `json:"update_at"`
+	Text     string     `json:"text"`
 }
 
 type ReportID struct {

@@ -3,7 +3,6 @@ package control
 import (
 	json2 "encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gofrs/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -46,25 +45,34 @@ func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksh
 			return
 		}
 		if *owner.SubOwnerId == Worksheet.OwnerId {
+			var StatusWorksheetArray []structure.StatusWorksheet
+
+			for _, m1 := range Worksheet.StatusWorksheet {
+				StatusWorksheet := structure.StatusWorksheet{
+					StatusWorksheet1: structure.StatusWorksheet1{
+						Status:   m1.StatusWorksheet1.Status,
+						UpdateAt: m1.StatusWorksheet1.UpdateAt,
+					},
+					StatusWorksheet2: structure.StatusWorksheet2{
+						Status:   m1.StatusWorksheet2.Status,
+						UpdateAt: m1.StatusWorksheet2.UpdateAt,
+					},
+					StatusWorksheet3: structure.StatusWorksheet3{
+						Status:   m1.StatusWorksheet3.Status,
+						UpdateAt: m1.StatusWorksheet3.UpdateAt,
+						Text:     m1.StatusWorksheet3.Text,
+					},
+				}
+				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+			}
+
 			data := structure.Worksheet{
-				ID:       qr.ID,
-				QrCodeID: Worksheet.QrCodeID,
-				Text:     Worksheet.Text,
-				Type:     Worksheet.Type,
-				Ops:      Worksheet.Ops,
-				StatusWorksheet1: structure.StatusWorksheet1{
-					Status:   Worksheet.StatusWorksheet1.Status,
-					UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
-				},
-				StatusWorksheet2: structure.StatusWorksheet2{
-					Status:   Worksheet.StatusWorksheet2.Status,
-					UpdateAt: Worksheet.StatusWorksheet2.UpdateAt,
-				},
-				StatusWorksheet3: structure.StatusWorksheet3{
-					Status:   Worksheet.StatusWorksheet3.Status,
-					UpdateAt: Worksheet.StatusWorksheet3.UpdateAt,
-					Text:     Worksheet.StatusWorksheet3.Text,
-				},
+				ID:              qr.ID,
+				QrCodeID:        Worksheet.QrCodeID,
+				Text:            Worksheet.Text,
+				Type:            Worksheet.Type,
+				Ops:             Worksheet.Ops,
+				StatusWorksheet: StatusWorksheetArray,
 			}
 			responseArray = append(responseArray, data)
 		}
@@ -80,8 +88,6 @@ func (ctrl *APIControl) GetWorksheetById(req *structure.ReportID) (res structure
 		return
 	}
 
-
-	fmt.Println("req : ",req.LineUserId)
 	ops, err := ctrl.access.RDBMS.GetDataQrCodeOpsById(req.ReportID)
 	if err != nil {
 		Error = err
@@ -96,26 +102,34 @@ func (ctrl *APIControl) GetWorksheetById(req *structure.ReportID) (res structure
 	qr, err := ctrl.access.RDBMS.GetDataQrCodeInfo(Worksheet.QrCodeID.String())
 	info, err := json2.Marshal(qr.Info)
 
+	var StatusWorksheetArray []structure.StatusWorksheet
+	for _, m1 := range Worksheet.StatusWorksheet {
+		StatusWorksheet := structure.StatusWorksheet{
+			StatusWorksheet1: structure.StatusWorksheet1{
+				Status:   m1.StatusWorksheet1.Status,
+				UpdateAt: m1.StatusWorksheet1.UpdateAt,
+			},
+			StatusWorksheet2: structure.StatusWorksheet2{
+				Status:   m1.StatusWorksheet2.Status,
+				UpdateAt: m1.StatusWorksheet2.UpdateAt,
+			},
+			StatusWorksheet3: structure.StatusWorksheet3{
+				Status:   m1.StatusWorksheet3.Status,
+				UpdateAt: m1.StatusWorksheet3.UpdateAt,
+				Text:     m1.StatusWorksheet3.Text,
+			},
+		}
+		StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+	}
+
 	data := structure.Worksheet{
-		ID:       ops.ID,
-		QrCodeID: Worksheet.QrCodeID,
-		Info:     datatypes.JSON(info),
-		Text:     Worksheet.Text,
-		Type:     Worksheet.Type,
-		Ops:      Worksheet.Ops,
-		StatusWorksheet1: structure.StatusWorksheet1{
-			Status:   Worksheet.StatusWorksheet1.Status,
-			UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
-		},
-		StatusWorksheet2: structure.StatusWorksheet2{
-			Status:   Worksheet.StatusWorksheet2.Status,
-			UpdateAt: Worksheet.StatusWorksheet2.UpdateAt,
-		},
-		StatusWorksheet3: structure.StatusWorksheet3{
-			Status:   Worksheet.StatusWorksheet3.Status,
-			UpdateAt: Worksheet.StatusWorksheet3.UpdateAt,
-			Text:     Worksheet.StatusWorksheet3.Text,
-		},
+		ID:              ops.ID,
+		QrCodeID:        Worksheet.QrCodeID,
+		Info:            datatypes.JSON(info),
+		Text:            Worksheet.Text,
+		Type:            Worksheet.Type,
+		Ops:             Worksheet.Ops,
+		StatusWorksheet: StatusWorksheetArray,
 	}
 	res = data
 
@@ -137,23 +151,23 @@ func (ctrl *APIControl) InsertWorksheet(req *structure.InsertWorksheet) (Error e
 		OwnerId = qr.OwnerId
 	}
 
-	Worksheet := structure.Worksheet{
-		QrCodeID: req.QrCodeID,
-		Text:     req.Text,
-		Type:     req.Type,
-		OwnerId:  OwnerId,
+	var StatusWorksheetArray []structure.StatusWorksheet
+	StatusWorksheet := structure.StatusWorksheet{
 		StatusWorksheet1: structure.StatusWorksheet1{
 			Status:   constant.WorksheetsStatus1,
 			UpdateAt: time.Now(),
 		},
-		StatusWorksheet2: structure.StatusWorksheet2{
-			Status:   "",
-			UpdateAt: time.Time{},
-		},
-		StatusWorksheet3: structure.StatusWorksheet3{
-			Status:   "",
-			UpdateAt: time.Time{},
-		},
+		StatusWorksheet2: structure.StatusWorksheet2{},
+		StatusWorksheet3: structure.StatusWorksheet3{},
+	}
+	StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+
+	Worksheet := structure.Worksheet{
+		QrCodeID:        req.QrCodeID,
+		Text:            req.Text,
+		Type:            req.Type,
+		OwnerId:         OwnerId,
+		StatusWorksheet: StatusWorksheetArray,
 	}
 	json, err := json2.Marshal(Worksheet)
 	if err != nil {
@@ -190,10 +204,30 @@ func (ctrl *APIControl) Worksheet(reportId uint, req structure.ReportID) (Error 
 		Error = err
 		return
 	}
-	if Worksheet.StatusWorksheet2.Status != "" {
-		Error = errors.New("มีซ่อมรับงานนี้ไปแล้ว")
-		return
+
+	setTime := time.Now()
+	var StatusWorksheetArray []structure.StatusWorksheet
+	for _, m1 :=range Worksheet.StatusWorksheet{
+		if m1.StatusWorksheet2.Status != "" {
+			Error = errors.New("มีซ่อมรับงานนี้ไปแล้ว")
+			return
+		}
+		StatusWorksheet := structure.StatusWorksheet{
+			StatusWorksheet1: structure.StatusWorksheet1{
+				Status:   m1.StatusWorksheet1.Status,
+				UpdateAt: m1.StatusWorksheet1.UpdateAt,
+			},
+			StatusWorksheet2: structure.StatusWorksheet2{
+				Status:   constant.WorksheetsStatus2,
+				UpdateAt: &setTime,
+			},
+			StatusWorksheet3: structure.StatusWorksheet3{},
+		}
+		StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 	}
+
+
+
 
 	data := structure.Worksheet{
 		QrCodeID: Worksheet.QrCodeID,
@@ -201,15 +235,7 @@ func (ctrl *APIControl) Worksheet(reportId uint, req structure.ReportID) (Error 
 		Type:     Worksheet.Type,
 		Ops:      &line.Username,
 		OwnerId:  Worksheet.OwnerId,
-		StatusWorksheet1: structure.StatusWorksheet1{
-			Status:   Worksheet.StatusWorksheet1.Status,
-			UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
-		},
-		StatusWorksheet2: structure.StatusWorksheet2{
-			Status:   constant.WorksheetsStatus2,
-			UpdateAt: time.Now(),
-		},
-		StatusWorksheet3: structure.StatusWorksheet3{},
+		StatusWorksheet: StatusWorksheetArray,
 	}
 	jsonData, err := json2.Marshal(data)
 	if err != nil {
@@ -256,25 +282,33 @@ func (ctrl *APIControl) GetUpdateWorksheet(QrCodeId string) (res structure.GetWo
 			return
 		}
 		if qr.QrCodeID.String() == QrCodeId {
+			var StatusWorksheetArray []structure.StatusWorksheet
+			for _, m1 := range Worksheet.StatusWorksheet {
+				StatusWorksheet := structure.StatusWorksheet{
+					StatusWorksheet1: structure.StatusWorksheet1{
+						Status:   m1.StatusWorksheet1.Status,
+						UpdateAt: m1.StatusWorksheet1.UpdateAt,
+					},
+					StatusWorksheet2: structure.StatusWorksheet2{
+						Status:   m1.StatusWorksheet2.Status,
+						UpdateAt: m1.StatusWorksheet2.UpdateAt,
+					},
+					StatusWorksheet3: structure.StatusWorksheet3{
+						Status:   m1.StatusWorksheet3.Status,
+						UpdateAt: m1.StatusWorksheet3.UpdateAt,
+						Text:     m1.StatusWorksheet3.Text,
+					},
+				}
+				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+			}
+
 			data := structure.Worksheet{
-				ID:       qr.ID,
-				Text:     Worksheet.Text,
-				QrCodeID: Worksheet.QrCodeID,
-				Type:     Worksheet.Type,
-				Ops:      Worksheet.Ops,
-				StatusWorksheet1: structure.StatusWorksheet1{
-					Status:   Worksheet.StatusWorksheet1.Status,
-					UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
-				},
-				StatusWorksheet2: structure.StatusWorksheet2{
-					Status:   Worksheet.StatusWorksheet2.Status,
-					UpdateAt: Worksheet.StatusWorksheet2.UpdateAt,
-				},
-				StatusWorksheet3: structure.StatusWorksheet3{
-					Status:   Worksheet.StatusWorksheet3.Status,
-					UpdateAt: Worksheet.StatusWorksheet3.UpdateAt,
-					Text:     Worksheet.StatusWorksheet3.Text,
-				},
+				ID:              qr.ID,
+				QrCodeID:        Worksheet.QrCodeID,
+				Text:            Worksheet.Text,
+				Type:            Worksheet.Type,
+				Ops:             Worksheet.Ops,
+				StatusWorksheet: StatusWorksheetArray,
 			}
 			responseArray = append(responseArray, data)
 		}
@@ -307,29 +341,40 @@ func (ctrl *APIControl) UpdateWorksheet(reportId uint, req structure.UpdateWorks
 		Error = err
 		return
 	}
-	if Worksheet.StatusWorksheet3.Status != "" {
-		Error = errors.New("มีการแก้ไขปัญหาเรียบร้อยแล้ว")
-		return
+
+	setTime := time.Now()
+	var StatusWorksheetArray []structure.StatusWorksheet
+	for _ , m1 := range Worksheet.StatusWorksheet{
+		if m1.StatusWorksheet3.Status != "" {
+			Error = errors.New("มีการแก้ไขปัญหาเรียบร้อยแล้ว")
+			return
+		}
+		StatusWorksheet := structure.StatusWorksheet{
+			StatusWorksheet1: structure.StatusWorksheet1{
+				Status:   m1.StatusWorksheet1.Status,
+				UpdateAt: m1.StatusWorksheet1.UpdateAt,
+			},
+			StatusWorksheet2: structure.StatusWorksheet2{
+				Status:   m1.StatusWorksheet2.Status,
+				UpdateAt: m1.StatusWorksheet2.UpdateAt,
+			},
+			StatusWorksheet3: structure.StatusWorksheet3{
+				Status:   constant.WorksheetsStatus3,
+				UpdateAt: &setTime,
+				Text:     req.Text,
+			},
+		}
+		StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 	}
+
+
 	data := structure.Worksheet{
 		QrCodeID: Worksheet.QrCodeID,
 		Text:     Worksheet.Text,
 		Type:     Worksheet.Type,
 		Ops:      &line.Username,
 		OwnerId:  Worksheet.OwnerId,
-		StatusWorksheet1: structure.StatusWorksheet1{
-			Status:   Worksheet.StatusWorksheet1.Status,
-			UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
-		},
-		StatusWorksheet2: structure.StatusWorksheet2{
-			Status:   Worksheet.StatusWorksheet2.Status,
-			UpdateAt: Worksheet.StatusWorksheet2.UpdateAt,
-		},
-		StatusWorksheet3: structure.StatusWorksheet3{
-			Status:   constant.WorksheetsStatus3,
-			UpdateAt: time.Now(),
-			Text:     req.Text,
-		},
+		StatusWorksheet: StatusWorksheetArray,
 	}
 	jsonData, err := json2.Marshal(data)
 	if err != nil {
@@ -371,29 +416,41 @@ func (ctrl *APIControl) DeleteWorksheet(reportId uint, req structure.UpdateWorks
 		Error = err
 		return
 	}
-	if Worksheet.StatusWorksheet3.Status != "" {
-		Error = errors.New("มีการแก้ไขปัญหาเรียบร้อยแล้ว หรือ มีการยกเลิก")
-		return
+
+
+	setTime := time.Now()
+	var StatusWorksheetArray []structure.StatusWorksheet
+	for _ , m1 := range Worksheet.StatusWorksheet{
+		if m1.StatusWorksheet3.Status != "" {
+			Error = errors.New("มีการแก้ไขปัญหาเรียบร้อยแล้ว")
+			return
+		}
+		StatusWorksheet := structure.StatusWorksheet{
+			StatusWorksheet1: structure.StatusWorksheet1{
+				Status:   m1.StatusWorksheet1.Status,
+				UpdateAt: m1.StatusWorksheet1.UpdateAt,
+			},
+			StatusWorksheet2: structure.StatusWorksheet2{
+				Status:   m1.StatusWorksheet2.Status,
+				UpdateAt: m1.StatusWorksheet2.UpdateAt,
+			},
+			StatusWorksheet3: structure.StatusWorksheet3{
+				Status:   constant.WorksheetsStatus4,
+				UpdateAt: &setTime,
+				Text:     req.Text,
+			},
+		}
+		StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 	}
+
+
 	data := structure.Worksheet{
 		QrCodeID: Worksheet.QrCodeID,
 		Text:     Worksheet.Text,
 		Type:     Worksheet.Type,
 		Ops:      &line.Username,
 		OwnerId:  Worksheet.OwnerId,
-		StatusWorksheet1: structure.StatusWorksheet1{
-			Status:   Worksheet.StatusWorksheet1.Status,
-			UpdateAt: Worksheet.StatusWorksheet1.UpdateAt,
-		},
-		StatusWorksheet2: structure.StatusWorksheet2{
-			Status:   Worksheet.StatusWorksheet2.Status,
-			UpdateAt: Worksheet.StatusWorksheet2.UpdateAt,
-		},
-		StatusWorksheet3: structure.StatusWorksheet3{
-			Status:   constant.WorksheetsStatus4,
-			UpdateAt: time.Now(),
-			Text:     req.Text,
-		},
+		StatusWorksheet: StatusWorksheetArray,
 	}
 	jsonData, err := json2.Marshal(data)
 	if err != nil {
