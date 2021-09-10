@@ -47,8 +47,9 @@ type StatusWorksheet3 struct {
 	Text     string    `json:"text"`
 }
 
-type LineUserId struct {
-	LineUserId string `json:"line_user_id" validate:"required"`
+type ReportID struct {
+	ReportID   uint   `json:"report_id" query:"report_id"`
+	LineUserId string `json:"line_user_id" query:"line_user_id"`
 }
 
 type InsertWorksheet struct {

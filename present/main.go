@@ -105,8 +105,8 @@ func APICreate(ctrl *control.APIControl) {
 	ops.Put("updateDataQrCode", updateDataQrCodeOps)
 
 	ops.Get("typeReport", getTypeWorksheet)
-	ops.Get("report", getWorksheet)
-	ops.Get("report/:id", getWorksheetById)
+	ops.Get("report/:id", getWorksheet)
+	ops.Get("report", getWorksheetById)
 	ops.Post("report", insertWorksheet)
 	ops.Put("worksheet/:id", worksheet)
 	ops.Get("getDataUpdate/:id", getUpdateWorksheet)

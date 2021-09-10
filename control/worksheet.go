@@ -3,6 +3,7 @@ package control
 import (
 	json2 "encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gofrs/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -24,8 +25,8 @@ func (ctrl *APIControl) GetTypeWorksheet() structure.TypeWorksheet {
 	return arrTemplates
 }
 
-func (ctrl *APIControl) GetWorksheet(req *structure.LineUserId) (response []structure.Worksheet, Error error) {
-	owner, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
+func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksheet, Error error) {
+	owner, err := ctrl.access.RDBMS.GetAccountByLineId(lineId)
 	if err != nil {
 		Error = err
 		return
@@ -72,14 +73,16 @@ func (ctrl *APIControl) GetWorksheet(req *structure.LineUserId) (response []stru
 	return
 }
 
-func (ctrl *APIControl) GetWorksheetById(reportId uint, req *structure.LineUserId) (res structure.Worksheet, Error error) {
+func (ctrl *APIControl) GetWorksheetById(req *structure.ReportID) (res structure.Worksheet, Error error) {
 	_, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
 	if err != nil {
 		Error = err
 		return
 	}
 
-	ops, err := ctrl.access.RDBMS.GetDataQrCodeOpsById(reportId)
+
+	fmt.Println("req : ",req.LineUserId)
+	ops, err := ctrl.access.RDBMS.GetDataQrCodeOpsById(req.ReportID)
 	if err != nil {
 		Error = err
 		return
@@ -169,7 +172,7 @@ func (ctrl *APIControl) InsertWorksheet(req *structure.InsertWorksheet) (Error e
 	return
 }
 
-func (ctrl *APIControl) Worksheet(reportId uint, req structure.LineUserId) (Error error) {
+func (ctrl *APIControl) Worksheet(reportId uint, req structure.ReportID) (Error error) {
 	line, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
 	if err != nil {
 		Error = err
