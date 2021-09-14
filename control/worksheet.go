@@ -237,17 +237,17 @@ func (ctrl *APIControl) Worksheet(reportId uint, req structure.ReportID) (Error 
 	setTime := time.Now()
 	var StatusWorksheetArray []structure.StatusWorksheet
 	for _, m1 := range Worksheet.StatusWorksheet {
-			if m1.Status == constant.WorksheetsStatus2{
-				Error = errors.New("มีช่างรับงานนี้ไปแล้ว")
-				return
-			}
-			StatusWorksheet1 := structure.StatusWorksheet{
-				Status:     m1.Status,
-				UpdateAt:   m1.UpdateAt,
-				Text:       nil,
-				Equipments: nil,
-			}
-			StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet1)
+		if m1.Status == constant.WorksheetsStatus2 {
+			Error = errors.New("มีช่างรับงานนี้ไปแล้ว")
+			return
+		}
+		StatusWorksheet1 := structure.StatusWorksheet{
+			Status:     m1.Status,
+			UpdateAt:   m1.UpdateAt,
+			Text:       nil,
+			Equipments: nil,
+		}
+		StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet1)
 
 	}
 	StatusWorksheet2 := structure.StatusWorksheet{
@@ -485,13 +485,19 @@ func (ctrl *APIControl) DeleteWorksheet(reportId uint, req structure.UpdateWorks
 			StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet1)
 		}
 		if index == 1 {
-			StatusWorksheet2 := structure.StatusWorksheet{
-				Status:     m1.Status,
-				UpdateAt:   m1.UpdateAt,
-				Text:       nil,
-				Equipments: nil,
+			if m1.Status == constant.WorksheetsStatus2 {
+
+				StatusWorksheet2 := structure.StatusWorksheet{
+					Status:     m1.Status,
+					UpdateAt:   m1.UpdateAt,
+					Text:       nil,
+					Equipments: nil,
+				}
+				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet2)
+			}else {
+				Error = errors.New("งานนี้ถูกยกเลิก หรือ ส่งงานแล้ว")
+				return
 			}
-			StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet2)
 		}
 		if index == 2 {
 			Error = errors.New("งานนี้ถูกยกเลิก หรือ ส่งงานแล้ว")
