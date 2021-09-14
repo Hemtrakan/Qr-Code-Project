@@ -46,7 +46,7 @@ func APICreate(ctrl *control.APIControl) {
 	api := app.Group("/api")
 	api.Post("admin", admin) // todo สำหรับ สมัคร admin เท่านั้น
 
-	qr := api.Group("/qr")
+	qr := app.Group("/qr")
 	qr.Get("*", getDataQrCode) // ตอน ScanQrCode
 
 	qrApi := api.Group("/qr-api")
@@ -90,7 +90,7 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Post("insertDataQrCode", insertDataQrCode)
 	owner.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
 	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)
-	owner.Get("getTemplate", getTemplate)
+	owner.Get("getTemplate", getTemplateList)
 
 	ops := api.Group("/ops")
 	ops.Post("login", LoginOperator)
@@ -185,7 +185,7 @@ func APICreate(ctrl *control.APIControl) {
 	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
 
 	// -- TeamPage
-	admin.Get("getTemplate", getTemplate)
+	admin.Get("getTemplate", getTemplateList)
 	//admin.Get("TestQrCode", TestQrCode)
 
 	// -- TeamPage Qr Computer

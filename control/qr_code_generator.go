@@ -498,8 +498,9 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 	var pathQr string
 	var arrayFileName []structure.ArrayFileName
 	for _, res := range data {
-		qrc, err := qrcode.New(string(ctrl.access.ENV.URLQRCode) + res.QrCodeUUID.String())
-		fmt.Println("qr c:", qrc)
+		URL := ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String()
+		qrc, err := qrcode.New(URL)
+		fmt.Println("qr c:", URL)
 		if err != nil {
 			Error = err
 			return

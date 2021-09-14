@@ -67,7 +67,7 @@ func TextOnImg(request Request) (Error error) {
 	}
 	dc.SetColor(color)
 	dc.SetFillRuleWinding()
-	dc.DrawStringWrapped(request.Text, x, y, 0.5, -38.5, maxWidth, 5, gg.AlignCenter)
+	dc.DrawStringWrapped(request.Text, x, y, 0.5, -42, maxWidth, 5, gg.AlignCenter)
 	dc.Image()
 
 	out, err := os.Create(request.PathSave)

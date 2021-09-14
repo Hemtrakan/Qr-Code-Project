@@ -15,8 +15,9 @@ const (
 )
 
 const(
-	//URLFront URL = "https://9013-1-47-146-211.ngrok.io"
-	URLFront URL = "http://192.168.1.104:12000/qr/"
+	//URLFront URL = "http://192.168.1.104:12000/"
+	//URLFront URL = "http://localhost:3000/qr/"
+	URLFront URL = "https://964f-1-47-1-82.jp.ngrok.io/qr/"
 )
 
 type Properties struct {
@@ -39,10 +40,10 @@ type Properties struct {
 	//// --
 
 	//// -- URL
-	URLFront string `env:"URL_FRONT,default=http://localhost:12000/viewdata/"`
+	//URLFront string `env:"URL_FRONT,default=http://localhost:12000/viewdata/"`
 	//URLFront URL `env:"URL_FRONT,default=https://4eb2-1-47-146-211.ngrok.io/viewdata/"`
 	//URLQRCode string `env:"URL_QR_CODE,default=https://liff.line.me/1656385614-YE6rXz2M/api/qr/"`
-	URLQRCode string `env:"URL_QR_CODE,default=https://192.168.1.104:8080/api/qr/"`
+	URLQRCode string `env:"URL_QR_CODE,default=https://liff.line.me/1656385614-YE6rXz2M?qr_id="`
 
 	//// -- ServiceLine
 	Authorization string `env:"AUTHORIZATION,default=Bearer gkFHAAtmlfClxm0//s233eQb6eTaksrvKzJ+p171IpINsonSX2JV0LMlnKTxTRbdPAc/1fU27N/77/nv+vjffmBJBCOUKbYME0fZ3HOLlM7rlfnF8uddV4JMjjXAuRVN/9YnU4XjDnp2vgrjVAoTtQdB04t89/1O/w1cDnyilFU="`

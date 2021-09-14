@@ -28,9 +28,9 @@ func gormInstance(env *environment.Properties) GORMFactory {
 		//panic(fmt.Sprintf("failed to connect database : %s", err.Error()))
 	}
 
-	if env.Flavor != environment.Production {
-		db = db.Debug()
-	}
+	//if env.Flavor != environment.Production {
+	//	db = db.Debug()
+	//}
 
 	_ = db.AutoMigrate(
 		&rdbmsstructure.Account{},
