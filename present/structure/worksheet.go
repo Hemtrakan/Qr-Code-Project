@@ -30,8 +30,8 @@ type Worksheet struct {
 }
 
 type StatusWorksheet struct {
-	Status     string      `json:"status"`
-	UpdateAt   *time.Time  `json:"update_at"`
+	Status     string      `json:"status,omitempty"`
+	UpdateAt   *time.Time  `json:"update_at,omitempty"`
 	Text       *string      `json:"text,omitempty"`
 	Equipments []Equipment `json:"equipments,omitempty"`
 }

@@ -17,7 +17,7 @@ const (
 const(
 	//URLFront URL = "http://192.168.1.104:12000/"
 	//URLFront URL = "http://localhost:3000/qr/"
-	URLFront URL = "https://964f-1-47-1-82.jp.ngrok.io/qr/"
+	URLFront URL = "https://9ed0-1-47-1-82.jp.ngrok.io/qr/"
 )
 
 type Properties struct {

@@ -8,8 +8,8 @@ type Worksheets string
 
 const (
 	WorksheetsStatus1 string = "รอดำเนิดการ"
-	WorksheetsStatus2 string = "กำลังดำเนิดการ"
-	WorksheetsStatus3 string = "ดำเนิดการเสร็จสิ้น"
+	WorksheetsStatus2 string = "กำลังดำเนินการ"
+	WorksheetsStatus3 string = "ดำเนินการเสร็จสิ้น"
 	WorksheetsStatus4 string = "รายการถูกยกเลิก"
 )
 
