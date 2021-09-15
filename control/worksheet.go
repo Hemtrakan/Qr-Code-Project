@@ -300,7 +300,7 @@ func (ctrl *APIControl) GetUpdateWorksheet(QrCodeId string) (res structure.GetWo
 
 	var responseArray []structure.Worksheet
 	Worksheet := structure.Worksheet{}
-	ops, err := ctrl.access.RDBMS.GetDataQrCodeOps()
+	ops, err := ctrl.access.RDBMS.GetDataQrCodeOpsByQrCodeID(QrCodeId)
 	if err != nil {
 		Error = err
 		return

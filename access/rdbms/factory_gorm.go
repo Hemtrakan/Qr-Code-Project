@@ -583,6 +583,23 @@ func (factory GORMFactory) GetDataQrCodeOps() (response []rdbmsstructure.Ops, Er
 	return
 }
 
+func (factory GORMFactory) GetDataQrCodeOpsByQrCodeID(QrCodeId string) (response []rdbmsstructure.Ops, Error error) {
+	var data []rdbmsstructure.Ops
+	err := factory.client.Where("qr_code_id = ?",QrCodeId).Order("created_at DESC").Find(&data).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			Error = err
+			return
+		} else {
+			Error = errors.New("record not found")
+			return
+		}
+		return
+	}
+	response = data
+	return
+}
+
 func (factory GORMFactory) GetDataQrCodeOpsById(ID uint) (response rdbmsstructure.Ops, Error error) {
 	var data rdbmsstructure.Ops
 	err := factory.client.Where("id = ?",ID).First(&data).Error

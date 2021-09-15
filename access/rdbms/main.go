@@ -42,6 +42,7 @@ type FactoryInterface interface {
 
 	GetDataQrCodeInfo(QrCodeUUID string) (response rdbmsstructure.QrCode , Error error)
 	GetDataQrCodeOps() (response []rdbmsstructure.Ops, Error error)
+	GetDataQrCodeOpsByQrCodeID(QrCodeId string) (response []rdbmsstructure.Ops, Error error)
 	UpdateDataQrCodeOps(ops rdbmsstructure.Ops) (Error error)
 	GetDataQrCodeOpsById(ID uint) (response rdbmsstructure.Ops, Error error)
 
