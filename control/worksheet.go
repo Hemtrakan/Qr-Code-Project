@@ -162,9 +162,11 @@ func (ctrl *APIControl) InsertWorksheet(req *structure.InsertWorksheet) (Error e
 	var QrCodeRefer uint
 	var OwnerId uint
 	for _, qr := range QrCode {
-		QrCodeID = qr.QrCodeUUID
-		QrCodeRefer = qr.ID
-		OwnerId = qr.OwnerId
+		if qr.TemplateName == string(constant.OfficeEquipment) {
+			QrCodeID = qr.QrCodeUUID
+			QrCodeRefer = qr.ID
+			OwnerId = qr.OwnerId
+		}
 	}
 
 	setTime := time.Now()
@@ -312,39 +314,42 @@ func (ctrl *APIControl) GetUpdateWorksheet(QrCodeId string) (res structure.GetWo
 			}
 			var Text *string
 			var StatusWorksheetArray []structure.StatusWorksheet
-			for _, m1 := range Worksheet.StatusWorksheet {
-				var Equipments []structure.Equipment
-				if m1.Status != "" {
-					if m1.Status != constant.WorksheetsStatus4 {
-						Equipment := structure.Equipment{}
-						for _, m2 := range m1.Equipments {
-							Equipment = structure.Equipment{
-								NameEquipment: m2.NameEquipment,
+
+			s1 := len(Worksheet.StatusWorksheet)
+			if s1 == 2 {
+				for _, m1 := range Worksheet.StatusWorksheet {
+					var Equipments []structure.Equipment
+					if m1.Status != "" {
+						if m1.Status != constant.WorksheetsStatus4 {
+							Equipment := structure.Equipment{}
+							for _, m2 := range m1.Equipments {
+								Equipment = structure.Equipment{
+									NameEquipment: m2.NameEquipment,
+								}
+								Equipments = append(Equipments, Equipment)
 							}
-							Equipments = append(Equipments, Equipment)
 						}
 					}
+					Text = m1.Text
+					StatusWorksheet := structure.StatusWorksheet{
+						Status:     m1.Status,
+						UpdateAt:   m1.UpdateAt,
+						Text:       Text,
+						Equipments: Equipments,
+					}
+					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 				}
-				Text = m1.Text
 
-				StatusWorksheet := structure.StatusWorksheet{
-					Status:     m1.Status,
-					UpdateAt:   m1.UpdateAt,
-					Text:       Text,
-					Equipments: Equipments,
+				data := structure.Worksheet{
+					ID:              qr.ID,
+					QrCodeID:        Worksheet.QrCodeID,
+					Text:            Worksheet.Text,
+					Type:            Worksheet.Type,
+					Ops:             Worksheet.Ops,
+					StatusWorksheet: StatusWorksheetArray,
 				}
-				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+				responseArray = append(responseArray, data)
 			}
-
-			data := structure.Worksheet{
-				ID:              qr.ID,
-				QrCodeID:        Worksheet.QrCodeID,
-				Text:            Worksheet.Text,
-				Type:            Worksheet.Type,
-				Ops:             Worksheet.Ops,
-				StatusWorksheet: StatusWorksheetArray,
-			}
-			responseArray = append(responseArray, data)
 		}
 	}
 
@@ -494,7 +499,7 @@ func (ctrl *APIControl) DeleteWorksheet(reportId uint, req structure.UpdateWorks
 					Equipments: nil,
 				}
 				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet2)
-			}else {
+			} else {
 				Error = errors.New("งานนี้ถูกยกเลิก หรือ ส่งงานแล้ว")
 				return
 			}
