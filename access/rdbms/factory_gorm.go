@@ -46,7 +46,7 @@ func gormInstance(env *environment.Properties) GORMFactory {
 
 //  Account
 
-func (factory GORMFactory) CheckUserRegister(Username, PhoneNumber, LineId string, UserId uint) (response *rdbmsstructure.Account, Error error) {
+func (factory GORMFactory) CheckUserRegister(Username, PhoneNumber string, UserId uint) (response *rdbmsstructure.Account, Error error) {
 	var data *rdbmsstructure.Account
 	err := factory.client.Where("username = ? ", Username).First(&data).Error
 	if err == nil {
@@ -58,11 +58,11 @@ func (factory GORMFactory) CheckUserRegister(Username, PhoneNumber, LineId strin
 		Error = errors.New("เบอร์โทรศัพท์นี้มีอยู่แล้ว")
 		return
 	}
-	err = factory.client.Where("line_id = ?", LineId).First(&data).Error
-	if err == nil {
-		Error = errors.New("LineId นี้มีอยู่แล้ว")
-		return
-	}
+	//err = factory.client.Where("line_id = ?", LineId).First(&data).Error
+	//if err == nil {
+	//	Error = errors.New("LineId นี้มีอยู่แล้ว")
+	//	return
+	//}
 	response = data
 	return
 }
@@ -618,9 +618,21 @@ func (factory GORMFactory) GetDataQrCodeOpsById(ID uint) (response rdbmsstructur
 }
 
 func (factory GORMFactory) UpdateDataQrCodeOps(ops rdbmsstructure.Ops) (Error error) {
-	db := factory.client.Where("id = ?", ops.ID).Updates(&ops).Error
+	Data := rdbmsstructure.Ops{}
+	db := factory.client
+
+	err := db.Where("id = ?",ops.ID).Take(&Data).Error
+	if err != nil {
+		return err
+	}
+
+	Data.Operator = ops.Operator
+
+
+
+	err = db.Where("id = ?", ops.ID).Updates(&ops).Error
 	if db != nil {
-		return db
+		return err
 	}
 	return
 }

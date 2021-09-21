@@ -92,11 +92,21 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)
 	owner.Get("getTemplate", getTemplateList)
 
+	owner.Put("updateOption", UpdateOption)
+	owner.Put("worksheet/:id", worksheet)
+
+	owner.Get("report", ownerGetWorksheet)
+	owner.Get("report/:id", ownerGetWorksheetById)
+	owner.Put("worksheet/:id", ownerWorksheet)
+	owner.Get("getDataUpdate/:id", ownerGetUpdateWorksheet)
+	owner.Put("report/:id", ownerUpdateWorksheet)
+	owner.Delete("report/:id", ownerDeleteWorksheet)
+
+
+	// ops
 	ops := api.Group("/ops")
 	ops.Post("login", LoginOperator)
 	ops.Get("getAccount/:id", getAccountByLineId)
-	//ops.Put("updateProfile",updateProfile)
-	//ops.Put("changePasswordOperator", ChangePasswordOperator)
 
 	ops.Post("getWorksheet/:id", getWorksheet)
 	ops.Get("getTemplate", getTemplateList)
@@ -187,14 +197,7 @@ func APICreate(ctrl *control.APIControl) {
 	// -- TeamPage
 	admin.Get("getTemplate", getTemplateList)
 	//admin.Get("TestQrCode", TestQrCode)
-
-	// -- TeamPage Qr Computer
-	com := admin.Group("/computer")
-	com.Post("/:id", Insert) // สำหรับเพิ่มครั้งแรก
-	com.Put("/:id", UpData)  // สำหรับแก้ไขข้อมูล
-
 	_ = app.Listen(":8000")
-
 }
 
 func ValidateStruct(dataStruct interface{}) error {

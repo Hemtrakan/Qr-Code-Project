@@ -135,26 +135,6 @@ func getDataQrCodeJson(context *fiber.Ctx) error {
 }
 
 func getDataQrCode(context *fiber.Ctx) error {
-	//api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	//id := context.Params("id")
-	//res , err := api.GetDataQrCode(id)
-	//if err != nil {
-	//	return utility.FiberError(context,http.StatusBadRequest,"")
-	//}
-	//
-	//// สำหรับยังไม่มี Template
-	//if res.TemplateName == "" {
-	//	url := string(environment.URLFront)
-	//	if err = proxy.Do(context, url); err != nil {
-	//		return err
-	//	}
-	//	// Remove Server header from response
-	//	context.Response().Header.Del(fiber.HeaderServer)
-	//	return nil
-	//}
-
-
-
 	// สำหรับมี Template แล้ว
 	contentType := context.Get("Content-Type")
 	if contentType == "" {

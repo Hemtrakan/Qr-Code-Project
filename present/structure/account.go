@@ -107,7 +107,7 @@ type Operators struct {
 	OperatorFirstName   string    `json:"operator_first_name"`
 	OperatorLastName    string    `json:"operator_last_name"`
 	OperatorPhoneNumber string    `json:"operator_phone_number"`
-	OperatorLineId      string    `json:"operator_line_id"`
+	OperatorLineId      *string    `json:"operator_line_id"`
 	CreatedAt           time.Time `json:"created_at"`
 	UpdatedAt           time.Time `json:"updated_at"`
 }

@@ -17,7 +17,6 @@ func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOpe
 	reqOperator.Password = strings.Trim(reqOperator.Password, "\t \n")
 	reqOperator.Firstname = strings.Trim(reqOperator.Firstname, "\t \n")
 	reqOperator.Lastname = strings.Trim(reqOperator.Lastname, "\t \n")
-	reqOperator.Lineid = strings.Trim(reqOperator.Lineid, "\t \n")
 	reqOperator.Phonenumber = strings.Trim(reqOperator.Phonenumber, "\t \n")
 	user, err := regexp.MatchString("^[a-z0-9_-]{6,20}$", reqOperator.Username)
 	if !user {
@@ -47,11 +46,7 @@ func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOpe
 	if !Phonenumber {
 		return errors.New("phonenumber ต้องไม่ต่ำกว่า 9 ตัว และ ไม่เกิน 10 ตัว ต้องมีแต่ตัวเลขเท่านั้น")
 	}
-	LineId, err := regexp.MatchString("^[a-z0-9._-]{1,20}$", reqOperator.Lineid)
-	if !LineId {
-		return errors.New("lineid ต้องไม่ต่ำกว่า 1 ตัว และ ไม่เกิน 20 ตัว ไม่สามารถใส่ตัวพิมพ์ใหญ่ได้และมีอักษรพิเศษได้แค่ ._- เท่านั้น")
-	}
-	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOperator.Username, reqOperator.Phonenumber, reqOperator.Lineid, 0)
+	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOperator.Username, reqOperator.Phonenumber, 0)
 	if err != nil {
 		Error = err
 		return
@@ -68,7 +63,6 @@ func (ctrl *APIControl) RegisterOperatorOwner(reqOperator *structure.RegisterOpe
 		FirstName:   reqOperator.Firstname,
 		LastName:    reqOperator.Lastname,
 		PhoneNumber: reqOperator.Phonenumber,
-		LineId:      reqOperator.Lineid,
 		Role:        string(constant.Operator),
 		SubOwnerId:  OwnerId,
 	}
@@ -119,7 +113,7 @@ func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.Operator
 			OperatorFirstName:   data.FirstName,
 			OperatorLastName:    data.LastName,
 			OperatorPhoneNumber: data.PhoneNumber,
-			OperatorLineId:      data.LineId,
+			OperatorLineId:      data.LineUserId,
 			CreatedAt:           data.CreatedAt,
 			UpdatedAt:           data.UpdatedAt,
 		}

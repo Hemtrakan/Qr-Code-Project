@@ -9,7 +9,7 @@ type RegisterOwners struct {
 	Firstname   string `json:"firstname" validate:"required"`
 	Lastname    string `json:"lastname" validate:"required"`
 	Phonenumber string `json:"phonenumber" validate:"required"`
-	Lineid      string `json:"lineid" validate:"required"`
+	//Lineid      string `json:"lineid" validate:"required"`
 	Role        string `json:"role"`
 }
 

@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"errors"
-	"fmt"
 	uuid2 "github.com/gofrs/uuid"
 	"github.com/yeqown/go-qrcode"
 	"gorm.io/datatypes"
@@ -500,7 +499,6 @@ func (ctrl *APIControl) AddFileZipByOwner(req structure.FileZipByOwner) (file st
 	for _, res := range data {
 		URL := ctrl.access.ENV.URLQRCode + res.QrCodeUUID.String()
 		qrc, err := qrcode.New(URL)
-		fmt.Println("qr c:", URL)
 		if err != nil {
 			Error = err
 			return

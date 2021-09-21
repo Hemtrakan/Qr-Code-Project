@@ -19,7 +19,10 @@ type GetWorksheet struct {
 }
 
 type Worksheet struct {
-	ID              uint              `json:"id,omitempty"`
+	ID uint `json:"id,omitempty"`
+	// การเพิ่ม option ในส่วน QrCode ตอนที่มีการ assign งาน
+	// มาให้สามารถกำหนดได้ว่าเป็นรูปแบบที่ (Owner) สามารถระบุให้ช่างได้เลย
+	Option          bool              `json:"option"`
 	QrCodeID        uuid.UUID         `json:"qr_code_id,omitempty"`
 	Info            interface{}       `json:"info,omitempty"`
 	Text            string            `json:"text,omitempty"`
@@ -29,38 +32,22 @@ type Worksheet struct {
 	StatusWorksheet []StatusWorksheet `json:"status_worksheet"`
 }
 
+type UpdateOption struct {
+	OwnerId      uint   `json:"owner_id" validate:"required"`
+	TemplateName string `json:"template_name" validate:"required"`
+	Option       bool   `json:"option" validate:"required"`
+}
+
 type StatusWorksheet struct {
 	Status     string      `json:"status,omitempty"`
 	UpdateAt   *time.Time  `json:"update_at,omitempty"`
-	Text       *string      `json:"text,omitempty"`
+	Text       *string     `json:"text,omitempty"`
 	Equipments []Equipment `json:"equipments,omitempty"`
 }
 
 type Equipment struct {
 	NameEquipment string `json:"name_equipment,omitempty"`
 }
-
-//type StatusWorksheet struct {
-//	StatusWorksheet1 StatusWorksheet1 `json:"status_worksheet_1"`
-//	StatusWorksheet2 StatusWorksheet2 `json:"status_worksheet_2"`
-//	StatusWorksheet3 StatusWorksheet3 `json:"status_worksheet_3"`
-//}
-
-//type StatusWorksheet1 struct {
-//	Status   string    `json:"status"`
-//	UpdateAt time.Time `json:"update_at"`
-//}
-//
-//type StatusWorksheet2 struct {
-//	Status   string     `json:"status"`
-//	UpdateAt *time.Time `json:"update_at"`
-//}
-
-//type StatusWorksheet3 struct {
-//	Status   string     `json:"status"`
-//	UpdateAt *time.Time `json:"update_at"`
-//	Text     string     `json:"text"`
-//}
 
 type ReportID struct {
 	ReportID   uint   `json:"report_id" query:"report_id"`
@@ -74,7 +61,7 @@ type InsertWorksheet struct {
 }
 
 type UpdateWorksheet struct {
-	LineUserId string `json:"line_user_id" validate:"required"`
-	Text       string `json:"text,omitempty" validate:"required"`
+	LineUserId string      `json:"line_user_id" validate:"required"`
+	Text       string      `json:"text,omitempty" validate:"required"`
 	Equipments []Equipment `json:"equipments,omitempty"`
 }

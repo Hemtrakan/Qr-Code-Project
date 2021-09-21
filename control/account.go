@@ -54,7 +54,6 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error
 	reqOwner.Password = strings.Trim(reqOwner.Password, "\t \n")
 	reqOwner.Firstname = strings.Trim(reqOwner.Firstname, "\t \n")
 	reqOwner.Lastname = strings.Trim(reqOwner.Lastname, "\t \n")
-	reqOwner.Lineid = strings.Trim(reqOwner.Lineid, "\t \n")
 	reqOwner.Phonenumber = strings.Trim(reqOwner.Phonenumber, "\t \n")
 	user, err := regexp.MatchString("^[a-z0-9_-]{6,20}$", reqOwner.Username)
 	if !user {
@@ -84,11 +83,7 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error
 	if !Phonenumber {
 		return errors.New("phonenumber ต้องไม่ต่ำกว่า 9 ตัว และ ไม่เกิน 10 ตัว ต้องมีแต่ตัวเลขเท่านั้น")
 	}
-	LineId, err := regexp.MatchString("^[a-z0-9._-]{1,20}$", reqOwner.Lineid)
-	if !LineId {
-		return errors.New("lineid ต้องไม่ต่ำกว่า 1 ตัว และ ไม่เกิน 20 ตัว ไม่สามารถใส่ตัวพิมพ์ใหญ่ได้และมีอักษรพิเศษได้แค่ ._- เท่านั้น")
-	}
-	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOwner.Username, reqOwner.Phonenumber, reqOwner.Lineid, 0)
+	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOwner.Username, reqOwner.Phonenumber,  0)
 	if err != nil {
 		Error = err
 		return
@@ -104,7 +99,6 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error
 		FirstName:   reqOwner.Firstname,
 		LastName:    reqOwner.Lastname,
 		PhoneNumber: reqOwner.Phonenumber,
-		LineId:      reqOwner.Lineid,
 		Role:        string(constant.Owner),
 	}
 	err = ctrl.insert(Owner)
@@ -149,7 +143,6 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 	reqOperator.Password = strings.Trim(reqOperator.Password, "\t \n")
 	reqOperator.Firstname = strings.Trim(reqOperator.Firstname, "\t \n")
 	reqOperator.Lastname = strings.Trim(reqOperator.Lastname, "\t \n")
-	reqOperator.Lineid = strings.Trim(reqOperator.Lineid, "\t \n")
 	reqOperator.Phonenumber = strings.Trim(reqOperator.Phonenumber, "\t \n")
 	user, err := regexp.MatchString("^[a-z0-9_-]{6,20}$", reqOperator.Username)
 	if !user {
@@ -179,11 +172,8 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 	if !Phonenumber {
 		return errors.New("phonenumber ต้องไม่ต่ำกว่า 9 ตัว และ ไม่เกิน 10 ตัว ต้องมีแต่ตัวเลขเท่านั้น")
 	}
-	LineId, err := regexp.MatchString("^[a-z0-9._-]{1,20}$", reqOperator.Lineid)
-	if !LineId {
-		return errors.New("lineid ต้องไม่ต่ำกว่า 1 ตัว และ ไม่เกิน 20 ตัว ไม่สามารถใส่ตัวพิมพ์ใหญ่ได้และมีอักษรพิเศษได้แค่ ._- เท่านั้น")
-	}
-	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOperator.Username, reqOperator.Phonenumber, reqOperator.Lineid, 0)
+
+	_, err = ctrl.access.RDBMS.CheckUserRegister(reqOperator.Username, reqOperator.Phonenumber, 0)
 	if err != nil {
 		Error = err
 		return
@@ -214,7 +204,6 @@ func (ctrl *APIControl) RegisterOperator(reqOperator *structure.RegisterOperator
 		FirstName:   reqOperator.Firstname,
 		LastName:    reqOperator.Lastname,
 		PhoneNumber: reqOperator.Phonenumber,
-		LineId:      reqOperator.Lineid,
 		Role:        string(constant.Operator),
 		SubOwnerId:  reqOperator.SubOwnerId,
 	}
@@ -422,7 +411,7 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner
 				OperatorFirstName:   dataOps.FirstName,
 				OperatorLastName:    dataOps.LastName,
 				OperatorPhoneNumber: dataOps.PhoneNumber,
-				OperatorLineId:      dataOps.LineId,
+				OperatorLineId:      dataOps.LineUserId,
 				CreatedAt:           dataOps.CreatedAt,
 				UpdatedAt:           dataOps.UpdatedAt,
 			}
@@ -535,19 +524,13 @@ func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile)
 		return
 	}
 	if !(res.PhoneNumber == Account.PhoneNumber) {
-		_, err = ctrl.access.RDBMS.CheckUserRegister("", Account.PhoneNumber, "", 0)
+		_, err = ctrl.access.RDBMS.CheckUserRegister("", Account.PhoneNumber, 0)
 		if err != nil {
 			Error = err
 			return
 		}
 	}
-	if !(res.LineId == Account.LineId) {
-		_, err = ctrl.access.RDBMS.CheckUserRegister("", "", Account.LineId, 0)
-		if err != nil {
-			Error = err
-			return
-		}
-	}
+
 
 	if !(len(Account.FirstName) <= 30) {
 		return errors.New("firstname ต้องไม่เกิน 30 ตัว")

@@ -40,6 +40,7 @@ type FactoryInterface interface {
 	DeleteQrCode(QrCodeUUID string) (Error error)
 
 
+
 	GetDataQrCodeInfo(QrCodeUUID string) (response rdbmsstructure.QrCode , Error error)
 	GetDataQrCodeOps() (response []rdbmsstructure.Ops, Error error)
 	GetDataQrCodeOpsByQrCodeID(QrCodeId string) (response []rdbmsstructure.Ops, Error error)
@@ -58,7 +59,7 @@ type FactoryInterface interface {
 	GetAccountByLineId(lineId string) (response rdbmsstructure.Account,Error error)
 
 	CheckAccountId(id uint) (response *rdbmsstructure.Account,Error error)
-	CheckUserRegister(Username , PhoneNumber ,LineId  string,UserId uint) (response *rdbmsstructure.Account,Error error)
+	CheckUserRegister(Username , PhoneNumber string,UserId uint) (response *rdbmsstructure.Account,Error error)
 
 
 	//TestGetQrData() (response []rdbmsstructure.TestQrCode,Error error)
