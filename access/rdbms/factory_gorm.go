@@ -15,8 +15,6 @@ type GORMFactory struct {
 	client *gorm.DB
 }
 
-
-
 func gormInstance(env *environment.Properties) GORMFactory {
 	databaseSet := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		env.GormHost, env.GormPort, env.GormUser, env.GormName, env.GormPass, "disable")
@@ -383,7 +381,7 @@ func (factory GORMFactory) CreateQrCode(QrCode rdbmsstructure.QrCode) (Error err
 	return
 }
 
-func (factory GORMFactory) UpdateDataQrCode(Info rdbmsstructure.QrCode,HistoryInfo rdbmsstructure.HistoryInfo) (Error error){
+func (factory GORMFactory) UpdateDataQrCode(Info rdbmsstructure.QrCode, HistoryInfo rdbmsstructure.HistoryInfo) (Error error) {
 	db := factory.client
 	err := db.Where("qr_code_uuid = ?", Info.QrCodeUUID).Updates(&Info).Error
 	if err != nil {
@@ -533,9 +531,21 @@ func (factory GORMFactory) GetQrCodeByQrCodeId(OwnerId int, QrCodeId string) (re
 	return
 }
 
-func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
-	var data rdbmsstructure.QrCode
-	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Delete(&data).Error
+func (factory GORMFactory) DeleteQrCode(id uint) (Error error) {
+	QrCode := rdbmsstructure.QrCode{
+		Model: gorm.Model{
+			ID: id,
+		},
+	}
+	db := factory.client
+	if err := db.Select("DataHistory", "DataOps").Delete(&QrCode).Error; err != nil {
+		return err
+	}
+	return
+}
+
+func (factory GORMFactory) InsertQrCode(QrCodeUUID string, QrCode rdbmsstructure.QrCode) (Error error) {
+	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Updates(QrCode).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -551,7 +561,7 @@ func (factory GORMFactory) DeleteQrCode(QrCodeUUID string) (Error error) {
 
 func (factory GORMFactory) GetDataQrCodeInfo(QrCodeUUID string) (response rdbmsstructure.QrCode, Error error) {
 	var data rdbmsstructure.QrCode
-	err := factory.client.Where("qr_code_uuid = ?",QrCodeUUID).Take(&data).Error
+	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Take(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -585,7 +595,7 @@ func (factory GORMFactory) GetDataQrCodeOps() (response []rdbmsstructure.Ops, Er
 
 func (factory GORMFactory) GetDataQrCodeOpsByQrCodeID(QrCodeId string) (response []rdbmsstructure.Ops, Error error) {
 	var data []rdbmsstructure.Ops
-	err := factory.client.Where("qr_code_id = ?",QrCodeId).Order("created_at DESC").Find(&data).Error
+	err := factory.client.Where("qr_code_id = ?", QrCodeId).Order("created_at DESC").Find(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -602,7 +612,7 @@ func (factory GORMFactory) GetDataQrCodeOpsByQrCodeID(QrCodeId string) (response
 
 func (factory GORMFactory) GetDataQrCodeOpsById(ID uint) (response rdbmsstructure.Ops, Error error) {
 	var data rdbmsstructure.Ops
-	err := factory.client.Where("id = ?",ID).First(&data).Error
+	err := factory.client.Where("id = ?", ID).First(&data).Error
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			Error = err
@@ -621,14 +631,12 @@ func (factory GORMFactory) UpdateDataQrCodeOps(ops rdbmsstructure.Ops) (Error er
 	Data := rdbmsstructure.Ops{}
 	db := factory.client
 
-	err := db.Where("id = ?",ops.ID).Take(&Data).Error
+	err := db.Where("id = ?", ops.ID).Take(&Data).Error
 	if err != nil {
 		return err
 	}
 
 	Data.Operator = ops.Operator
-
-
 
 	err = db.Where("id = ?", ops.ID).Updates(&ops).Error
 	if db != nil {
@@ -636,26 +644,6 @@ func (factory GORMFactory) UpdateDataQrCodeOps(ops rdbmsstructure.Ops) (Error er
 	}
 	return
 }
-
-// -- TeamPage
-
-
-func (factory GORMFactory) InsertQrCode(QrCodeUUID string, QrCode rdbmsstructure.QrCode) (Error error) {
-	err := factory.client.Where("qr_code_uuid = ?", QrCodeUUID).Updates(QrCode).Error
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			Error = err
-			return
-		} else {
-			Error = errors.New("record not found")
-			return
-		}
-		return
-	}
-	return
-}
-
-
 
 // test
 //func (factory GORMFactory) TestGetQrData() (response []rdbmsstructure.TestQrCode, Error error) {

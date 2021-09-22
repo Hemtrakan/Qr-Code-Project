@@ -41,8 +41,6 @@ type Properties struct {
 
 	//// -- URL
 	URLFront string `env:"URL_FRONT,default=https://a2f4-1-47-1-82.jp.ngrok.io/qr/"`
-	//URLFront URL `env:"URL_FRONT,default=https://4eb2-1-47-146-211.ngrok.io/viewdata/"`
-	//URLQRCode string `env:"URL_QR_CODE,default=https://liff.line.me/1656385614-YE6rXz2M/api/qr/"`
 	URLQRCode string `env:"URL_QR_CODE,default=https://liff.line.me/1656385614-YE6rXz2M?qr_id="`
 
 	//// -- ServiceLine

@@ -11,8 +11,134 @@ import (
 )
 
 
-// Owner
+// Admin
+func adminGetTypeWorksheet(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	res := api.GetTypeWorksheet()
+	return context.Status(http.StatusOK).JSON(res)
+}
 
+func adminGetWorksheet(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	lineId := context.Params("id")
+	res, err := api.GetWorksheet(lineId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
+}
+
+func adminGetWorksheetById(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	workSheet := new(structure.ReportID)
+	if err := context.QueryParser(workSheet); err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	res, err := api.GetWorksheetById(workSheet)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
+}
+
+func adminWorksheet(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	report := context.Params("id")
+	reportId, err := strconv.Atoi(report)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	workSheet := new(structure.ReportID)
+	err = context.BodyParser(workSheet)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = ValidateStruct(*workSheet)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.Worksheet(uint(reportId), *workSheet)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "รับงานสำเร็จ")
+}
+
+func adminInsertWorksheet(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	report := new(structure.InsertWorksheet)
+	err := context.BodyParser(report)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = ValidateStruct(*report)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.InsertWorksheet(report)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "รายงานปัญหาสำเร็จ")
+}
+
+func adminGetUpdateWorksheet(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	QrCodeId := context.Params("id")
+	res, err := api.GetUpdateWorksheet(QrCodeId)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
+}
+
+func adminUpdateWorksheet(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	report := context.Params("id")
+	reportId, err := strconv.Atoi(report)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	update := new(structure.UpdateWorksheet)
+	err = context.BodyParser(update)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = ValidateStruct(*update)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.UpdateWorksheet(uint(reportId), *update)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "ดำเนิดการแก้ปัญหาสำเร็จ")
+}
+
+func adminDeleteWorksheet(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	report := context.Params("id")
+	reportId, err := strconv.Atoi(report)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	update := new(structure.UpdateWorksheet)
+	err = context.BodyParser(update)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = ValidateStruct(*update)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.DeleteWorksheet(uint(reportId), *update)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return utility.FiberSuccess(context, http.StatusOK, "ยกเลิกรายการสำเร็จ")
+}
+
+// Owner
 func UpdateOption(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	update := new(structure.UpdateOption)

@@ -92,9 +92,10 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)
 	owner.Get("getTemplate", getTemplateList)
 
+
+	// officeEquipment
 	owner.Put("updateOption", UpdateOption)
 	owner.Put("worksheet/:id", worksheet)
-
 	owner.Get("report", ownerGetWorksheet)
 	owner.Get("report/:id", ownerGetWorksheetById)
 	owner.Put("worksheet/:id", ownerWorksheet)
@@ -108,12 +109,14 @@ func APICreate(ctrl *control.APIControl) {
 	ops.Post("login", LoginOperator)
 	ops.Get("getAccount/:id", getAccountByLineId)
 
-	ops.Post("getWorksheet/:id", getWorksheet)
-	ops.Get("getTemplate", getTemplateList)
-	ops.Get("getTemplate/:id", getTemplate)
+	// insertDataQrCode And UpdateDataQrCode
 	ops.Post("insertDataQrCode", insertDataQrCodeOps)
 	ops.Put("updateDataQrCode", updateDataQrCodeOps)
 
+	// officeEquipment
+	ops.Post("getWorksheet/:id", getWorksheet)
+	ops.Get("getTemplate", getTemplateList)
+	ops.Get("getTemplate/:id", getTemplate)
 	ops.Get("typeReport", getTypeWorksheet)
 	ops.Get("report/:id", getWorksheet)
 	ops.Get("report", getWorksheetById)
@@ -177,7 +180,8 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Put("changePassword/:id", changePassword)
 	admin.Delete("deleteAccount/:id", deleteAccount)
 
-	// -- createQrCode
+	// -- QrCode
+	admin.Get("getTemplate", getTemplateList)
 	admin.Get("getDateQrCodeById/:id", getDataQrCodeJson)
 	admin.Post("createQrCode", createQrCode)
 	admin.Post("genQrCodeToFileZipByTemplateName", genQrCodeToFileZipByTemplateName)
@@ -185,17 +189,17 @@ func APICreate(ctrl *control.APIControl) {
 	admin.Post("genQrCodeToFileZipByQrCodeId", genQrCodeToFileZipByQrCodeId)
 	admin.Get("getAllQrCodeByOwnerId/:id", getQrCodeById) // Id >>> OwnerId
 	admin.Get("getAllQrCode", getAllQrCode)
-
 	admin.Post("insertDataQrCode", insertDataQrCode)
 	admin.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
 	admin.Post("updateOpsDataQrCode", updateOpsDataQrCode)
-
 	admin.Delete("delQrCode", deleteQrCode) // todo ลบ QrCode
 	admin.Put("updateStatusQrCode/:id", updateStatusQrCode)
-	//admin.Get("getQrCodeFile/:name", genQrCodeByName)
+
+
+	//officeEquipment
+
 
 	// -- TeamPage
-	admin.Get("getTemplate", getTemplateList)
 	//admin.Get("TestQrCode", TestQrCode)
 	_ = app.Listen(":8000")
 }

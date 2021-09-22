@@ -94,6 +94,14 @@ func (ctrl *APIControl) RegisterOwner(reqOwner *structure.RegisterOwners) (Error
 	}
 
 	Owner := rdbmsstructure.Account{
+		// DataInAccount :rdbmsstructure.DataInAccount{
+		//	Username:    reqOwner.Username,
+		//	Password:    string(hashPassword),
+		//	FirstName:   reqOwner.Firstname,
+		//	LastName:    reqOwner.Lastname,
+		//	PhoneNumber: reqOwner.Phonenumber,
+		//	Role:        string(constant.Owner),
+		//},
 		Username:    reqOwner.Username,
 		Password:    string(hashPassword),
 		FirstName:   reqOwner.Firstname,

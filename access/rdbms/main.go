@@ -37,7 +37,7 @@ type FactoryInterface interface {
 	UpdateHistoryInfoQrCodeById(QrCode rdbmsstructure.HistoryInfo) (Error error)
 	UpdateOpsQrCodeById(QrCode rdbmsstructure.Ops) (Error error)
 	UpdateQrCodeActive(QrCode rdbmsstructure.QrCode) (Error error)
-	DeleteQrCode(QrCodeUUID string) (Error error)
+	DeleteQrCode(id uint) (Error error)
 
 
 

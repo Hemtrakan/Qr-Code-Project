@@ -396,15 +396,17 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 		Error = errors.New("ไม่มี Qr-Code ถูกส่งมา")
 	}
 	for _, del := range req.QrCodeId {
-		_, err := ctrl.access.RDBMS.GetDataQrCode(del)
+		id, err := ctrl.access.RDBMS.GetDataQrCode(del)
 		if err != nil {
 			Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
 			return
 		}
-		err = ctrl.access.RDBMS.DeleteQrCode(del)
-		if err != nil {
-			Error = err
-			return
+		for _ , m1 := range  id{
+			err = ctrl.access.RDBMS.DeleteQrCode(m1.ID)
+			if err != nil {
+				Error = err
+				return
+			}
 		}
 	}
 	return
