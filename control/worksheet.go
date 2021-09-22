@@ -3,6 +3,7 @@ package control
 import (
 	json2 "encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gofrs/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -65,18 +66,19 @@ func (ctrl *APIControl) UpdateOption(req structure.UpdateOption) (Error error) {
 
 func (ctrl *APIControl) OwnerGetWorksheet(OwnerID uint) (response []structure.Worksheet, Error error) {
 	var responseArray []structure.Worksheet
-	Worksheet := structure.Worksheet{}
 	ops, err := ctrl.access.RDBMS.GetDataQrCodeOps()
 	if err != nil {
 		Error = err
 		return
 	}
 	for _, qr := range ops {
+		Worksheet := structure.Worksheet{}
 		err = json2.Unmarshal(qr.Operator, &Worksheet)
 		if err != nil {
 			Error = err
 			return
 		}
+
 		if OwnerID == Worksheet.OwnerId {
 			var StatusWorksheetArray []structure.StatusWorksheet
 			for _, m1 := range Worksheet.StatusWorksheet {
@@ -103,7 +105,8 @@ func (ctrl *APIControl) OwnerGetWorksheet(OwnerID uint) (response []structure.Wo
 				}
 				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 			}
-			Ops := Worksheet.Ops
+			var Ops *string
+			Ops = Worksheet.Ops
 			data := structure.Worksheet{
 				ID:              qr.ID,
 				QrCodeID:        Worksheet.QrCodeID,
@@ -227,7 +230,7 @@ func (ctrl *APIControl) OwnerWorksheet(reportId uint, req structure.ReportID) (E
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             line.Username,
+		Ops:             &line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -302,13 +305,13 @@ func (ctrl *APIControl) OwnerGetUpdateWorksheet(QrCodeId string) (res structure.
 					}
 					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 				}
-				Ops := Worksheet.Ops
+				Ops := *Worksheet.Ops
 				data := structure.Worksheet{
 					ID:              qr.ID,
 					QrCodeID:        Worksheet.QrCodeID,
 					Text:            Worksheet.Text,
 					Type:            Worksheet.Type,
-					Ops:             Ops,
+					Ops:             &Ops,
 					StatusWorksheet: StatusWorksheetArray,
 				}
 				responseArray = append(responseArray, data)
@@ -395,7 +398,7 @@ func (ctrl *APIControl) OwnerUpdateWorksheet(reportId uint, req structure.Update
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             line.Username,
+		Ops:             &line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -485,7 +488,7 @@ func (ctrl *APIControl) OwnerDeleteWorksheet(reportId uint, req structure.Update
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             line.Username,
+		Ops:             &line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -532,96 +535,99 @@ func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksh
 	}
 
 	var responseArray []structure.Worksheet
-	Worksheet := structure.Worksheet{}
+
 	ops, err := ctrl.access.RDBMS.GetDataQrCodeOps()
 	if err != nil {
 		Error = err
 		return
 	}
-	for _, qr := range ops {
+	for i, qr := range ops {
+		Worksheet := structure.Worksheet{}
 		err = json2.Unmarshal(qr.Operator, &Worksheet)
 		if err != nil {
 			Error = err
 			return
 		}
-		Ops := Worksheet.Ops
-		var StatusWorksheetArray []structure.StatusWorksheet
+		fmt.Println(i)
 		if *owner.SubOwnerId == Worksheet.OwnerId {
-			if Worksheet.Option == true {
-				for _, m1 := range Worksheet.StatusWorksheet {
-					var Equipments []structure.Equipment
-					var Text *string
-					if m1.Status != "" {
-						if m1.Status != constant.WorksheetsStatus4 {
-							Equipment := structure.Equipment{}
-							for _, m2 := range m1.Equipments {
-								Equipment = structure.Equipment{
-									NameEquipment: m2.NameEquipment,
-								}
-								Equipments = append(Equipments, Equipment)
+			var StatusWorksheetArray []structure.StatusWorksheet
+			var Ops *string
+			Ops = Worksheet.Ops
+			//if Worksheet.Option == true {
+			//	for _, m1 := range Worksheet.StatusWorksheet {
+			//		var Equipments []structure.Equipment
+			//		var Text *string
+			//		if m1.Status != "" {
+			//			if m1.Status != constant.WorksheetsStatus4 {
+			//				Equipment := structure.Equipment{}
+			//				for _, m2 := range m1.Equipments {
+			//					Equipment = structure.Equipment{
+			//						NameEquipment: m2.NameEquipment,
+			//					}
+			//					Equipments = append(Equipments, Equipment)
+			//				}
+			//				Text = m1.Text
+			//			}
+			//		}
+			//
+			//		StatusWorksheet := structure.StatusWorksheet{
+			//			Status:     m1.Status,
+			//			UpdateAt:   m1.UpdateAt,
+			//			Text:       Text,
+			//			Equipments: Equipments,
+			//		}
+			//		StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+			//
+			//		data := structure.Worksheet{
+			//			ID:              qr.ID,
+			//			Option:          Worksheet.Option,
+			//			QrCodeID:        Worksheet.QrCodeID,
+			//			Text:            Worksheet.Text,
+			//			Type:            Worksheet.Type,
+			//			Ops:             Ops,
+			//			StatusWorksheet: StatusWorksheetArray,
+			//		}
+			//		responseArray = append(responseArray, data)
+			//	}
+			//} else {
+			for _, m1 := range Worksheet.StatusWorksheet {
+				var Equipments []structure.Equipment
+				var Text *string
+				if m1.Status != "" {
+					if m1.Status != constant.WorksheetsStatus4 {
+						Equipment := structure.Equipment{}
+						for _, m2 := range m1.Equipments {
+							Equipment = structure.Equipment{
+								NameEquipment: m2.NameEquipment,
 							}
-							Text = m1.Text
+							Equipments = append(Equipments, Equipment)
 						}
+						Text = m1.Text
 					}
-
-					StatusWorksheet := structure.StatusWorksheet{
-						Status:     m1.Status,
-						UpdateAt:   m1.UpdateAt,
-						Text:       Text,
-						Equipments: Equipments,
-					}
-					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
-
-					data := structure.Worksheet{
-						ID:              qr.ID,
-						Option:          Worksheet.Option,
-						QrCodeID:        Worksheet.QrCodeID,
-						Text:            Worksheet.Text,
-						Type:            Worksheet.Type,
-						Ops:             Ops,
-						StatusWorksheet: StatusWorksheetArray,
-					}
-					responseArray = append(responseArray, data)
 				}
-			} else {
-				for _, m1 := range Worksheet.StatusWorksheet {
-					var Equipments []structure.Equipment
-					var Text *string
-					if m1.Status != "" {
-						if m1.Status != constant.WorksheetsStatus4 {
-							Equipment := structure.Equipment{}
-							for _, m2 := range m1.Equipments {
-								Equipment = structure.Equipment{
-									NameEquipment: m2.NameEquipment,
-								}
-								Equipments = append(Equipments, Equipment)
-							}
-							Text = m1.Text
-						}
-					}
 
-					StatusWorksheet := structure.StatusWorksheet{
-						Status:     m1.Status,
-						UpdateAt:   m1.UpdateAt,
-						Text:       Text,
-						Equipments: Equipments,
-					}
-					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+				StatusWorksheet := structure.StatusWorksheet{
+					Status:     m1.Status,
+					UpdateAt:   m1.UpdateAt,
+					Text:       Text,
+					Equipments: Equipments,
 				}
-				if owner.Username == Ops {
-					data := structure.Worksheet{
-						ID:              qr.ID,
-						Option:          Worksheet.Option,
-						QrCodeID:        Worksheet.QrCodeID,
-						Text:            Worksheet.Text,
-						Type:            Worksheet.Type,
-						Ops:             Ops,
-						StatusWorksheet: StatusWorksheetArray,
-					}
-					responseArray = append(responseArray, data)
-				}
+				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 			}
+			//if Ops == &owner.Username {
+			data := structure.Worksheet{
+				ID:              qr.ID,
+				Option:          Worksheet.Option,
+				QrCodeID:        Worksheet.QrCodeID,
+				Text:            Worksheet.Text,
+				Type:            Worksheet.Type,
+				Ops:             Ops,
+				StatusWorksheet: StatusWorksheetArray,
+			}
+			responseArray = append(responseArray, data)
+			//}
 		}
+		//}
 	}
 	response = responseArray
 	return
@@ -803,8 +809,9 @@ func (ctrl *APIControl) Worksheet(reportId uint, req structure.ReportID) (Error 
 	data := structure.Worksheet{
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
+		Option:          Worksheet.Option,
 		Type:            Worksheet.Type,
-		Ops:             line.Username,
+		Ops:             &line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -879,13 +886,13 @@ func (ctrl *APIControl) GetUpdateWorksheet(QrCodeId string) (res structure.GetWo
 					}
 					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 				}
-				Ops := Worksheet.Ops
+				Ops := *Worksheet.Ops
 				data := structure.Worksheet{
 					ID:              qr.ID,
 					QrCodeID:        Worksheet.QrCodeID,
 					Text:            Worksheet.Text,
 					Type:            Worksheet.Type,
-					Ops:             Ops,
+					Ops:             &Ops,
 					StatusWorksheet: StatusWorksheetArray,
 				}
 				responseArray = append(responseArray, data)
@@ -971,8 +978,9 @@ func (ctrl *APIControl) UpdateWorksheet(reportId uint, req structure.UpdateWorks
 	data := structure.Worksheet{
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
+		Option:          Worksheet.Option,
 		Type:            Worksheet.Type,
-		Ops:             line.Username,
+		Ops:             &line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -1061,8 +1069,9 @@ func (ctrl *APIControl) DeleteWorksheet(reportId uint, req structure.UpdateWorks
 	data := structure.Worksheet{
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
+		Option:          Worksheet.Option,
 		Type:            Worksheet.Type,
-		Ops:             line.Username,
+		Ops:             &line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
