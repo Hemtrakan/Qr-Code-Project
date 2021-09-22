@@ -3,7 +3,6 @@ package control
 import (
 	json2 "encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gofrs/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -541,14 +540,13 @@ func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksh
 		Error = err
 		return
 	}
-	for i, qr := range ops {
+	for _, qr := range ops {
 		Worksheet := structure.Worksheet{}
 		err = json2.Unmarshal(qr.Operator, &Worksheet)
 		if err != nil {
 			Error = err
 			return
 		}
-		fmt.Println(i)
 		if *owner.SubOwnerId == Worksheet.OwnerId {
 			var StatusWorksheetArray []structure.StatusWorksheet
 			var Ops *string

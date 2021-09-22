@@ -86,7 +86,9 @@ func APICreate(ctrl *control.APIControl) {
 	// QrCode
 	owner.Put("updateStatusQrCode/:id", updateStatusQrCodeOwner)
 	owner.Get("getQrCode", getQrCodeOwnerById) // Id >>> OwnerId
-	owner.Post("updateDataQrCode", updateDataQrCode)
+	//owner.Post("updateDataQrCode", updateDataQrCode)
+	owner.Put("updateDataQrCode", updateDataQrCodeOps)
+
 	owner.Post("insertDataQrCode", insertDataQrCode)
 	owner.Post("updateHistoryInfoDataQrCode", updateHistoryInfoDataQrCode)
 	owner.Post("updateOpsDataQrCode", updateOpsDataQrCode)

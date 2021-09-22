@@ -252,8 +252,9 @@ func (ctrl *APIControl) LoginOwner(reqLogin *structure.LoginOwner) (Token string
 }
 
 func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token string, Error error) {
+	Username := strings.ToLower(reqLogin.Username)
 	login := rdbmsstructure.Account{
-		Username: reqLogin.Username,
+		Username: Username,
 		Password: reqLogin.Password,
 	}
 	data, err := ctrl.access.RDBMS.Login(login)
@@ -261,6 +262,7 @@ func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token 
 		Error = err
 		return
 	}
+
 	if data.LineUserId != nil {
 		Error = errors.New("ผู้ใช้งานคนนี้ได้เข้าสู่ระบบแล้ว")
 		return
@@ -295,6 +297,9 @@ func (ctrl *APIControl) LoginOperator(reqLogin *structure.LoginOperator) (Token 
 				return
 			}
 		}
+	}else {
+		Error = errors.New("สิทธิ์ไม่ถูกต้อง")
+		return
 	}
 
 	return
