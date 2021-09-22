@@ -103,14 +103,14 @@ func (ctrl *APIControl) OwnerGetWorksheet(OwnerID uint) (response []structure.Wo
 				}
 				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 			}
-			Ops := *Worksheet.Ops
+			Ops := Worksheet.Ops
 			data := structure.Worksheet{
 				ID:              qr.ID,
 				QrCodeID:        Worksheet.QrCodeID,
 				Option:          Worksheet.Option,
 				Text:            Worksheet.Text,
 				Type:            Worksheet.Type,
-				Ops:             &Ops,
+				Ops:             Ops,
 				StatusWorksheet: StatusWorksheetArray,
 			}
 			responseArray = append(responseArray, data)
@@ -227,7 +227,7 @@ func (ctrl *APIControl) OwnerWorksheet(reportId uint, req structure.ReportID) (E
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -302,13 +302,13 @@ func (ctrl *APIControl) OwnerGetUpdateWorksheet(QrCodeId string) (res structure.
 					}
 					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 				}
-				Ops := *Worksheet.Ops
+				Ops := Worksheet.Ops
 				data := structure.Worksheet{
 					ID:              qr.ID,
 					QrCodeID:        Worksheet.QrCodeID,
 					Text:            Worksheet.Text,
 					Type:            Worksheet.Type,
-					Ops:             &Ops,
+					Ops:             Ops,
 					StatusWorksheet: StatusWorksheetArray,
 				}
 				responseArray = append(responseArray, data)
@@ -395,7 +395,7 @@ func (ctrl *APIControl) OwnerUpdateWorksheet(reportId uint, req structure.Update
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -485,7 +485,7 @@ func (ctrl *APIControl) OwnerDeleteWorksheet(reportId uint, req structure.Update
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -544,7 +544,7 @@ func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksh
 			Error = err
 			return
 		}
-		Ops := *Worksheet.Ops
+		Ops := Worksheet.Ops
 		var StatusWorksheetArray []structure.StatusWorksheet
 		if *owner.SubOwnerId == Worksheet.OwnerId {
 			if Worksheet.Option == true {
@@ -574,10 +574,11 @@ func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksh
 
 					data := structure.Worksheet{
 						ID:              qr.ID,
+						Option:          Worksheet.Option,
 						QrCodeID:        Worksheet.QrCodeID,
 						Text:            Worksheet.Text,
 						Type:            Worksheet.Type,
-						Ops:             &Ops,
+						Ops:             Ops,
 						StatusWorksheet: StatusWorksheetArray,
 					}
 					responseArray = append(responseArray, data)
@@ -610,10 +611,11 @@ func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksh
 				if owner.Username == Ops {
 					data := structure.Worksheet{
 						ID:              qr.ID,
+						Option:          Worksheet.Option,
 						QrCodeID:        Worksheet.QrCodeID,
 						Text:            Worksheet.Text,
 						Type:            Worksheet.Type,
-						Ops:             &Ops,
+						Ops:             Ops,
 						StatusWorksheet: StatusWorksheetArray,
 					}
 					responseArray = append(responseArray, data)
@@ -802,7 +804,7 @@ func (ctrl *APIControl) Worksheet(reportId uint, req structure.ReportID) (Error 
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -877,13 +879,13 @@ func (ctrl *APIControl) GetUpdateWorksheet(QrCodeId string) (res structure.GetWo
 					}
 					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 				}
-				Ops := *Worksheet.Ops
+				Ops := Worksheet.Ops
 				data := structure.Worksheet{
 					ID:              qr.ID,
 					QrCodeID:        Worksheet.QrCodeID,
 					Text:            Worksheet.Text,
 					Type:            Worksheet.Type,
-					Ops:             &Ops,
+					Ops:             Ops,
 					StatusWorksheet: StatusWorksheetArray,
 				}
 				responseArray = append(responseArray, data)
@@ -970,7 +972,7 @@ func (ctrl *APIControl) UpdateWorksheet(reportId uint, req structure.UpdateWorks
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -1060,7 +1062,7 @@ func (ctrl *APIControl) DeleteWorksheet(reportId uint, req structure.UpdateWorks
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             line.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
