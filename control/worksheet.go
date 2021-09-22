@@ -104,7 +104,6 @@ func (ctrl *APIControl) OwnerGetWorksheet(OwnerID uint) (response []structure.Wo
 				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 			}
 			Ops := *Worksheet.Ops
-
 			data := structure.Worksheet{
 				ID:              qr.ID,
 				QrCodeID:        Worksheet.QrCodeID,
