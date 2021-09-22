@@ -79,7 +79,7 @@ type UpdateDataQrCode struct {
 	OwnerId  uint        `json:"owner_id" validate:"required"`
 	QrCodeId uuid.UUID   `json:"qr_code_id" validate:"required"`
 	Info     interface{} `json:"info" validate:"required"`
-	LineUserId string `json:"line_user_id" validate:"required"`
+	LineUserId string `json:"line_user_id"`
 	//HistoryInfo interface{} `json:"history_info" validate:"required"`
 }
 

@@ -60,10 +60,16 @@ func (ctrl *APIControl) UpdateDataQrCode(req *structure.UpdateDataQrCode) (Error
 		return
 	}
 
-	ops, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
-	if err != nil {
-		Error = err
-		return
+	var UserId uint
+	if req.LineUserId != "" {
+		ops, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
+		if err != nil {
+			Error = err
+			return
+		}
+		UserId = ops.ID
+	}else {
+		UserId = req.OwnerId
 	}
 	infoJson, err := json.Marshal(req.Info)
 	if err != nil {
@@ -89,7 +95,7 @@ func (ctrl *APIControl) UpdateDataQrCode(req *structure.UpdateDataQrCode) (Error
 		},
 		QrCodeID:    req.QrCodeId,
 		HistoryInfo: datatypes.JSON(HistoryJson),
-		UserId:      ops.ID, // id คนที่มาอัพเดทข้อมูล
+		UserId:      UserId, // id คนที่มาอัพเดทข้อมูล
 		QrCodeRefer: OldInfo.ID,
 	}
 
@@ -182,12 +188,12 @@ func (ctrl *APIControl) GetDataQrCode(QrCodeId string) (response structure.GetDa
 			var Role string
 			if User.Username == "" {
 				Username = "ผู้ใช้งานทั้วไป"
-			}else {
+			} else {
 				Username = User.Username
 			}
 			if User.Role == "" {
 				Role = "Viewer"
-			}else {
+			} else {
 				Role = User.Role
 			}
 			ops := structure.GetOps{
@@ -401,7 +407,7 @@ func (ctrl *APIControl) DeleteQrCode(req structure.DelQrCode) (Error error) {
 			Error = errors.New("Qr-Code ที่จะลบไม่มีอยู่ในระบบ")
 			return
 		}
-		for _ , m1 := range  id{
+		for _, m1 := range id {
 			err = ctrl.access.RDBMS.DeleteQrCode(m1.ID)
 			if err != nil {
 				Error = err
