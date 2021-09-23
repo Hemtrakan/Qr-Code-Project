@@ -323,13 +323,12 @@ func (ctrl *APIControl) OwnerGetUpdateWorksheet(QrCodeId string) (res structure.
 	return
 }
 
-func (ctrl *APIControl) OwnerUpdateWorksheet(reportId uint, req structure.UpdateWorksheet) (Error error) {
-	line, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
+func (ctrl *APIControl) OwnerUpdateWorksheet(OwnerId,reportId uint, req structure.UpdateWorksheet) (Error error) {
+	owner ,err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
 	if err != nil {
 		Error = err
 		return
 	}
-
 	ops, err := ctrl.access.RDBMS.GetDataQrCodeOpsById(reportId)
 	if err != nil {
 		Error = err
@@ -393,7 +392,7 @@ func (ctrl *APIControl) OwnerUpdateWorksheet(reportId uint, req structure.Update
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             &owner.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -408,7 +407,7 @@ func (ctrl *APIControl) OwnerUpdateWorksheet(reportId uint, req structure.Update
 		},
 		QrCodeID: Worksheet.QrCodeID,
 		Operator: datatypes.JSON(jsonData),
-		UserId:   line.ID,
+		UserId:   OwnerId,
 	}
 
 	err = ctrl.access.RDBMS.UpdateDataQrCodeOps(dataOps)
@@ -419,8 +418,8 @@ func (ctrl *APIControl) OwnerUpdateWorksheet(reportId uint, req structure.Update
 	return
 }
 
-func (ctrl *APIControl) OwnerDeleteWorksheet(reportId uint, req structure.UpdateWorksheet) (Error error) {
-	line, err := ctrl.access.RDBMS.GetAccountByLineId(req.LineUserId)
+func (ctrl *APIControl) OwnerDeleteWorksheet(OwnerId,reportId uint, req structure.UpdateWorksheet) (Error error) {
+	owner ,err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
 	if err != nil {
 		Error = err
 		return
@@ -483,7 +482,7 @@ func (ctrl *APIControl) OwnerDeleteWorksheet(reportId uint, req structure.Update
 		QrCodeID:        Worksheet.QrCodeID,
 		Text:            Worksheet.Text,
 		Type:            Worksheet.Type,
-		Ops:             &line.Username,
+		Ops:             &owner.Username,
 		OwnerId:         Worksheet.OwnerId,
 		StatusWorksheet: StatusWorksheetArray,
 	}
@@ -498,7 +497,7 @@ func (ctrl *APIControl) OwnerDeleteWorksheet(reportId uint, req structure.Update
 		},
 		QrCodeID: Worksheet.QrCodeID,
 		Operator: datatypes.JSON(jsonData),
-		UserId:   line.ID,
+		UserId:   OwnerId,
 	}
 
 	err = ctrl.access.RDBMS.UpdateDataQrCodeOps(dataOps)

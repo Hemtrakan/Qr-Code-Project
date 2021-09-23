@@ -59,7 +59,7 @@ type InsertWorksheet struct {
 }
 
 type UpdateWorksheet struct {
-	LineUserId string      `json:"line_user_id" validate:"required"`
+	LineUserId string      `json:"line_user_id"`
 	Text       string      `json:"text,omitempty" validate:"required"`
 	Equipments []Equipment `json:"equipments,omitempty"`
 }

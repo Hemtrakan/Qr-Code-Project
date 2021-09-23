@@ -219,6 +219,12 @@ func ownerGetUpdateWorksheet(context *fiber.Ctx) error {
 
 func ownerUpdateWorksheet(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	OwnerId ,err:= getOwnerId(context)
+	if err != nil {
+		if err != nil {
+			return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		}
+	}
 	report := context.Params("id")
 	reportId, err := strconv.Atoi(report)
 	if err != nil {
@@ -233,7 +239,7 @@ func ownerUpdateWorksheet(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = api.OwnerUpdateWorksheet(uint(reportId), *update)
+	err = api.OwnerUpdateWorksheet(OwnerId,uint(reportId), *update)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
@@ -242,6 +248,12 @@ func ownerUpdateWorksheet(context *fiber.Ctx) error {
 
 func ownerDeleteWorksheet(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	OwnerId ,err:= getOwnerId(context)
+	if err != nil {
+		if err != nil {
+			return utility.FiberError(context, http.StatusBadRequest, err.Error())
+		}
+	}
 	report := context.Params("id")
 	reportId, err := strconv.Atoi(report)
 	if err != nil {
@@ -256,7 +268,7 @@ func ownerDeleteWorksheet(context *fiber.Ctx) error {
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = api.OwnerDeleteWorksheet(uint(reportId), *update)
+	err = api.OwnerDeleteWorksheet(OwnerId,uint(reportId), *update)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
