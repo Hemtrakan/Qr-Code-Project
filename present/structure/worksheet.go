@@ -18,6 +18,11 @@ type GetWorksheet struct {
 	Worksheet []Worksheet `json:"worksheet,omitempty"`
 }
 
+type OwnerWorksheet struct {
+	Option bool `json:"option"`
+	Worksheet []Worksheet `json:"worksheet"`
+}
+
 type Worksheet struct {
 	ID uint `json:"id,omitempty"`
 	// การเพิ่ม option ในส่วน QrCode ตอนที่มีการ assign งาน
