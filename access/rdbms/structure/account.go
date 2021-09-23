@@ -9,7 +9,6 @@ type Account struct {
 	FirstName   string
 	LastName    string
 	PhoneNumber string
-	LineId      string
 	LineUserId  *string
 	Role        string
 	SubOwnerId  *uint

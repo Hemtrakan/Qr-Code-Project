@@ -30,7 +30,6 @@ type UpdateProFile struct {
 	FirstName   string `json:"firstname" validate:"required"`
 	LastName    string `json:"lastname" validate:"required"`
 	PhoneNumber string `json:"phonenumber" validate:"required"`
-	LineId      string `json:"lineid" validate:"required"`
 }
 
 type UserAccount struct {
@@ -64,7 +63,6 @@ type Owner struct {
 	FirstName   string    `json:"owner_firstname"`
 	LastName    string    `json:"owner_lastname"`
 	PhoneNumber string    `json:"owner_phonenumber"`
-	LineId      string    `json:"owner_lineid"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

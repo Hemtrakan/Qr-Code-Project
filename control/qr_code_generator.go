@@ -320,11 +320,7 @@ func (ctrl *APIControl) GetAllQrCode() (response []structure.GetQrCode, Error er
 		return
 	}
 	for _, res := range data {
-		owner, err := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
-		if err != nil {
-			Error = err
-			return
-		}
+		owner, _ := ctrl.access.RDBMS.GetAccount(int(res.OwnerId))
 		resGetQrCode := structure.GetQrCode{
 			OwnerId:       res.OwnerId,
 			OwnerUsername: owner.Username,

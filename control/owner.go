@@ -92,7 +92,6 @@ func (ctrl *APIControl) GetOperatorById(OperatorId int, OwnerId uint) (response 
 		FirstName:   data.FirstName,
 		LastName:    data.LastName,
 		PhoneNumber: data.PhoneNumber,
-		LineId:      data.LineId,
 		Role:        data.Role,
 		SubOwnerId:  data.SubOwnerId,
 	}

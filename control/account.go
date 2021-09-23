@@ -135,7 +135,6 @@ func (ctrl *APIControl) RegisterAdmin() (Error error) {
 		FirstName:   "FirstName",
 		LastName:    "LastName",
 		PhoneNumber: "PhoneNumber",
-		LineId:      "LineId",
 		Role:        string(constant.Admin),
 	}
 	err = ctrl.insert(admin)
@@ -345,7 +344,6 @@ func (ctrl *APIControl) GetAccountByLineId(lineId string) (response structure.Us
 		FirstName:   data.FirstName,
 		LastName:    data.LastName,
 		PhoneNumber: data.PhoneNumber,
-		LineId:      data.LineId,
 		Role:        data.Role,
 		SubOwnerId:  data.SubOwnerId,
 	}
@@ -363,7 +361,6 @@ func (ctrl *APIControl) GetAccount(id int) (response structure.UserAccount, Erro
 		FirstName:   data.FirstName,
 		LastName:    data.LastName,
 		PhoneNumber: data.PhoneNumber,
-		LineId:      data.LineId,
 		Role:        data.Role,
 		SubOwnerId:  data.SubOwnerId,
 	}
@@ -385,7 +382,6 @@ func (ctrl *APIControl) GetAllAccountOwner() (response []structure.UserAccountOw
 			FirstName:   data.FirstName,
 			LastName:    data.LastName,
 			PhoneNumber: data.PhoneNumber,
-			LineId:      data.LineId,
 			Role:        data.Role,
 			CreatedAt:   data.CreatedAt,
 			UpdatedAt:   data.UpdatedAt,
@@ -436,7 +432,6 @@ func (ctrl *APIControl) GetSubOwner(OwnerId int) (response structure.GetSubOwner
 			OwnerFirstName:      data.FirstName,
 			OwnerLastName:       data.LastName,
 			OwnerPhoneNumber:    data.PhoneNumber,
-			OwnerLineId:         data.LineId,
 			UserAccountOperator: UserAccountOperatorArray,
 		}
 	}
@@ -466,7 +461,6 @@ func (ctrl *APIControl) GetAllAccountOperator() (response []structure.UserAccoun
 			OperatorFirstName:   data.FirstName,
 			OperatorLastName:    data.LastName,
 			OperatorPhoneNumber: data.PhoneNumber,
-			OperatorLineId:      data.LineId,
 			OwnerId:             *data.SubOwnerId,
 			OwnerName:           owner.FirstName + " " + owner.LastName,
 			CreatedAt:           data.CreatedAt,
@@ -508,7 +502,6 @@ func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetO
 			FirstName:   ops.FirstName,
 			LastName:    ops.LastName,
 			PhoneNumber: ops.PhoneNumber,
-			LineId:      ops.LineId,
 			CreatedAt:   ops.CreatedAt,
 			UpdatedAt:   ops.UpdatedAt,
 			Owner: structure.Owner{
@@ -516,7 +509,6 @@ func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetO
 				FirstName:   owner.FirstName,
 				LastName:    owner.LastName,
 				PhoneNumber: owner.PhoneNumber,
-				LineId:      owner.LineId,
 				CreatedAt:   owner.CreatedAt,
 				UpdatedAt:   owner.UpdatedAt,
 			},
@@ -528,7 +520,6 @@ func (ctrl *APIControl) GetOwnerByIdOps(OperatorId int) (response structure.GetO
 func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile) (Error error) {
 	Account.FirstName = strings.Trim(Account.FirstName, "\t \n")
 	Account.LastName = strings.Trim(Account.LastName, "\t \n")
-	Account.LineId = strings.Trim(Account.LineId, "\t \n")
 	Account.PhoneNumber = strings.Trim(Account.PhoneNumber, "\t \n")
 
 	res, err := ctrl.access.RDBMS.CheckAccountId(id)
@@ -562,10 +553,6 @@ func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile)
 	if !Phonenumber {
 		return errors.New("phonenumber ต้องไม่ต่ำกว่า 9 ตัว และ ไม่เกิน 10 ตัว ต้องมีแต่ตัวเลขเท่านั้น")
 	}
-	LineId, err := regexp.MatchString("^[a-z0-9._-]{1,20}$", Account.LineId)
-	if !LineId {
-		return errors.New("lineid ต้องไม่ต่ำกว่า 1 ตัว และ ไม่เกิน 20 ตัว ไม่สามารถใส่ตัวพิมพ์ใหญ่ได้และมีอักษรพิเศษได้แค่ ._- เท่านั้น")
-	}
 
 	data := rdbmsstructure.Account{
 		Model: gorm.Model{
@@ -575,7 +562,6 @@ func (ctrl *APIControl) UpdateProfile(id uint, Account *structure.UpdateProFile)
 		FirstName:   Account.FirstName,
 		LastName:    Account.LastName,
 		PhoneNumber: Account.PhoneNumber,
-		LineId:      Account.LineId,
 	}
 	err = ctrl.access.RDBMS.UpdateProfile(data)
 	if err != nil {
