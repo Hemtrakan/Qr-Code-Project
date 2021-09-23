@@ -159,11 +159,12 @@ func UpdateOption(context *fiber.Ctx) error {
 
 func ownerGetWorksheet(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	qrId := context.Params("id")
 	OwnerID , err := getOwnerId(context)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	res, err := api.OwnerGetWorksheet(OwnerID)
+	res, err := api.OwnerGetWorksheet(qrId,OwnerID)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}

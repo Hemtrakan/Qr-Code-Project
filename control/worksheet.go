@@ -59,9 +59,9 @@ func (ctrl *APIControl) UpdateOption(OwnerId uint, req structure.UpdateOption) (
 	return
 }
 
-func (ctrl *APIControl) OwnerGetWorksheet(OwnerID uint) (response []structure.Worksheet, Error error) {
+func (ctrl *APIControl) OwnerGetWorksheet(qrId string,OwnerID uint) (response []structure.Worksheet, Error error) {
 	var responseArray []structure.Worksheet
-	ops, err := ctrl.access.RDBMS.GetDataQrCodeOps()
+	ops, err := ctrl.access.RDBMS.GetDataQrCodeOpsByQrCodeID(qrId)
 	if err != nil {
 		Error = err
 		return

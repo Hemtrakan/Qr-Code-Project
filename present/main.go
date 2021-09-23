@@ -97,7 +97,7 @@ func APICreate(ctrl *control.APIControl) {
 	owner.Get("getOperatorLine", getOperatorLine)
 	owner.Put("updateOption", UpdateOption)
 	owner.Put("worksheet/:id", worksheet)
-	owner.Get("report", ownerGetWorksheet)
+	owner.Get("reportAll/:id", ownerGetWorksheet)
 	owner.Get("report/:id", ownerGetWorksheetById)
 	owner.Put("worksheet/:id", ownerWorksheet)
 	owner.Get("getDataUpdate/:id", ownerGetUpdateWorksheet)
