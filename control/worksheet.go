@@ -13,7 +13,7 @@ import (
 )
 
 // Owner
-func (ctrl *APIControl) UpdateOption(OwnerId uint,req structure.UpdateOption) (Error error) {
+func (ctrl *APIControl) UpdateOption(OwnerId uint, req structure.UpdateOption) (Error error) {
 	data, err := ctrl.access.RDBMS.GetQrCode(OwnerId, string(constant.OfficeEquipment))
 	if err != nil {
 		Error = err
@@ -25,35 +25,35 @@ func (ctrl *APIControl) UpdateOption(OwnerId uint,req structure.UpdateOption) (E
 			Error = err
 			return
 		}
-			for _, m2 := range dataOps {
-				Worksheet := structure.Worksheet{}
-				err = json2.Unmarshal(m2.Operator, &Worksheet)
-				dataWorksheet := structure.Worksheet{
-					QrCodeID:        Worksheet.QrCodeID,
-					Text:            Worksheet.Text,
-					Option:          req.Option,
-					Type:            Worksheet.Type,
-					Ops:             Worksheet.Ops,
-					OwnerId:         Worksheet.OwnerId,
-					StatusWorksheet: Worksheet.StatusWorksheet,
-				}
-				jsonData, err := json2.Marshal(dataWorksheet)
-				if err != nil {
-					Error = err
-					return
-				}
-				dataSave := rdbmsstructure.Ops{
-					Model: gorm.Model{
-						ID: m2.ID,
-					},
-					Operator: datatypes.JSON(jsonData),
-				}
+		for _, m2 := range dataOps {
+			Worksheet := structure.Worksheet{}
+			err = json2.Unmarshal(m2.Operator, &Worksheet)
+			dataWorksheet := structure.Worksheet{
+				QrCodeID:        Worksheet.QrCodeID,
+				Text:            Worksheet.Text,
+				Option:          req.Option,
+				Type:            Worksheet.Type,
+				Ops:             Worksheet.Ops,
+				OwnerId:         Worksheet.OwnerId,
+				StatusWorksheet: Worksheet.StatusWorksheet,
+			}
+			jsonData, err := json2.Marshal(dataWorksheet)
+			if err != nil {
+				Error = err
+				return
+			}
+			dataSave := rdbmsstructure.Ops{
+				Model: gorm.Model{
+					ID: m2.ID,
+				},
+				Operator: datatypes.JSON(jsonData),
+			}
 
-				err = ctrl.access.RDBMS.UpdateDataQrCodeOps(dataSave)
-				if err != nil {
-					Error = err
-					return
-				}
+			err = ctrl.access.RDBMS.UpdateDataQrCodeOps(dataSave)
+			if err != nil {
+				Error = err
+				return
+			}
 		}
 	}
 	return
@@ -323,8 +323,8 @@ func (ctrl *APIControl) OwnerGetUpdateWorksheet(QrCodeId string) (res structure.
 	return
 }
 
-func (ctrl *APIControl) OwnerUpdateWorksheet(OwnerId,reportId uint, req structure.UpdateWorksheet) (Error error) {
-	owner ,err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
+func (ctrl *APIControl) OwnerUpdateWorksheet(OwnerId, reportId uint, req structure.UpdateWorksheet) (Error error) {
+	owner, err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
 	if err != nil {
 		Error = err
 		return
@@ -418,8 +418,8 @@ func (ctrl *APIControl) OwnerUpdateWorksheet(OwnerId,reportId uint, req structur
 	return
 }
 
-func (ctrl *APIControl) OwnerDeleteWorksheet(OwnerId,reportId uint, req structure.UpdateWorksheet) (Error error) {
-	owner ,err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
+func (ctrl *APIControl) OwnerDeleteWorksheet(OwnerId, reportId uint, req structure.UpdateWorksheet) (Error error) {
+	owner, err := ctrl.access.RDBMS.GetAccount(int(OwnerId))
 	if err != nil {
 		Error = err
 		return
@@ -522,7 +522,7 @@ func (ctrl *APIControl) GetTypeWorksheet() structure.TypeWorksheet {
 }
 
 func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksheet, Error error) {
-	owner, err := ctrl.access.RDBMS.GetAccountByLineId(lineId)
+	opsLine, err := ctrl.access.RDBMS.GetAccountByLineId(lineId)
 	if err != nil {
 		Error = err
 		return
@@ -542,85 +542,87 @@ func (ctrl *APIControl) GetWorksheet(lineId string) (response []structure.Worksh
 			Error = err
 			return
 		}
-		if *owner.SubOwnerId == Worksheet.OwnerId {
+
+		if *opsLine.SubOwnerId == Worksheet.OwnerId {
 			var StatusWorksheetArray []structure.StatusWorksheet
 			var Ops *string
 			Ops = Worksheet.Ops
-			//if Worksheet.Option == true {
-			//	for _, m1 := range Worksheet.StatusWorksheet {
-			//		var Equipments []structure.Equipment
-			//		var Text *string
-			//		if m1.Status != "" {
-			//			if m1.Status != constant.WorksheetsStatus4 {
-			//				Equipment := structure.Equipment{}
-			//				for _, m2 := range m1.Equipments {
-			//					Equipment = structure.Equipment{
-			//						NameEquipment: m2.NameEquipment,
-			//					}
-			//					Equipments = append(Equipments, Equipment)
-			//				}
-			//				Text = m1.Text
-			//			}
-			//		}
-			//
-			//		StatusWorksheet := structure.StatusWorksheet{
-			//			Status:     m1.Status,
-			//			UpdateAt:   m1.UpdateAt,
-			//			Text:       Text,
-			//			Equipments: Equipments,
-			//		}
-			//		StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
-			//
-			//		data := structure.Worksheet{
-			//			ID:              qr.ID,
-			//			Option:          Worksheet.Option,
-			//			QrCodeID:        Worksheet.QrCodeID,
-			//			Text:            Worksheet.Text,
-			//			Type:            Worksheet.Type,
-			//			Ops:             Ops,
-			//			StatusWorksheet: StatusWorksheetArray,
-			//		}
-			//		responseArray = append(responseArray, data)
-			//	}
-			//} else {
-			for _, m1 := range Worksheet.StatusWorksheet {
-				var Equipments []structure.Equipment
-				var Text *string
-				if m1.Status != "" {
-					if m1.Status != constant.WorksheetsStatus4 {
-						Equipment := structure.Equipment{}
-						for _, m2 := range m1.Equipments {
-							Equipment = structure.Equipment{
-								NameEquipment: m2.NameEquipment,
+			if Worksheet.Option == true {
+				for _, m1 := range Worksheet.StatusWorksheet {
+					var Equipments []structure.Equipment
+					var Text *string
+					if m1.Status != "" {
+						if m1.Status != constant.WorksheetsStatus4 {
+							Equipment := structure.Equipment{}
+							for _, m2 := range m1.Equipments {
+								Equipment = structure.Equipment{
+									NameEquipment: m2.NameEquipment,
+								}
+								Equipments = append(Equipments, Equipment)
 							}
-							Equipments = append(Equipments, Equipment)
+							Text = m1.Text
 						}
-						Text = m1.Text
 					}
+
+					StatusWorksheet := structure.StatusWorksheet{
+						Status:     m1.Status,
+						UpdateAt:   m1.UpdateAt,
+						Text:       Text,
+						Equipments: Equipments,
+					}
+					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
+				}
+				data := structure.Worksheet{
+					ID:              qr.ID,
+					Option:          Worksheet.Option,
+					QrCodeID:        Worksheet.QrCodeID,
+					Text:            Worksheet.Text,
+					Type:            Worksheet.Type,
+					Ops:             Ops,
+					StatusWorksheet: StatusWorksheetArray,
+				}
+				responseArray = append(responseArray, data)
+
+			} else {
+				for _, m1 := range Worksheet.StatusWorksheet {
+					var Equipments []structure.Equipment
+					var Text *string
+					if m1.Status != "" {
+						if m1.Status != constant.WorksheetsStatus4 {
+							Equipment := structure.Equipment{}
+							for _, m2 := range m1.Equipments {
+								Equipment = structure.Equipment{
+									NameEquipment: m2.NameEquipment,
+								}
+								Equipments = append(Equipments, Equipment)
+							}
+							Text = m1.Text
+						}
+					}
+
+					StatusWorksheet := structure.StatusWorksheet{
+						Status:     m1.Status,
+						UpdateAt:   m1.UpdateAt,
+						Text:       Text,
+						Equipments: Equipments,
+					}
+					StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 				}
 
-				StatusWorksheet := structure.StatusWorksheet{
-					Status:     m1.Status,
-					UpdateAt:   m1.UpdateAt,
-					Text:       Text,
-					Equipments: Equipments,
+				if Ops != nil && *Ops == opsLine.Username {
+					data := structure.Worksheet{
+						ID:              qr.ID,
+						Option:          Worksheet.Option,
+						QrCodeID:        Worksheet.QrCodeID,
+						Text:            Worksheet.Text,
+						Type:            Worksheet.Type,
+						Ops:             Ops,
+						StatusWorksheet: StatusWorksheetArray,
+					}
+					responseArray = append(responseArray, data)
 				}
-				StatusWorksheetArray = append(StatusWorksheetArray, StatusWorksheet)
 			}
-			//if Ops == &owner.Username {
-			data := structure.Worksheet{
-				ID:              qr.ID,
-				Option:          Worksheet.Option,
-				QrCodeID:        Worksheet.QrCodeID,
-				Text:            Worksheet.Text,
-				Type:            Worksheet.Type,
-				Ops:             Ops,
-				StatusWorksheet: StatusWorksheetArray,
-			}
-			responseArray = append(responseArray, data)
-			//}
 		}
-		//}
 	}
 	response = responseArray
 	return
