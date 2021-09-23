@@ -33,8 +33,6 @@ type Worksheet struct {
 }
 
 type UpdateOption struct {
-	OwnerId      uint   `json:"owner_id" validate:"required"`
-	TemplateName string `json:"template_name" validate:"required"`
 	Option       bool   `json:"option" validate:"required"`
 }
 

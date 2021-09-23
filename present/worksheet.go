@@ -141,12 +141,16 @@ func adminDeleteWorksheet(context *fiber.Ctx) error {
 // Owner
 func UpdateOption(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
-	update := new(structure.UpdateOption)
-	err := context.BodyParser(update)
+	ownerId ,err:= getOwnerId(context)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}
-	err = api.UpdateOption(*update)
+	update := new(structure.UpdateOption)
+	err = context.BodyParser(update)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	err = api.UpdateOption(ownerId,*update)
 	if err != nil {
 		return utility.FiberError(context, http.StatusBadRequest, err.Error())
 	}

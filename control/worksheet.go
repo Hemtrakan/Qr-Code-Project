@@ -13,23 +13,20 @@ import (
 )
 
 // Owner
-func (ctrl *APIControl) UpdateOption(req structure.UpdateOption) (Error error) {
-	data, err := ctrl.access.RDBMS.GetQrCode(req.OwnerId, req.TemplateName)
+func (ctrl *APIControl) UpdateOption(OwnerId uint,req structure.UpdateOption) (Error error) {
+	data, err := ctrl.access.RDBMS.GetQrCode(OwnerId, string(constant.OfficeEquipment))
 	if err != nil {
 		Error = err
 		return
 	}
-
 	for _, m1 := range data {
 		dataOps, err := ctrl.access.RDBMS.GetDataQrCodeOpsByQrCodeID(m1.QrCodeUUID.String())
 		if err != nil {
 			Error = err
 			return
 		}
-
-		if m1.TemplateName == string(constant.OfficeEquipment) {
-			Worksheet := structure.Worksheet{}
 			for _, m2 := range dataOps {
+				Worksheet := structure.Worksheet{}
 				err = json2.Unmarshal(m2.Operator, &Worksheet)
 				dataWorksheet := structure.Worksheet{
 					QrCodeID:        Worksheet.QrCodeID,
@@ -57,7 +54,6 @@ func (ctrl *APIControl) UpdateOption(req structure.UpdateOption) (Error error) {
 					Error = err
 					return
 				}
-			}
 		}
 	}
 	return
