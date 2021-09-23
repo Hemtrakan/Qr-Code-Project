@@ -135,10 +135,12 @@ func getDataQrCodeJson(context *fiber.Ctx) error {
 }
 
 func getDataQrCode(context *fiber.Ctx) error {
+	env := environment.Build()
+
 	// สำหรับมี Template แล้ว
 	contentType := context.Get("Content-Type")
 	if contentType == "" {
-		url := string(environment.URLFront) + context.Params("*")
+		url := env.URLFront + context.Params("*")
 		if err := proxy.Do(context, url); err != nil {
 			return err
 		}
