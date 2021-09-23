@@ -99,6 +99,30 @@ func (ctrl *APIControl) GetOperatorById(OperatorId int, OwnerId uint) (response 
 	return
 }
 
+func (ctrl *APIControl) GetOperatorLine(OwnerId uint) (response []structure.OperatorsLine, Error error) {
+	var DataArray []structure.OperatorsLine
+	res, err := ctrl.access.RDBMS.GetAllAccountOperatorByOwnerID(OwnerId)
+	if err != nil {
+		Error = err
+		return
+	}
+	for _, data := range res {
+		if data.LineUserId != nil {
+			UserAccountStructure := structure.OperatorsLine{
+				OperatorId:          data.ID,
+				OperatorUserName:    data.Username,
+				OperatorFirstName:   data.FirstName,
+				OperatorLastName:    data.LastName,
+				OperatorLineId:      data.LineUserId,
+			}
+			DataArray = append(DataArray, UserAccountStructure)
+		}
+	}
+
+	response = DataArray
+	return
+}
+
 func (ctrl *APIControl) GetOperator(OwnerId uint) (response []structure.Operators, Error error) {
 	var DataArray []structure.Operators
 	res, err := ctrl.access.RDBMS.GetAllAccountOperatorByOwnerID(OwnerId)
@@ -204,14 +228,14 @@ func (ctrl *APIControl) ChangePasswordOwnerAndOperator(OwnerId uint, password st
 	return
 }
 
-func (ctrl *APIControl) UpdateStatusQrCodeOwner(ownerId uint,QrCodeId string, req structure.StatusQrCode) (Error error) {
+func (ctrl *APIControl) UpdateStatusQrCodeOwner(ownerId uint, QrCodeId string, req structure.StatusQrCode) (Error error) {
 	res, err := ctrl.access.RDBMS.GetDataQrCode(QrCodeId)
 	if err != nil {
 		Error = errors.New("Qr-Code ที่จะเปลี่ยนสถานะไม่มีอยู่ในระบบ")
 		return
 	}
-	for _ , data := range  res {
-		if data.OwnerId != ownerId{
+	for _, data := range res {
+		if data.OwnerId != ownerId {
 			Error = errors.New("ผู้ใช้งานไม่ถูกต้อง")
 			return
 		}

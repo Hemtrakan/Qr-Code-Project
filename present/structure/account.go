@@ -112,6 +112,14 @@ type Operators struct {
 	UpdatedAt           time.Time `json:"updated_at"`
 }
 
+type OperatorsLine struct {
+	OperatorId          uint      `json:"operator_id"`
+	OperatorUserName    string    `json:"operator_user_name"`
+	OperatorFirstName   string    `json:"operator_first_name"`
+	OperatorLastName    string    `json:"operator_last_name"`
+	OperatorLineId      *string    `json:"operator_line_id"`
+}
+
 type UserAccountOperator struct {
 	OperatorId          int       `json:"operator_id"`
 	OperatorUserName    string    `json:"operator_user_name"`

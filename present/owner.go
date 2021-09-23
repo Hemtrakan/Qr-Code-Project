@@ -69,6 +69,19 @@ func getOperator(context *fiber.Ctx) error {
 	return context.Status(http.StatusOK).JSON(res)
 }
 
+func getOperatorLine(context *fiber.Ctx) error {
+	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
+	id, err := getOwnerId(context)
+	if err != nil {
+		return utility.FiberError(context,http.StatusBadRequest, err.Error())
+	}
+	res ,err := api.GetOperatorLine(id)
+	if err != nil {
+		return utility.FiberError(context, http.StatusBadRequest, err.Error())
+	}
+	return context.Status(http.StatusOK).JSON(res)
+}
+
 func getOperatorById(context *fiber.Ctx) error {
 	api := context.Locals(constant.LocalsKeyControl).(*control.APIControl)
 	OwnerId, err := getOwnerId(context)

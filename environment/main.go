@@ -17,7 +17,7 @@ const (
 const(
 	//URLFront URL = "http://192.168.1.104:12000/"
 	//URLFront URL = "http://localhost:3000/qr/"
-	URLFront URL = "https://a2f4-1-47-1-82.jp.ngrok.io/qr/"
+	URLFront URL = "https://ae20-101-108-194-83.ngrok.io/qr/"
 )
 
 type Properties struct {
@@ -40,7 +40,7 @@ type Properties struct {
 	//// --
 
 	//// -- URL
-	URLFront string `env:"URL_FRONT,default=https://a2f4-1-47-1-82.jp.ngrok.io/qr/"`
+	URLFront string `env:"URL_FRONT,default=https://ae20-101-108-194-83.ngrok.io/qr/"`
 	URLQRCode string `env:"URL_QR_CODE,default=https://liff.line.me/1656385614-YE6rXz2M?qr_id="`
 
 	//// -- ServiceLine
